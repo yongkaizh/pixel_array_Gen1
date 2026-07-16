@@ -1,0 +1,8 @@
+{
+  "name": "Integrated Silicon Array Layout Generator",
+  "description": "An interactive utility to generate micro-array semiconductor silicon layout scripts from spreadsheet specifications or custom parameters, featuring live visual design canvas controls and high-precision key mapping.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
