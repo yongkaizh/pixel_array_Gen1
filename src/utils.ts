@@ -106,39 +106,38 @@ export function getRowCategory(purpose: string, name: string, rov_purpose: strin
 // Default configuration out of the box
 export function getDefaultLayoutConfig(): LayoutConfig {
   return {
-    top_lib: 'OX02N10L_PIXTOP',
-    top_cell: 'array_pixel',
-    x_pitch: 2.2,
-    y_pitch: 2.2,
-    total_cols: 1936,
-        rov_purpose: 'c1',
+    top_lib: 'NEW_PIX_LIB_v2',
+    top_cell: 'new_array_pixel_001',
+    x_pitch: 2.5,
+    y_pitch: 2.5,
+    total_cols: 2048,
+    rov_purpose: 'c1',
     rows: [
-      { purpose: 'bottom', rows: 1, name: 'bottom' },
-      { purpose: 'dummy', rows: 1, name: 'dummy' },
-      { purpose: 'c1', rows: 35, name: 'BLC' },
-      { purpose: 'c2', rows: 16, name: 'BLC zero' },
-      { purpose: 'dummy', rows: 1, name: 'Dummy pixel row' },
-      { purpose: 'cbar', rows: 1, name: 'Color bar B row' },
-      { purpose: 'cbar', rows: 1, name: 'Color bar R row' },
-      { purpose: 'idle', rows: 2, name: 'Idle clamps' },
-      { purpose: 'bsun', rows: 2, name: 'ECL Bsun clamps' },
-      { purpose: 'ecl', rows: 2, name: 'ECL Sig clamps' },
-      { purpose: 'dummy', rows: 1, name: 'dummy' },
-      { purpose: 'dummy', rows: 1, name: 'dummy' },
-      { purpose: 'c1', rows: 1294, name: 'c1' },
-      { purpose: 'dummy', rows: 1, name: 'dummy' },
-      { purpose: 'top', rows: 1, name: 'top' }
+      { purpose: 'bottom', rows: 2, name: 'Bottom_v2' },
+      { purpose: 'dummy', rows: 2, name: 'Dummy_v2' },
+      { purpose: 'c1', rows: 40, name: 'BLC_new' },
+      { purpose: 'c2', rows: 20, name: 'BLC_zero_ext' },
+      { purpose: 'dummy', rows: 2, name: 'Extra_Dummy_Row' },
+      { purpose: 'cbar', rows: 2, name: 'Color_Bar_B_ext' },
+      { purpose: 'cbar', rows: 2, name: 'Color_Bar_R_ext' },
+      { purpose: 'idle', rows: 4, name: 'Idle_Clamps_Ext' },
+      { purpose: 'bsun', rows: 4, name: 'ECL_Bsun_Ext' },
+      { purpose: 'ecl', rows: 4, name: 'ECL_Sig_Ext' },
+      { purpose: 'dummy', rows: 2, name: 'Dummy_Mid' },
+      { purpose: 'c1', rows: 1300, name: 'Active_Core_v2' },
+      { purpose: 'dummy', rows: 2, name: 'Dummy_Top' },
+      { purpose: 'top', rows: 2, name: 'Top_Row_v2' }
     ],
     cell_map: {
-      bottom: { name: 'bottom', lib: 'pixel_2p2um_s1_BSI3_SLVDGS', cell: 'R_cell22s1_BSI3_SCG_SLVDGS_005_bottom_row', rot: 'R180' },
-      cbar: { name: 'cbar', lib: 'pixel_2p2um_s1_BSI3_SLVDGS', cell: 'R_cell22s1_BSI3_SCG_SLVDGS_005_unit_cbar_4line', rot: 'R180' },
-      idle: { name: 'idle', lib: 'pixel_2p2um_s1_BSI3_SLVDGS', cell: 'R_cell22s1_BSI3_SCG_SLVDGS_005_unit_idle_clamp', rot: 'R180' },
-      ecl: { name: 'ecl', lib: 'pixel_2p2um_s1_BSI3_SLVDGS', cell: 'R_cell22s1_BSI3_SCG_SLVDGS_005_unit_ecl_clamp', rot: 'R180' },
-      bsun: { name: 'bsun', lib: 'pixel_2p2um_s1_BSI3_SLVDGS', cell: 'R_cell22s1_BSI3_SCG_SLVDGS_005_unit_bsun_clamp', rot: 'R180' },
-      c1: { name: 'c1', lib: 'pixel_2p2um_s1_BSI3_SLVDGS', cell: 'R_cell22s1_BSI3_SCG_SLVDGS_005_unit', rot: 'R180' },
-      top: { name: 'top', lib: 'pixel_2p2um_s1_BSI3_SLVDGS', cell: 'R_cell22s1_BSI3_SCG_SLVDGS_005_top_row', rot: 'R180' },
-      c2: { name: 'c2', lib: 'pixel_2p2um_s1_BSI3_SLVDGS', cell: 'R_cell22s1_BSI3_SCG_SLVDGS_005_unit_zeroBLC', rot: 'R180' },
-      dummy: { name: 'dummy', lib: 'pixel_2p2um_s1_BSI3_SLVDGS', cell: 'R_cell22s1_BSI3_SCG_SLVDGS_005_unit_dummy', rot: 'R180' }
+      bottom: { name: 'bottom_v2', lib: 'pix_lib_v2', cell: 'cell_bottom_001', rot: 'R0' },
+      cbar: { name: 'cbar_v2', lib: 'pix_lib_v2', cell: 'cell_cbar_001', rot: 'R0' },
+      idle: { name: 'idle_v2', lib: 'pix_lib_v2', cell: 'cell_idle_001', rot: 'R0' },
+      ecl: { name: 'ecl_v2', lib: 'pix_lib_v2', cell: 'cell_ecl_001', rot: 'R0' },
+      bsun: { name: 'bsun_v2', lib: 'pix_lib_v2', cell: 'cell_bsun_001', rot: 'R0' },
+      c1: { name: 'active_v2', lib: 'pix_lib_v2', cell: 'cell_active_001', rot: 'R0' },
+      top: { name: 'top_v2', lib: 'pix_lib_v2', cell: 'cell_top_001', rot: 'R0' },
+      c2: { name: 'blc_zero_v2', lib: 'pix_lib_v2', cell: 'cell_blc_zero_001', rot: 'R0' },
+      dummy: { name: 'dummy_v2', lib: 'pix_lib_v2', cell: 'cell_dummy_001', rot: 'R0' }
     }
   };
 }
