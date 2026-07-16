@@ -270,8 +270,8 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
           onClick={() => setActiveSubTab('globals')}
           className={`flex-1 py-1.5 rounded-lg text-xs font-mono font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
             activeSubTab === 'globals'
-              ? 'glass-button bg-white/10 text-white shadow-[inset_0_0_10px_rgba(255,255,255,0.05)]'
-              : 'text-glass-text/80 hover:text-white hover:bg-white/5'
+              ? 'glass-button bg-indigo-600 text-white shadow-lg'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'
           }`}
         >
           <Settings className="w-3.5 h-3.5" />
@@ -281,8 +281,8 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
           onClick={() => setActiveSubTab('rows')}
           className={`flex-1 py-1.5 rounded-lg text-xs font-mono font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
             activeSubTab === 'rows'
-              ? 'glass-button bg-white/10 text-white shadow-[inset_0_0_10px_rgba(255,255,255,0.05)]'
-              : 'text-glass-text/80 hover:text-white hover:bg-white/5'
+              ? 'glass-button bg-indigo-600 text-white shadow-lg'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'
           }`}
         >
           <Layers className="w-3.5 h-3.5" />
@@ -292,8 +292,8 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
           onClick={() => setActiveSubTab('cells')}
           className={`flex-1 py-1.5 rounded-lg text-xs font-mono font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
             activeSubTab === 'cells'
-              ? 'glass-button bg-white/10 text-white shadow-[inset_0_0_10px_rgba(255,255,255,0.05)]'
-              : 'text-glass-text/80 hover:text-white hover:bg-white/5'
+              ? 'glass-button bg-indigo-600 text-white shadow-lg'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'
           }`}
         >
           <RefreshCw className="w-3.5 h-3.5" />
@@ -420,7 +420,8 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
                       />
                       <button
                         onClick={() => executeRenameCellPurpose(key)}
-                        className="text-xs font-mono bg-white/10 text-white hover:bg-emerald-700 px-1.5 py-0.5 font-bold uppercase tracking-wider transition cursor-pointer"
+                        className="text-xs font-mono bg-slate-200 text-slate-800 hover:bg-emerald-600 hover:text-white px-1.5 py-0.5 font-bold uppercase tracking-wider transition cursor-pointer"
+                        title="Delete unmapped physical cell template"
                       >
                         Save
                       </button>
@@ -721,7 +722,7 @@ export function RowItemEditor({ row, idx, cellMap, totalCols, onUpdate, onDelete
           <button
             onClick={onMoveUp}
             disabled={isFirst}
-            className={`p-1 rounded-lg border transition-all ${isFirst ? 'text-glass-text/30 border-transparent cursor-not-allowed' : 'text-glass-text/80 hover:text-white border-transparent hover:border-[#141414] hover:bg-white/5 active:scale-95 cursor-pointer'}`}
+            className={`p-1 rounded-lg border transition-all ${isFirst ? 'text-glass-text/30 border-transparent cursor-not-allowed' : 'text-slate-600 hover:text-slate-900 border-transparent hover:border-[#141414] hover:bg-slate-200 active:scale-95 cursor-pointer'}`}
             title="Move Row Up"
           >
             <ArrowUp className="w-3.5 h-3.5" />
@@ -729,7 +730,7 @@ export function RowItemEditor({ row, idx, cellMap, totalCols, onUpdate, onDelete
           <button
             onClick={onMoveDown}
             disabled={isLast}
-            className={`p-1 rounded-lg border transition-all ${isLast ? 'text-glass-text/30 border-transparent cursor-not-allowed' : 'text-glass-text/80 hover:text-white border-transparent hover:border-[#141414] hover:bg-white/5 active:scale-95 cursor-pointer'}`}
+            className={`p-1 rounded-lg border transition-all ${isLast ? 'text-glass-text/30 border-transparent cursor-not-allowed' : 'text-slate-600 hover:text-slate-900 border-transparent hover:border-[#141414] hover:bg-slate-200 active:scale-95 cursor-pointer'}`}
             title="Move Row Down"
           >
             <ArrowDown className="w-3.5 h-3.5" />
@@ -820,7 +821,7 @@ export function RowItemEditor({ row, idx, cellMap, totalCols, onUpdate, onDelete
       </div>
       
       {row.segments && row.segments.length > 0 && (
-        <div className="bg-white/10 text-white/90 p-1.5 font-mono text-sm rounded-lg flex flex-wrap items-center gap-1 border border-glass-border">
+        <div className="bg-slate-200 text-slate-800 p-1.5 font-mono text-sm rounded-lg flex flex-wrap items-center gap-1 border border-glass-border">
           <span className="text-emerald-400 font-bold">SEGMENTS:</span>
           {row.segments.map((seg, sIdx) => (
             <span key={sIdx} className="bg-zinc-800 px-1 py-0.5 border border-zinc-700">

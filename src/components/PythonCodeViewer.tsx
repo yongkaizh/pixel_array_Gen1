@@ -46,7 +46,7 @@ export const PythonCodeViewer = React.memo(function PythonCodeViewer() {
       </div>
 
       {/* Code Display Sandbox */}
-      <div className="relative rounded-lg border border-glass-border bg-white/10 overflow-hidden">
+      <div className="relative rounded-lg border border-glass-border bg-black/5 overflow-hidden">
         {/* Code Actions Toolbar */}
         <div className="flex items-center justify-between px-5 py-3 border-b border-glass-border bg-glass-bg text-glass-text">
           <div className="text-xs text-glass-text font-mono uppercase tracking-wider font-bold">
@@ -133,7 +133,7 @@ function highlightPythonCode(code: string) {
     });
 
     return (
-      <div key={idx} className="table-row hover:bg-slate-900/40">
+      <div key={idx} className="table-row hover:bg-slate-100">
         <span className="table-cell text-right pr-4 text-slate-400 select-none w-10 text-sm border-r border-slate-900/80 pr-2 mr-3">{idx + 1}</span>
         <span className="pl-3">
           {styledCode}

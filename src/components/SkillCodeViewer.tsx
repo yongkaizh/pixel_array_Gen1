@@ -49,15 +49,15 @@ export const SkillCodeViewer = React.memo(function SkillCodeViewer({ config }: S
         <div className="space-y-1">
           <span className="font-mono font-bold uppercase text-sm tracking-wide text-glass-text">Execution in Cadence Virtuoso:</span>
           <p className="leading-relaxed text-sm">
-            1. Save as <code className="font-mono bg-white/10 px-1 py-0.5 text-white font-bold">pixel_array.il</code> inside Virtuoso's working directory.<br />
-            2. In the CIW console, load the compiled layout view: <code className="font-mono bg-white/10 px-1 py-0.5 text-white font-bold">load("pixel_array.il")</code>.<br />
+            1. Save as <code className="font-mono bg-slate-200 px-1 py-0.5 text-slate-800 font-bold">pixel_array.il</code> inside Virtuoso's working directory.<br />
+            2. In the CIW console, load the compiled layout view: <code className="font-mono bg-slate-200 px-1 py-0.5 text-slate-800 font-bold">load("pixel_array.il")</code>.<br />
             3. The layout cellview is automatically compiled, centered, and written.
           </p>
         </div>
       </div>
 
       {/* Editor Frame */}
-      <div className="relative rounded-lg border border-glass-border bg-white/10 overflow-hidden">
+      <div className="relative rounded-lg border border-glass-border bg-black/5 overflow-hidden">
         {/* Editor Toolbar */}
         <div className="flex items-center justify-between px-5 py-3 border-b border-glass-border bg-glass-bg text-glass-text">
           <div className="text-xs text-glass-text font-mono uppercase tracking-wider font-bold">
@@ -82,7 +82,7 @@ export const SkillCodeViewer = React.memo(function SkillCodeViewer({ config }: S
         </div>
 
         {/* Script code with manual SKILL-like highlight */}
-        <div className="overflow-x-auto max-h-[500px] overflow-y-auto bg-white/10 select-text">
+        <div className="overflow-x-auto max-h-[500px] overflow-y-auto bg-black/5 select-text">
           <div className="p-5 font-mono text-sm leading-relaxed text-slate-300 min-w-max">
             {highlightedCode}
           </div>

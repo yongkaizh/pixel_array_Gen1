@@ -916,7 +916,7 @@ export const CadViewer = React.memo(function CadViewer({ config }: CadViewerProp
               CAD Layout Viewport: {config.top_cell} <span className="text-xs text-glass-text/80 font-mono italic normal-case font-normal">({config.top_lib})</span>
             </h3>
           </div>
-          <div className="h-4 w-px bg-white/10/20 hidden sm:block" />
+          <div className="h-4 w-px bg-black/10 hidden sm:block" />
           <button
             onClick={() => {
               setViewMode(v => v === 'physical' ? 'schematic' : 'physical');
@@ -949,19 +949,19 @@ export const CadViewer = React.memo(function CadViewer({ config }: CadViewerProp
         <div className="flex flex-wrap items-center gap-1 bg-glass-bg p-1 border border-glass-border rounded-lg self-start xl:self-auto">
           <button
             onClick={() => setShowSubgrid(!showSubgrid)}
-            className={`p-1.5 rounded-lg transition-all cursor-pointer ${showSubgrid ? 'bg-white/10 text-white' : 'text-glass-text/80 hover:text-glass-text'}`}
+            className={`p-1.5 rounded-lg transition-all cursor-pointer ${showSubgrid ? 'bg-slate-200 text-slate-800' : 'text-glass-text/80 hover:text-glass-text'}`}
             title="Toggle Subgrid Columns"
           >
             <Grid className="w-4 h-4" />
           </button>
           <button
             onClick={() => setShowCoordinates(!showCoordinates)}
-            className={`p-1.5 rounded-lg transition-all cursor-pointer ${showCoordinates ? 'bg-white/10 text-white' : 'text-glass-text/80 hover:text-glass-text'}`}
+            className={`p-1.5 rounded-lg transition-all cursor-pointer ${showCoordinates ? 'bg-slate-200 text-slate-800' : 'text-glass-text/80 hover:text-glass-text'}`}
             title="Toggle Coordinate Labels"
           >
             {showCoordinates ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
           </button>
-          <div className="w-px h-4 bg-white/10/30 mx-1" />
+          <div className="w-px h-4 bg-black/10 mx-1" />
           <button
             onClick={handlePanUp}
             className="p-1.5 rounded-lg text-glass-text hover:bg-glass-panel border border-transparent hover:border-[#141414] cursor-pointer transition"
@@ -990,7 +990,7 @@ export const CadViewer = React.memo(function CadViewer({ config }: CadViewerProp
           >
             <ArrowRight className="w-4 h-4" />
           </button>
-          <div className="w-px h-4 bg-white/10/30 mx-1" />
+          <div className="w-px h-4 bg-black/10 mx-1" />
           <button
             onClick={handleZoomIn}
             className="p-1.5 rounded-lg text-glass-text hover:bg-glass-panel border border-transparent hover:border-[#141414] cursor-pointer transition"
@@ -1031,7 +1031,7 @@ export const CadViewer = React.memo(function CadViewer({ config }: CadViewerProp
         onWheel={handleWheel}
       >
         {/* Absolute Background Guide Grid */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none opacity-50" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(0,0,0,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.05)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none opacity-50" />
         
         {/* Live Coordinate Ruler overlay */}
         {showCoordinates && hoveredCoord && !isSchematic && (
@@ -1321,7 +1321,7 @@ export const CadViewer = React.memo(function CadViewer({ config }: CadViewerProp
                       {nameToShow.toUpperCase()} {isSegment ? '' : 'Block'}
                       {lockedRowIdx !== null && <span className="ml-2 text-[9px] bg-neon-cyan/20 text-neon-cyan px-1.5 py-0.5 rounded-full normal-case">Locked (Click to copy)</span>}
                     </span>
-                    <span className="text-xs font-mono text-white bg-white/10 uppercase tracking-widest px-1.5 py-0.5 font-bold">
+                    <span className="text-xs font-mono text-slate-800 bg-slate-200 uppercase tracking-widest px-1.5 py-0.5 font-bold">
                       {isSegment ? `${segCols} Cols` : `${b.rows} Rows`}
                     </span>
                   </div>
@@ -1366,7 +1366,7 @@ export const CadViewer = React.memo(function CadViewer({ config }: CadViewerProp
             <span className="uppercase tracking-wide text-glass-text/90">MOUSE: DRAG TO PAN // SCROLL TO ZOOM</span>
           </div>
           <div className="flex items-center gap-1.5 text-[10.5px]">
-            <span className="bg-white/10 text-white px-1.5 py-0.5 text-[8.5px] rounded-lg font-bold">KEYBOARD CONTROLS</span>
+            <span className="bg-slate-200 text-slate-800 px-1.5 py-0.5 text-[8.5px] rounded-lg font-bold">KEYBOARD CONTROLS</span>
             <span className="uppercase tracking-wide font-bold text-glass-text">WASD / ARROWS TO PAN &bull; +/- TO ZOOM &bull; F TO FIT &bull; G TO GRID</span>
           </div>
         </div>

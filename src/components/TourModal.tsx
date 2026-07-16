@@ -45,7 +45,7 @@ export function TourModal({ isOpen, onClose }: TourModalProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-white/10/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/10 backdrop-blur-sm"
             onClick={onClose}
           />
           
@@ -61,7 +61,7 @@ export function TourModal({ isOpen, onClose }: TourModalProps) {
               <h2 className="text-xl font-black uppercase tracking-tighter italic">Interactive Tour & Guide</h2>
               <button
                 onClick={onClose}
-                className="bg-white/10 text-white p-1 hover:bg-rose-600 rounded-lg transition-colors cursor-pointer"
+                className="bg-slate-200 text-slate-800 p-1 hover:bg-rose-600 rounded-lg transition-colors cursor-pointer"
                 aria-label="Close Tour"
               >
                 <X className="w-5 h-5" />
@@ -77,11 +77,11 @@ export function TourModal({ isOpen, onClose }: TourModalProps) {
               <div className="grid gap-4">
                 {steps.map((step, index) => (
                   <div key={index} className="flex gap-4 p-4 border border-glass-border glass-panel hover:bg-white/5 transition-colors rounded-lg">
-                    <div className="shrink-0 flex items-center justify-center w-12 h-12 border border-glass-border rounded-full bg-white/10 shadow-[0_0_15px_rgba(255,255,255,0.05)]">
+                    <div className="shrink-0 flex items-center justify-center w-12 h-12 border border-glass-border rounded-full bg-slate-200 shadow-[0_0_15px_rgba(255,255,255,0.05)]">
                       {step.icon}
                     </div>
                     <div>
-                      <h3 className="font-bold text-lg mb-1 text-white">{step.title}</h3>
+                      <h3 className="font-bold text-lg mb-1 text-slate-800">{step.title}</h3>
                       <p className="text-sm font-mono text-glass-muted leading-relaxed">{step.description}</p>
                     </div>
                   </div>
@@ -91,7 +91,7 @@ export function TourModal({ isOpen, onClose }: TourModalProps) {
               <div className="flex justify-end pt-4">
                 <button
                   onClick={onClose}
-                  className="glass-button text-white px-8 py-3 font-bold uppercase tracking-widest hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
+                  className="glass-button text-slate-800 px-8 py-3 font-bold uppercase tracking-widest hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
                 >
                   Get Started
                 </button>

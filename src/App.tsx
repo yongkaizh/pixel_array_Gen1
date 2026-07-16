@@ -58,7 +58,7 @@ export default function App() {
         initial={{ y: -50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="glass-panel sticky top-0 z-30 border-b-0 border-x-0 border-t-0 bg-black/20"
+        className="glass-panel sticky top-0 z-30 border-b-0 border-x-0 border-t-0 bg-white/40"
       >
         <div className="max-w-7xl mx-auto px-4 py-3 md:px-6 md:py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -70,10 +70,10 @@ export default function App() {
             </motion.div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="font-sans font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-glass-muted tracking-tighter text-lg uppercase">
+                <h1 className="font-sans font-black text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-600 tracking-tighter text-lg uppercase">
                   Integrated Silicon Array Builder
                 </h1>
-                <span className="text-xs font-mono font-bold bg-white/10 text-neon-cyan px-2 py-0.5 rounded-full uppercase tracking-wider border border-neon-cyan/30">
+                <span className="text-xs font-mono font-bold bg-black/5 text-neon-cyan px-2 py-0.5 rounded-full uppercase tracking-wider border border-neon-cyan/30">
                   Layout Engine
                 </span>
               </div>
@@ -129,7 +129,7 @@ export default function App() {
                   <Cpu className="w-6 h-6" />
                 </div>
                 <div>
-                  <h4 className="font-mono font-black uppercase text-sm text-white tracking-wider">
+                  <h4 className="font-mono font-black uppercase text-sm text-slate-800 tracking-wider">
                     DRAFT STAGE ACTIVE // CHANGES DETECTED
                   </h4>
                   <p className="text-sm text-glass-muted font-sans mt-1">
@@ -142,7 +142,7 @@ export default function App() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleDiscardChanges}
-                  className="px-5 py-2.5 text-xs font-mono font-bold uppercase tracking-widest text-glass-muted hover:text-white glass-button rounded-lg cursor-pointer"
+                  className="px-5 py-2.5 text-xs font-mono font-bold uppercase tracking-widest text-glass-muted hover:text-slate-900 glass-button rounded-lg cursor-pointer"
                 >
                   Discard Draft
                 </motion.button>
@@ -181,7 +181,7 @@ export default function App() {
                   <AlertCircle className="w-5 h-5 text-neon-rose shrink-0 mt-0.5 drop-shadow-[0_0_8px_rgba(244,63,94,0.5)]" />
                 )}
                 <div className="text-sm font-mono">
-                  <span className="font-bold uppercase block mb-1 text-white tracking-wider">
+                  <span className="font-bold uppercase block mb-1 text-slate-800 tracking-wider">
                     {status.type === 'success' ? 'SYSTEM OK // COMPILE SUCCESS' : 'SYSTEM CRITICAL // EXCEPTION'}
                   </span>
                   <span className="text-glass-muted leading-relaxed">{status.message}</span>
@@ -191,7 +191,7 @@ export default function App() {
               {/* Clear button */}
               <button
                 onClick={() => setStatus({ type: 'idle', message: '' })}
-                className="text-glass-muted hover:text-white hover:bg-white/10 p-2 rounded-lg transition-colors shrink-0 cursor-pointer flex items-center justify-center relative z-10"
+                className="text-glass-muted hover:text-slate-900 hover:bg-black/5 p-2 rounded-lg transition-colors shrink-0 cursor-pointer flex items-center justify-center relative z-10"
                 title="Dismiss notification"
               >
                 <X className="w-4 h-4" />
@@ -232,10 +232,10 @@ export default function App() {
         </div>
       </motion.main>
 
-      <footer className="glass-panel border-b-0 border-x-0 border-t border-glass-border py-6 px-6 text-center text-xs uppercase tracking-widest mt-auto bg-black/20">
+      <footer className="glass-panel border-b-0 border-x-0 border-t border-glass-border py-6 px-6 text-center text-xs uppercase tracking-widest mt-auto bg-white/40">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <span className="text-glass-muted font-mono">Session: X782-99 // Memory: 24.1 MB</span>
-          <span className="flex items-center gap-2 font-mono text-white">
+          <span className="flex items-center gap-2 font-mono text-slate-800">
             <span className="w-2.5 h-2.5 rounded-full bg-neon-emerald shadow-[0_0_10px_rgba(16,185,129,0.8)] animate-pulse inline-block"></span>
             SYSTEM OK &bull; Copyright © {new Date().getFullYear()} Yongkai Zhang
           </span>
