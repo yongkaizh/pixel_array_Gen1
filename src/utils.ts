@@ -421,36 +421,31 @@ export function generateSkillCode(config: LayoutConfig): string {
     code.push('');
   });
 
-  // Calculate true geometric center of active core C1/primary cell
-  // X-axis: find left-padding columns before C1/primary segment
+  // Calculate true geometric center of active core C1/primary cell (maxActiveRow)
   let left_cols = 0;
   let active_cols = config.total_cols;
-  const activeRowForX = config.rows.find(r => getRowCategory(r.purpose, r.name || '', config.rov_purpose) === 'active');
-  if (activeRowForX && activeRowForX.segments && activeRowForX.segments.length > 0) {
-    const activeSegIdx = activeRowForX.segments.findIndex(s => s.purpose.toLowerCase() === config.rov_purpose.toLowerCase() || getRowCategory(s.purpose, '', config.rov_purpose) === 'active');
+  if (maxActiveRow && maxActiveRow.segments && maxActiveRow.segments.length > 0) {
+    const activeSegIdx = maxActiveRow.segments.findIndex(s => s.purpose.toLowerCase() === config.rov_purpose.toLowerCase() || getRowCategory(s.purpose, '', config.rov_purpose) === 'active');
     if (activeSegIdx !== -1) {
       for (let i = 0; i < activeSegIdx; i++) {
-        left_cols += activeRowForX.segments[i].cols;
+        left_cols += maxActiveRow.segments[i].cols;
       }
-      active_cols = activeRowForX.segments[activeSegIdx].cols;
+      active_cols = maxActiveRow.segments[activeSegIdx].cols;
     }
   }
   const targetDx = - (left_cols + active_cols / 2.0) * config.x_pitch;
 
-  // Y-axis: count rows physically BELOW the active core block in forward (bottom→top) build order
-  let below_active_rows = 0;
-  let active_rows = 0;
-  let reachedActive = false;
-  config.rows.forEach(r => {
-    const isAct = getRowCategory(r.purpose, r.name || '', config.rov_purpose) === 'active';
-    if (isAct) {
-      active_rows += r.rows;
-      reachedActive = true;
-    } else if (!reachedActive) {
-      below_active_rows += r.rows;
+  // Y-axis: Find the physical Y-offset of the primary ROV block (maxActiveRow)
+  let startY_rows = 0;
+  if (maxActiveRow) {
+    for (const r of config.rows) {
+      if (r === maxActiveRow) break;
+      startY_rows += r.rows;
     }
-  });
-  const targetDy = - (below_active_rows + active_rows / 2.0) * config.y_pitch;
+  }
+  const targetDy = maxActiveRow
+    ? - (startY_rows + maxActiveRow.rows / 2.0) * config.y_pitch
+    : - (config.rows.reduce((sum, r) => sum + r.rows, 0) / 2.0) * config.y_pitch;
 
   code.push('    ; --- Center Array at (0, 0) ---');
   code.push('    printf("\\nFinding Global Array Center...\\n")');
@@ -1093,18 +1088,18 @@ def main():
 
     target_dx = - (left_cols + active_cols / 2.0) * x_pitch
 
-    # Calculate Y-centering: rows below the active block in forward (bottom->top) build order
-    below_active_rows = 0
-    active_rows_count = 0
-    reached_active = False
-    for r in rows:
-        is_act = get_row_category(r["purpose"], r.get("name", ""), rov_purpose) == "active"
-        if is_act:
-            active_rows_count += r["rows"]
-            reached_active = True
-        elif not reached_active:
-            below_active_rows += r["rows"]
-    target_dy = - (below_active_rows + active_rows_count / 2.0) * y_pitch
+    # Y-axis: Find the physical Y-offset of the primary ROV block (max_active_row)
+    start_y_rows = 0
+    if max_active_row:
+        for r in rows:
+            if r == max_active_row:
+                break
+            start_y_rows += r["rows"]
+    
+    if max_active_row:
+        target_dy = - (start_y_rows + max_active_row["rows"] / 2.0) * y_pitch
+    else:
+        target_dy = - (sum(r["rows"] for r in rows) / 2.0) * y_pitch
 
     # Center Array at (0,0) based on collective center of all rows
     skill.append(f"""

@@ -235,15 +235,15 @@ describe('generateSkillCode – centering at (0,0)', () => {
 
   /**
    * Multi-active: dummy(2)+active(10)+dummy(1)+active(100)+dummy(2), pitch=1
-   *   below_active = 2 (rows before first active block)
-   *   total_active = 10 + 100 = 110
-   *   dy = -(2 + 110/2) * 1.0 = -57.0
+   *   maxActiveRow is active(100)
+   *   startY_rows = 2 + 10 + 1 = 13
+   *   dy = -(13 + 100/2) * 1.0 = -63.0
    *   dx = -5.0
    */
-  it('multi-active: combined active block centered, dy=-57.0', () => {
+  it('multi-active: maxActiveRow block centered, dy=-63.0', () => {
     const code = generateSkillCode(multiActiveConfig);
     expect(extractCenterValue(code, 'dx')).toBeCloseTo(-5.0, 4);
-    expect(extractCenterValue(code, 'dy')).toBeCloseTo(-57.0, 4);
+    expect(extractCenterValue(code, 'dy')).toBeCloseTo(-63.0, 4);
   });
 
   it('scales correctly with non-trivial pitches', () => {
@@ -415,10 +415,10 @@ describe('generatePythonCode(corrected=true) – R180 and forward order', () => 
     expect(py).not.toContain('for rev_idx, row in enumerate(reversed(rows)):');
   });
 
-  it('uses analytical Y centering with below_active_rows variable', () => {
+  it('uses analytical Y centering with start_y_rows variable', () => {
     const py = generatePythonCode(true);
-    expect(py).toContain('below_active_rows');
-    expect(py).toContain('target_dy = - (below_active_rows');
+    expect(py).toContain('start_y_rows');
+    expect(py).toContain('target_dy = - (start_y_rows');
     expect(py).not.toContain('centerBox(rovInst');
   });
 
