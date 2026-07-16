@@ -67,7 +67,7 @@ export default function App() {
               className="w-10 h-10 rounded-lg bg-gradient-to-br from-neon-purple to-neon-cyan flex items-center justify-center font-mono font-bold text-sm text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]"
             >
               I.S.
-            </div>
+            </motion.div>
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="font-sans font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-glass-muted tracking-tighter text-lg uppercase">
