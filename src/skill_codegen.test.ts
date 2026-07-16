@@ -235,15 +235,16 @@ describe('generateSkillCode – centering at (0,0)', () => {
 
   /**
    * Multi-active: dummy(2)+active(10)+dummy(1)+active(100)+dummy(2), pitch=1
-   *   maxActiveRow is active(100)
-   *   startY_rows = 2 + 10 + 1 = 13
-   *   dy = -(13 + 100/2) * 1.0 = -63.0
+   *   entire active block from index 1 to 3
+   *   startY_rows = 2
+   *   endY_rows = 2 + 10 + 1 + 100 = 113
+   *   dy = -(2 + 113) / 2.0 * 1.0 = -57.5
    *   dx = -5.0
    */
-  it('multi-active: maxActiveRow block centered, dy=-63.0', () => {
+  it('multi-active: entire active block centered, dy=-57.5', () => {
     const code = generateSkillCode(multiActiveConfig);
     expect(extractCenterValue(code, 'dx')).toBeCloseTo(-5.0, 4);
-    expect(extractCenterValue(code, 'dy')).toBeCloseTo(-63.0, 4);
+    expect(extractCenterValue(code, 'dy')).toBeCloseTo(-57.5, 4);
   });
 
   it('scales correctly with non-trivial pitches', () => {
@@ -428,6 +429,54 @@ describe('generatePythonCode(corrected=true) – R180 and forward order', () => 
      'def get_row_category', 'def main():', 'if __name__ == "__main__":'].forEach(token => {
       expect(py).toContain(token);
     });
+  });
+});
+
+describe('generateSkillCode – rigorous ROV active block centering', () => {
+  it('centers correctly for mixed-cell asymmetric configurations', () => {
+    // A complex configuration with dummy interleaved in active block, and asymmetric segments
+    const mixedConfig = makeConfig({
+      x_pitch: 2.0,
+      y_pitch: 3.0,
+      total_cols: 100,
+      rows: [
+        { purpose: 'bottom', rows: 2, name: 'Bottom' }, // startY_rows = 0, y=0..6
+        { purpose: 'dummy', rows: 4, name: 'Dummy' },   // startY_rows = 2, y=6..18
+        { 
+          purpose: 'active', rows: 10, name: 'Act1',    // startY_rows = 6, y=18..48
+          segments: [
+            { purpose: 'dummy', cols: 10 },
+            { purpose: 'active', cols: 70 }, // Active cols
+            { purpose: 'dummy', cols: 20 }
+          ]
+        },
+        { purpose: 'dummy', rows: 5, name: 'Interleaved' }, // startY_rows = 16, y=48..63
+        { 
+          purpose: 'active', rows: 15, name: 'Act2',    // startY_rows = 21, y=63..108
+          segments: [
+            { purpose: 'dummy', cols: 10 },
+            { purpose: 'active', cols: 70 }, // Active cols
+            { purpose: 'dummy', cols: 20 }
+          ]
+        },
+        { purpose: 'top', rows: 2, name: 'Top' }       // startY_rows = 36, y=108..114
+      ]
+    });
+
+    const code = generateSkillCode(mixedConfig);
+    
+    // Active block starts at row index 2 (startY_rows = 6)
+    // Active block ends at row index 4 (endY_rows = 6 + 10 + 5 + 15 = 36)
+    // Total active rows range = 6 to 36 rows = 30 rows.
+    // Center Y of active block = (6 + 36) / 2 = 21 rows * y_pitch(3.0) = 63.0
+    // dy should be -63.0
+    
+    // X center of active block: active segment starts at left_cols = 10, ends at 10+70 = 80
+    // Center X of active block = (10 + 80) / 2 = 45 cols * x_pitch(2.0) = 90.0
+    // dx should be -90.0
+
+    expect(extractCenterValue(code, 'dx')).toBeCloseTo(-90.0, 4);
+    expect(extractCenterValue(code, 'dy')).toBeCloseTo(-63.0, 4);
   });
 });
 

@@ -421,30 +421,50 @@ export function generateSkillCode(config: LayoutConfig): string {
     code.push('');
   });
 
-  // Calculate true geometric center of active core C1/primary cell (maxActiveRow)
+  // Calculate true geometric center of the ROV active block
+  let firstActiveIdx = -1;
+  let lastActiveIdx = -1;
+  config.rows.forEach((row, idx) => {
+    const isAct = getRowCategory(row.purpose, row.name || '', config.rov_purpose) === 'active' || getRowCategory(row.purpose, row.name || '', config.rov_purpose) === 'rov';
+    if (isAct) {
+      if (firstActiveIdx === -1) firstActiveIdx = idx;
+      lastActiveIdx = idx;
+    }
+  });
+
   let left_cols = 0;
   let active_cols = config.total_cols;
-  if (maxActiveRow && maxActiveRow.segments && maxActiveRow.segments.length > 0) {
-    const activeSegIdx = maxActiveRow.segments.findIndex(s => s.purpose.toLowerCase() === config.rov_purpose.toLowerCase() || getRowCategory(s.purpose, '', config.rov_purpose) === 'active');
-    if (activeSegIdx !== -1) {
-      for (let i = 0; i < activeSegIdx; i++) {
-        left_cols += maxActiveRow.segments[i].cols;
+  
+  if (firstActiveIdx !== -1) {
+    const firstActiveRow = config.rows[firstActiveIdx];
+    if (firstActiveRow.segments && firstActiveRow.segments.length > 0) {
+      const activeSegIdx = firstActiveRow.segments.findIndex(s => s.purpose.toLowerCase() === config.rov_purpose.toLowerCase() || getRowCategory(s.purpose, '', config.rov_purpose) === 'active');
+      if (activeSegIdx !== -1) {
+        for (let i = 0; i < activeSegIdx; i++) {
+          left_cols += firstActiveRow.segments[i].cols;
+        }
+        active_cols = firstActiveRow.segments[activeSegIdx].cols;
       }
-      active_cols = maxActiveRow.segments[activeSegIdx].cols;
     }
   }
   const targetDx = - (left_cols + active_cols / 2.0) * config.x_pitch;
 
-  // Y-axis: Find the physical Y-offset of the primary ROV block (maxActiveRow)
+  // Y-axis: Find the physical Y-offset of the primary ROV block
   let startY_rows = 0;
-  if (maxActiveRow) {
-    for (const r of config.rows) {
-      if (r === maxActiveRow) break;
-      startY_rows += r.rows;
+  let endY_rows = 0;
+
+  if (firstActiveIdx !== -1 && lastActiveIdx !== -1) {
+    for (let i = 0; i < firstActiveIdx; i++) {
+      startY_rows += config.rows[i].rows;
+    }
+    endY_rows = startY_rows;
+    for (let i = firstActiveIdx; i <= lastActiveIdx; i++) {
+      endY_rows += config.rows[i].rows;
     }
   }
-  const targetDy = maxActiveRow
-    ? - (startY_rows + maxActiveRow.rows / 2.0) * config.y_pitch
+
+  const targetDy = (firstActiveIdx !== -1)
+    ? - (startY_rows + endY_rows) / 2.0 * config.y_pitch
     : - (config.rows.reduce((sum, r) => sum + r.rows, 0) / 2.0) * config.y_pitch;
 
   code.push('    ; --- Center Array at (0, 0) ---');
@@ -1068,14 +1088,21 @@ def main():
 
         skill.append(f" currentY = currentY + ({row_count} * {y_pitch})")
 
-    # Calculate true geometric center of active core C1/primary cell
-    # X-axis: find left-padding columns before C1/primary segment
+    # Calculate true geometric center of the ROV active block
+    first_active_idx = -1
+    last_active_idx = -1
+    for i, r in enumerate(rows):
+        is_act = get_row_category(r["purpose"], r.get("name", ""), rov_purpose) in ("active", "rov")
+        if is_act:
+            if first_active_idx == -1:
+                first_active_idx = i
+            last_active_idx = i
+
     left_cols = 0
     active_cols = total_cols
-    active_rows_list = [r for r in rows if get_row_category(r["purpose"], r.get("name", ""), rov_purpose) == "active"]
-    if active_rows_list:
-        main_active_row = max(active_rows_list, key=lambda r: r["rows"])
-        segments = main_active_row.get("segments", [])
+    if first_active_idx != -1:
+        first_active_row = rows[first_active_idx]
+        segments = first_active_row.get("segments", [])
         if segments:
             active_seg_idx = -1
             for s_idx, seg in enumerate(segments):
@@ -1088,16 +1115,16 @@ def main():
 
     target_dx = - (left_cols + active_cols / 2.0) * x_pitch
 
-    # Y-axis: Find the physical Y-offset of the primary ROV block (max_active_row)
     start_y_rows = 0
-    if max_active_row:
-        for r in rows:
-            if r == max_active_row:
-                break
-            start_y_rows += r["rows"]
-    
-    if max_active_row:
-        target_dy = - (start_y_rows + max_active_row["rows"] / 2.0) * y_pitch
+    end_y_rows = 0
+    if first_active_idx != -1 and last_active_idx != -1:
+        for i in range(first_active_idx):
+            start_y_rows += rows[i]["rows"]
+        end_y_rows = start_y_rows
+        for i in range(first_active_idx, last_active_idx + 1):
+            end_y_rows += rows[i]["rows"]
+        
+        target_dy = - (start_y_rows + end_y_rows) / 2.0 * y_pitch
     else:
         target_dy = - (sum(r["rows"] for r in rows) / 2.0) * y_pitch
 
