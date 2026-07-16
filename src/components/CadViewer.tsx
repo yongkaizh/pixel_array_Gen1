@@ -1350,6 +1350,14 @@ export const CadViewer = React.memo(function CadViewer({ config }: CadViewerProp
                         {segCols} Cols × {b.rows} Rows
                       </span>
                     </div>
+                    {b.address && (
+                      <div className="mt-2.5 pt-2 border-t border-glass-border/30">
+                        <span className="bg-indigo-600/10 text-indigo-700 border border-indigo-200 px-2.5 py-1.5 rounded-md text-xs font-mono font-black flex items-center gap-2 uppercase tracking-wide">
+                          <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-pulse shadow-[0_0_8px_rgba(79,70,229,0.8)]"></span>
+                          Address: {b.address}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               );
