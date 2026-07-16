@@ -52,12 +52,20 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-glass-bg text-glass-text flex flex-col antialiased font-sans">
+    <div className="min-h-screen bg-transparent text-glass-text flex flex-col antialiased font-sans relative z-0">
       {/* Visual Navigation Header */}
-      <header className="glass-panel sticky top-0 z-30 border-b-0 border-glass-border">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <motion.header 
+        initial={{ y: -50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        className="glass-panel sticky top-0 z-30 border-b-0 border-x-0 border-t-0 bg-black/20"
+      >
+        <div className="max-w-7xl mx-auto px-4 py-3 md:px-6 md:py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-neon-purple to-neon-cyan flex items-center justify-center font-mono font-bold text-sm text-white shadow-[0_0_15px_rgba(0,240,255,0.4)]">
+            <motion.div 
+              whileHover={{ scale: 1.05, rotate: 5 }}
+              className="w-10 h-10 rounded-lg bg-gradient-to-br from-neon-purple to-neon-cyan flex items-center justify-center font-mono font-bold text-sm text-white shadow-[0_0_15px_rgba(6,182,212,0.4)]"
+            >
               I.S.
             </div>
             <div>
@@ -81,23 +89,30 @@ export default function App() {
                 UNAPPLIED DRAFT EDITS
               </span>
             )}
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => setShowTour(true)}
-              className="flex items-center gap-1.5 bg-white/5 text-glass-text px-4 py-1.5 rounded-full text-[10px] uppercase font-bold tracking-widest hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all hover:shadow-[0_0_10px_rgba(255,255,255,0.1)]"
+              className="flex items-center gap-1.5 glass-button text-glass-text px-4 py-1.5 rounded-full text-[10px] uppercase font-bold tracking-widest cursor-pointer"
             >
               <HelpCircle className="w-3.5 h-3.5" />
               Tour & Guide
-            </button>
+            </motion.button>
             <span className="text-glass-muted">STATUS:</span>
-            <span className="font-bold bg-neon-emerald/10 text-neon-emerald border border-neon-emerald/30 px-3 py-1 rounded-full tracking-widest text-[10px]">
+            <span className="font-bold bg-neon-emerald/10 text-neon-emerald border border-neon-emerald/30 px-3 py-1 rounded-full tracking-widest text-[10px] shadow-[0_0_10px_rgba(16,185,129,0.2)]">
               READY
             </span>
           </div>
         </div>
-      </header>
+      </motion.header>
 
       {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 space-y-6">
+      <motion.main 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+        className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 space-y-6 relative z-10"
+      >
         
         {/* Global Apply/Discard Floating Staging Banner when modified */}
         <AnimatePresence>
@@ -123,19 +138,23 @@ export default function App() {
                 </div>
               </div>
               <div className="flex items-center gap-3 shrink-0 w-full sm:w-auto justify-end relative z-10">
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={handleDiscardChanges}
-                  className="px-5 py-2.5 text-xs font-mono font-bold uppercase tracking-widest text-glass-muted hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-lg transition-all cursor-pointer"
+                  className="px-5 py-2.5 text-xs font-mono font-bold uppercase tracking-widest text-glass-muted hover:text-white glass-button rounded-lg cursor-pointer"
                 >
                   Discard Draft
-                </button>
-                <button
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={handleApplyChanges}
-                  className="flex items-center gap-2 px-6 py-2.5 text-xs font-mono font-bold uppercase tracking-widest text-white bg-gradient-to-r from-neon-purple to-neon-cyan hover:opacity-90 rounded-lg shadow-[0_0_20px_rgba(0,240,255,0.4)] hover:shadow-[0_0_30px_rgba(176,38,255,0.6)] transition-all cursor-pointer"
+                  className="flex items-center gap-2 px-6 py-2.5 text-xs font-mono font-bold uppercase tracking-widest text-white bg-gradient-to-r from-neon-purple to-neon-cyan hover:opacity-90 rounded-lg shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:shadow-[0_0_30px_rgba(147,51,234,0.6)] transition-all cursor-pointer border border-white/20"
                 >
                   <CheckCircle className="w-4.5 h-4.5" />
                   Apply &amp; Compile Draft
-                </button>
+                </motion.button>
               </div>
             </motion.div>
           )}
@@ -211,9 +230,9 @@ export default function App() {
           <SkillCodeViewer config={activeConfig} />
 
         </div>
-      </main>
+      </motion.main>
 
-      <footer className="glass-panel border-t border-glass-border py-6 px-6 text-center text-xs uppercase tracking-widest mt-auto">
+      <footer className="glass-panel border-b-0 border-x-0 border-t border-glass-border py-6 px-6 text-center text-xs uppercase tracking-widest mt-auto bg-black/20">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <span className="text-glass-muted font-mono">Session: X782-99 // Memory: 24.1 MB</span>
           <span className="flex items-center gap-2 font-mono text-white">

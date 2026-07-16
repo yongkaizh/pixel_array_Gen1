@@ -250,8 +250,8 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
           onClick={() => setActiveSubTab('globals')}
           className={`flex-1 py-1.5 rounded-lg text-[10px] font-mono font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
             activeSubTab === 'globals'
-              ? 'bg-white/10 text-white border border-glass-border'
-              : 'text-glass-text/60 hover:text-black'
+              ? 'glass-button bg-white/10 text-white shadow-[inset_0_0_10px_rgba(255,255,255,0.05)]'
+              : 'text-glass-text/60 hover:text-white hover:bg-white/5'
           }`}
         >
           <Settings className="w-3.5 h-3.5" />
@@ -261,8 +261,8 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
           onClick={() => setActiveSubTab('rows')}
           className={`flex-1 py-1.5 rounded-lg text-[10px] font-mono font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
             activeSubTab === 'rows'
-              ? 'bg-white/10 text-white border border-glass-border'
-              : 'text-glass-text/60 hover:text-black'
+              ? 'glass-button bg-white/10 text-white shadow-[inset_0_0_10px_rgba(255,255,255,0.05)]'
+              : 'text-glass-text/60 hover:text-white hover:bg-white/5'
           }`}
         >
           <Layers className="w-3.5 h-3.5" />
@@ -272,8 +272,8 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
           onClick={() => setActiveSubTab('cells')}
           className={`flex-1 py-1.5 rounded-lg text-[10px] font-mono font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
             activeSubTab === 'cells'
-              ? 'bg-white/10 text-white border border-glass-border'
-              : 'text-glass-text/60 hover:text-black'
+              ? 'glass-button bg-white/10 text-white shadow-[inset_0_0_10px_rgba(255,255,255,0.05)]'
+              : 'text-glass-text/60 hover:text-white hover:bg-white/5'
           }`}
         >
           <RefreshCw className="w-3.5 h-3.5" />
@@ -290,7 +290,7 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
               type="text"
               value={config.top_lib}
               onChange={(e) => updateGlobal('top_lib', e.target.value)}
-              className="w-full bg-glass-panel border border-glass-border focus:bg-glass-bg rounded-lg px-3.5 py-2 text-xs font-mono text-glass-text focus:outline-none transition-all"
+              className="w-full glass-input rounded-lg px-3.5 py-2 text-xs font-mono focus:ring-1 focus:ring-neon-cyan focus:border-neon-cyan transition-all"
             />
           </div>
           <div className="space-y-1.5">
@@ -299,7 +299,7 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
               type="text"
               value={config.top_cell}
               onChange={(e) => updateGlobal('top_cell', e.target.value)}
-              className="w-full bg-glass-panel border border-glass-border focus:bg-glass-bg rounded-lg px-3.5 py-2 text-xs font-mono text-glass-text focus:outline-none transition-all"
+              className="w-full glass-input rounded-lg px-3.5 py-2 text-xs font-mono focus:ring-1 focus:ring-neon-cyan focus:border-neon-cyan transition-all"
             />
           </div>
           <div className="space-y-1.5">
@@ -309,7 +309,7 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
               step="0.01"
               value={config.x_pitch}
               onChange={(e) => updateGlobal('x_pitch', parseFloat(e.target.value) || 1.0)}
-              className="w-full bg-glass-panel border border-glass-border focus:bg-glass-bg rounded-lg px-3.5 py-2 text-xs font-mono text-glass-text focus:outline-none transition-all"
+              className="w-full glass-input rounded-lg px-3.5 py-2 text-xs font-mono focus:ring-1 focus:ring-neon-cyan focus:border-neon-cyan transition-all"
             />
           </div>
           <div className="space-y-1.5">
@@ -319,7 +319,7 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
               step="0.01"
               value={config.y_pitch}
               onChange={(e) => updateGlobal('y_pitch', parseFloat(e.target.value) || 1.0)}
-              className="w-full bg-glass-panel border border-glass-border focus:bg-glass-bg rounded-lg px-3.5 py-2 text-xs font-mono text-glass-text focus:outline-none transition-all"
+              className="w-full glass-input rounded-lg px-3.5 py-2 text-xs font-mono focus:ring-1 focus:ring-neon-cyan focus:border-neon-cyan transition-all"
             />
           </div>
           <div className="space-y-1.5">
@@ -328,7 +328,7 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
               type="number"
               value={config.total_cols}
               onChange={(e) => updateGlobal('total_cols', parseInt(e.target.value, 10) || 1)}
-              className="w-full bg-glass-panel border border-glass-border focus:bg-glass-bg rounded-lg px-3.5 py-2 text-xs font-mono text-glass-text focus:outline-none transition-all"
+              className="w-full glass-input rounded-lg px-3.5 py-2 text-xs font-mono focus:ring-1 focus:ring-neon-cyan focus:border-neon-cyan transition-all"
             />
           </div>
           <div className="space-y-1.5">
@@ -336,7 +336,7 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
             <select
               value={config.rov_purpose}
               onChange={(e) => updateGlobal('rov_purpose', e.target.value)}
-              className="w-full bg-glass-panel border border-glass-border focus:bg-glass-bg rounded-lg px-3.5 py-2 text-xs font-mono text-glass-text focus:outline-none transition-all"
+              className="w-full glass-input rounded-lg px-3.5 py-2 text-xs font-mono focus:ring-1 focus:ring-neon-cyan focus:border-neon-cyan transition-all"
             >
               {Object.keys(config.cell_map).map((key) => (
                 <option key={key} value={key}>
@@ -391,7 +391,7 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
                           setEditingPurposeError('');
                         }}
                         placeholder="new name"
-                        className="bg-glass-panel border border-glass-border px-1.5 py-0.5 text-xs font-mono text-glass-text focus:outline-none w-32"
+                        className="glass-input px-1.5 py-0.5 text-xs font-mono w-32 rounded focus:ring-1 focus:ring-neon-cyan"
                         autoFocus
                       />
                       <button

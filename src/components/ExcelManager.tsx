@@ -146,7 +146,6 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
         </ul>
       </div>
 
-      {/* Drag & Drop Box */}
       <div
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
@@ -156,12 +155,12 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
             fileInputRef.current?.click();
           }
         }}
-        className={`border-2 border-dashed p-8 flex flex-col items-center justify-center text-center gap-3 transition-all rounded-lg ${
+        className={`border-2 border-dashed p-8 flex flex-col items-center justify-center text-center gap-3 transition-all rounded-lg glass-panel ${
           pendingConfig
-            ? 'border-amber-600 bg-amber-50/40 hover:bg-amber-50/70'
+            ? 'border-amber-500/50 bg-amber-500/10 hover:bg-amber-500/20 shadow-[0_0_20px_rgba(245,158,11,0.15)]'
             : isDragging
-            ? 'border-emerald-600 bg-emerald-50'
-            : 'border-[#141414] hover:border-black bg-glass-bg/50 hover:bg-glass-bg cursor-pointer'
+            ? 'border-neon-cyan bg-neon-cyan/10 shadow-[0_0_20px_rgba(6,182,212,0.2)]'
+            : 'border-glass-border hover:border-glass-border-hover bg-black/20 hover:bg-black/30 cursor-pointer'
         }`}
       >
         <input
@@ -207,7 +206,7 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
                   e.stopPropagation();
                   discardPendingConfig();
                 }}
-                className="px-4 py-2 text-[10px] font-mono font-bold uppercase tracking-wider text-glass-text/75 hover:text-rose-700 bg-glass-panel border border-glass-border/30 hover:border-rose-600 rounded-lg transition cursor-pointer"
+                className="px-4 py-2 text-[10px] font-mono font-bold uppercase tracking-wider text-glass-text/75 hover:text-white glass-button rounded-lg transition cursor-pointer"
               >
                 Discard
               </button>
@@ -278,7 +277,7 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
         </div>
         <button
           onClick={handleExportExcel}
-          className="flex items-center gap-2 px-3.5 py-2 text-[11px] font-mono font-bold uppercase tracking-wider text-white bg-white/10 hover:bg-black border border-glass-border rounded-lg transition-all cursor-pointer"
+          className="flex items-center gap-2 px-3.5 py-2 text-[11px] font-mono font-bold uppercase tracking-wider text-white glass-button rounded-lg transition-all cursor-pointer"
         >
           <FileDown className="w-3.5 h-3.5 text-green-400" />
           Export Active Config
