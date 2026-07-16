@@ -117,11 +117,11 @@ export default function App() {
         {/* Global Apply/Discard Floating Staging Banner when modified */}
         <AnimatePresence>
           {isModified && (
-              <motion.div
+            <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="p-5 glass-panel border border-neon-rose/30 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-xl shadow-[0_8px_30px_rgba(244,63,94,0.15)] relative overflow-hidden"
+              className="sticky top-24 z-40 p-5 glass-panel border border-neon-rose/30 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-xl shadow-[0_12px_40px_rgba(244,63,94,0.2)] overflow-hidden bg-white/80 backdrop-blur-xl"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-neon-rose/5 to-transparent pointer-events-none" />
               <div className="flex items-center gap-4 relative z-10">
