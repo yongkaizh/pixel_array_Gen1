@@ -135,7 +135,7 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
         </div>
       </div>
 
-      <div className="border border-glass-border/20 bg-[#F7F6F2] p-4 space-y-2.5">
+      <div className="border border-glass-border/20 bg-glass-panel p-4 space-y-2.5">
         <p className="text-xs font-mono font-black uppercase tracking-[0.2em] text-glass-text/90">
           What the workbook should contain
         </p>
@@ -157,7 +157,7 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
         }}
         className={`border-2 border-dashed p-8 flex flex-col items-center justify-center text-center gap-3 transition-all rounded-lg glass-panel ${
           pendingConfig
-            ? 'border-amber-500/50 bg-amber-500/10 hover:bg-amber-500/20 shadow-[0_0_20px_rgba(245,158,11,0.15)]'
+            ? 'border-amber-500/50 bg-amber-500/10 text-amber-2000/10 hover:bg-amber-500/10 text-amber-2000/20 shadow-[0_0_20px_rgba(245,158,11,0.15)]'
             : isDragging
             ? 'border-neon-cyan bg-neon-cyan/10 shadow-[0_0_20px_rgba(6,182,212,0.2)]'
             : 'border-glass-border hover:border-glass-border-hover bg-black/20 hover:bg-black/30 cursor-pointer'
@@ -186,11 +186,11 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
           <div className="flex flex-col items-center justify-center gap-3.5 w-full" onClick={(e) => e.stopPropagation()}>
             <CheckCircle className="w-10 h-10 text-neon-emerald shrink-0" />
             <div className="space-y-1">
-              <p className="text-xs font-mono font-black uppercase tracking-wider text-amber-950">
+              <p className="text-xs font-mono font-black uppercase tracking-wider text-amber-400">
                 // SPREADSHEET STAGED &amp; READY
               </p>
               <p className="text-xs text-glass-text font-bold">
-                File: <code className="font-mono bg-glass-panel px-1.5 py-0.5 border border-glass-border/20 text-amber-800">{pendingFileName}</code>
+                File: <code className="font-mono bg-glass-panel px-1.5 py-0.5 border border-glass-border/20 text-amber-300">{pendingFileName}</code>
               </p>
               <div className="flex items-center justify-center gap-4 text-xs font-mono text-glass-text/80 mt-1">
                 <span>Row blocks: <strong className="text-black">{pendingConfig.rows.length}</strong></span>
@@ -246,12 +246,12 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
           <div className="flex items-start gap-2">
             <AlertCircle className="w-4.5 h-4.5 text-rose-700 shrink-0 mt-0.5" />
             <div className="flex-1">
-              <p className="text-xs font-mono font-black uppercase tracking-wider text-rose-800">{errorDetails.title}</p>
-              <p className="text-xs text-rose-900 mt-1">{errorDetails.summary}</p>
+              <p className="text-xs font-mono font-black uppercase tracking-wider text-rose-400">{errorDetails.title}</p>
+              <p className="text-xs text-rose-200 mt-1">{errorDetails.summary}</p>
               {errorDetails.missingItem && (
-                <p className="text-sm text-rose-900 mt-1"><span className="font-bold">Missing item:</span> {errorDetails.missingItem}</p>
+                <p className="text-sm text-rose-200 mt-1"><span className="font-bold">Missing item:</span> {errorDetails.missingItem}</p>
               )}
-              <p className="text-sm text-rose-900 mt-2 leading-relaxed">{errorDetails.fixSuggestion}</p>
+              <p className="text-sm text-rose-200 mt-2 leading-relaxed">{errorDetails.fixSuggestion}</p>
             </div>
           </div>
           {errorDetails.showTemplateButton && (
@@ -366,35 +366,35 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
             </p>
             <div className="font-mono text-xs text-glass-text bg-glass-panel border border-glass-border rounded-lg overflow-hidden min-w-[300px]">
               <table className="w-full text-left border-collapse">
-                <thead className="bg-[#F0F0F0] text-glass-text">
+                <thead className="bg-glass-bg text-glass-text">
                   <tr>
-                    <th className="p-1 border-b border-[#141414] border-r w-6 text-center font-normal text-[#888]"></th>
-                    <th className="p-1 border-b border-[#141414] border-r text-center font-normal">A</th>
-                    <th className="p-1 border-b border-[#141414] border-r text-center font-normal">B</th>
-                    <th className="p-1 border-b border-[#141414] border-r text-center font-normal">C</th>
-                    <th className="p-1 border-b border-[#141414] text-center font-normal">D</th>
+                    <th className="p-1 border-b border-glass-border border-r w-6 text-center font-normal text-glass-muted"></th>
+                    <th className="p-1 border-b border-glass-border border-r text-center font-normal">A</th>
+                    <th className="p-1 border-b border-glass-border border-r text-center font-normal">B</th>
+                    <th className="p-1 border-b border-glass-border border-r text-center font-normal">C</th>
+                    <th className="p-1 border-b border-glass-border text-center font-normal">D</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className="border-b border-[#E4E3E0]">
-                    <td className="p-1 border-r border-[#141414] bg-[#F0F0F0] text-center text-[#888]">1</td>
-                    <td className="p-1 border-r border-[#E4E3E0] font-bold">Name</td>
-                    <td className="p-1 border-r border-[#E4E3E0] font-bold">library</td>
-                    <td className="p-1 border-r border-[#E4E3E0] font-bold">Cell</td>
+                  <tr className="border-b border-glass-border">
+                    <td className="p-1 border-r border-glass-border bg-glass-bg text-center text-glass-muted">1</td>
+                    <td className="p-1 border-r border-glass-border font-bold">Name</td>
+                    <td className="p-1 border-r border-glass-border font-bold">library</td>
+                    <td className="p-1 border-r border-glass-border font-bold">Cell</td>
                     <td className="p-1 font-bold">rotation</td>
                   </tr>
-                  <tr className="border-b border-[#E4E3E0]">
-                    <td className="p-1 border-r border-[#141414] bg-[#F0F0F0] text-center text-[#888]">2</td>
-                    <td className="p-1 border-r border-[#E4E3E0]">active</td>
-                    <td className="p-1 border-r border-[#E4E3E0]">pixel_lib</td>
-                    <td className="p-1 border-r border-[#E4E3E0]">pixel_active</td>
+                  <tr className="border-b border-glass-border">
+                    <td className="p-1 border-r border-glass-border bg-glass-bg text-center text-glass-muted">2</td>
+                    <td className="p-1 border-r border-glass-border">active</td>
+                    <td className="p-1 border-r border-glass-border">pixel_lib</td>
+                    <td className="p-1 border-r border-glass-border">pixel_active</td>
                     <td className="p-1">R0</td>
                   </tr>
                   <tr>
-                    <td className="p-1 border-r border-[#141414] bg-[#F0F0F0] text-center text-[#888]">3</td>
-                    <td className="p-1 border-r border-[#E4E3E0]">rov</td>
-                    <td className="p-1 border-r border-[#E4E3E0]">pixel_lib</td>
-                    <td className="p-1 border-r border-[#E4E3E0]">pixel_rov</td>
+                    <td className="p-1 border-r border-glass-border bg-glass-bg text-center text-glass-muted">3</td>
+                    <td className="p-1 border-r border-glass-border">rov</td>
+                    <td className="p-1 border-r border-glass-border">pixel_lib</td>
+                    <td className="p-1 border-r border-glass-border">pixel_rov</td>
                     <td className="p-1">MX</td>
                   </tr>
                 </tbody>
@@ -406,59 +406,59 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
             <p className="text-glass-text/90 text-sm leading-relaxed mb-3">
               Contains scalar metadata, column count, and stacked row blocks. 
               <strong> Heterogeneous Rows Support (Columns D & E):</strong> Specify left/right segment padding to create varying cell rows. 
-              Use format <code className="bg-white/10/10 px-1 font-bold">count</code> (e.g. <code className="bg-white/10/10 px-1">20</code>, defaults to <code className="bg-white/10/10 px-1">dummy</code>) or <code className="bg-white/10/10 px-1">purpose:count</code> (e.g. <code className="bg-white/10/10 px-1">dummy:20</code> or <code className="bg-white/10/10 px-1">idle:10,dummy:10</code>). The center active region columns count is calculated automatically!
+              Use format <code className="bg-white/10 px-1 font-bold">count</code> (e.g. <code className="bg-white/10 px-1">20</code>, defaults to <code className="bg-white/10 px-1">dummy</code>) or <code className="bg-white/10 px-1">purpose:count</code> (e.g. <code className="bg-white/10 px-1">dummy:20</code> or <code className="bg-white/10 px-1">idle:10,dummy:10</code>). The center active region columns count is calculated automatically!
             </p>
             <div className="font-mono text-xs text-glass-text bg-glass-panel border border-glass-border rounded-lg overflow-hidden min-w-[600px]">
               <table className="w-full text-left border-collapse">
-                <thead className="bg-[#F0F0F0] text-glass-text">
+                <thead className="bg-glass-bg text-glass-text">
                   <tr>
-                    <th className="p-1 border-b border-[#141414] border-r w-6 text-center font-normal text-[#888]"></th>
-                    <th className="p-1 border-b border-[#141414] border-r text-center font-normal">A (row_num)</th>
-                    <th className="p-1 border-b border-[#141414] border-r text-center font-normal">B (Purpose)</th>
-                    <th className="p-1 border-b border-[#141414] border-r text-center font-normal">C (Marker)</th>
-                    <th className="p-1 border-b border-[#141414] border-r text-center font-normal">D (Left Padding)</th>
-                    <th className="p-1 border-b border-[#141414] text-center font-normal">E (Right Padding)</th>
+                    <th className="p-1 border-b border-glass-border border-r w-6 text-center font-normal text-glass-muted"></th>
+                    <th className="p-1 border-b border-glass-border border-r text-center font-normal">A (row_num)</th>
+                    <th className="p-1 border-b border-glass-border border-r text-center font-normal">B (Purpose)</th>
+                    <th className="p-1 border-b border-glass-border border-r text-center font-normal">C (Marker)</th>
+                    <th className="p-1 border-b border-glass-border border-r text-center font-normal">D (Left Padding)</th>
+                    <th className="p-1 border-b border-glass-border text-center font-normal">E (Right Padding)</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className="border-b border-[#E4E3E0] text-glass-text/80 italic bg-[#FAFAFA]">
-                    <td className="p-1 border-r border-[#141414] bg-[#F0F0F0] text-center">...</td>
-                    <td className="p-1 border-r border-[#E4E3E0]">...</td>
-                    <td className="p-1 border-r border-[#E4E3E0]">...</td>
-                    <td className="p-1 border-r border-[#E4E3E0]">...</td>
-                    <td className="p-1 border-r border-[#E4E3E0]">...</td>
+                  <tr className="border-b border-glass-border text-glass-text/80 italic bg-glass-bg">
+                    <td className="p-1 border-r border-glass-border bg-glass-bg text-center">...</td>
+                    <td className="p-1 border-r border-glass-border">...</td>
+                    <td className="p-1 border-r border-glass-border">...</td>
+                    <td className="p-1 border-r border-glass-border">...</td>
+                    <td className="p-1 border-r border-glass-border">...</td>
                     <td className="p-1">...</td>
                   </tr>
-                  <tr className="border-b border-[#E4E3E0]">
-                    <td className="p-1 border-r border-[#141414] bg-[#F0F0F0] text-center text-[#888]">12</td>
-                    <td className="p-1 border-r border-[#E4E3E0] font-bold bg-amber-50">col_num</td>
-                    <td className="p-1 border-r border-[#E4E3E0] bg-amber-50">1936</td>
-                    <td className="p-1 border-r border-[#E4E3E0]">active</td>
-                    <td className="p-1 border-r border-[#E4E3E0]"></td>
+                  <tr className="border-b border-glass-border">
+                    <td className="p-1 border-r border-glass-border bg-glass-bg text-center text-glass-muted">12</td>
+                    <td className="p-1 border-r border-glass-border font-bold bg-amber-500/10 text-amber-200">col_num</td>
+                    <td className="p-1 border-r border-glass-border bg-amber-500/10 text-amber-200">1936</td>
+                    <td className="p-1 border-r border-glass-border">active</td>
+                    <td className="p-1 border-r border-glass-border"></td>
                     <td className="p-1"></td>
                   </tr>
-                  <tr className="border-b border-[#E4E3E0]">
-                    <td className="p-1 border-r border-[#141414] bg-[#F0F0F0] text-center text-[#888]">13</td>
-                    <td className="p-1 border-r border-[#E4E3E0] font-bold">row_num</td>
-                    <td className="p-1 border-r border-[#E4E3E0] font-bold">Row Count</td>
-                    <td className="p-1 border-r border-[#E4E3E0] font-bold">ROV Indicator</td>
-                    <td className="p-1 border-r border-[#E4E3E0] font-bold text-emerald-600">Left Column Segments</td>
+                  <tr className="border-b border-glass-border">
+                    <td className="p-1 border-r border-glass-border bg-glass-bg text-center text-glass-muted">13</td>
+                    <td className="p-1 border-r border-glass-border font-bold">row_num</td>
+                    <td className="p-1 border-r border-glass-border font-bold">Row Count</td>
+                    <td className="p-1 border-r border-glass-border font-bold">ROV Indicator</td>
+                    <td className="p-1 border-r border-glass-border font-bold text-emerald-600">Left Column Segments</td>
                     <td className="p-1 font-bold text-emerald-600">Right Column Segments</td>
                   </tr>
-                  <tr className="border-b border-[#E4E3E0]">
-                    <td className="p-1 border-r border-[#141414] bg-[#F0F0F0] text-center text-[#888]">14</td>
-                    <td className="p-1 border-r border-[#E4E3E0]">1294</td>
-                    <td className="p-1 border-r border-[#E4E3E0]">active (c1)</td>
-                    <td className="p-1 border-r border-[#E4E3E0]"></td>
-                    <td className="p-1 border-r border-[#E4E3E0] text-emerald-600 font-bold">dummy:20</td>
+                  <tr className="border-b border-glass-border">
+                    <td className="p-1 border-r border-glass-border bg-glass-bg text-center text-glass-muted">14</td>
+                    <td className="p-1 border-r border-glass-border">1294</td>
+                    <td className="p-1 border-r border-glass-border">active (c1)</td>
+                    <td className="p-1 border-r border-glass-border"></td>
+                    <td className="p-1 border-r border-glass-border text-emerald-600 font-bold">dummy:20</td>
                     <td className="p-1 text-emerald-600 font-bold">dummy:20</td>
                   </tr>
-                  <tr className="border-b border-[#E4E3E0]">
-                    <td className="p-1 border-r border-[#141414] bg-[#F0F0F0] text-center text-[#888]">15</td>
-                    <td className="p-1 border-r border-[#E4E3E0]">2</td>
-                    <td className="p-1 border-r border-[#E4E3E0]">rov (rov)</td>
-                    <td className="p-1 border-r border-[#E4E3E0] font-black text-red-500">ROV</td>
-                    <td className="p-1 border-r border-[#E4E3E0]"></td>
+                  <tr className="border-b border-glass-border">
+                    <td className="p-1 border-r border-glass-border bg-glass-bg text-center text-glass-muted">15</td>
+                    <td className="p-1 border-r border-glass-border">2</td>
+                    <td className="p-1 border-r border-glass-border">rov (rov)</td>
+                    <td className="p-1 border-r border-glass-border font-black text-red-500">ROV</td>
+                    <td className="p-1 border-r border-glass-border"></td>
                     <td className="p-1"></td>
                   </tr>
                 </tbody>
