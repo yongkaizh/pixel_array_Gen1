@@ -695,36 +695,52 @@ export function RowItemEditor({ row, idx, cellMap, totalCols, onUpdate, onDelete
 
   const handleLeftChange = (val: string) => {
     setLeftInput(val);
-    applySegments(val, rightInput);
+    const v = validateInputString(val);
+    const rv = validateInputString(rightInput);
+    if (v.valid && rv.valid) {
+      applySegments(val, rightInput);
+    } else {
+      onUpdate({ leftStr: val });
+    }
   };
 
   const handleRightChange = (val: string) => {
     setRightInput(val);
-    applySegments(leftInput, val);
+    const v = validateInputString(val);
+    const lv = validateInputString(leftInput);
+    if (v.valid && lv.valid) {
+      applySegments(leftInput, val);
+    } else {
+      onUpdate({ rightStr: val });
+    }
   };
 
-  const applySegments = (leftVal: string, rightVal: string) => {
+  const applySegments = (leftVal: string, rightVal: string, purposeOverride?: string) => {
     const leftSegs = parseSegmentsString(leftVal, 'dummy');
     const rightSegs = parseSegmentsString(rightVal, 'dummy');
     
     const leftSum = leftSegs.reduce((sum, s) => sum + s.cols, 0);
     const rightSum = rightSegs.reduce((sum, s) => sum + s.cols, 0);
     
+    const purp = purposeOverride || row.purpose;
     const segments: RowSegment[] = [];
     if (leftSum > 0 || rightSum > 0) {
       leftSegs.forEach(s => segments.push(s));
       const centerCols = totalCols - leftSum - rightSum;
       if (centerCols > 0) {
-        segments.push({ purpose: row.purpose.toLowerCase(), cols: centerCols });
+        segments.push({ purpose: purp.toLowerCase(), cols: centerCols });
       }
       rightSegs.forEach(s => segments.push(s));
     }
 
-    onUpdate({
+    const updates: Partial<RowConfig> = {
       segments: segments.length > 0 ? segments : undefined,
       leftStr: leftVal,
       rightStr: rightVal
-    });
+    };
+    if (purposeOverride) updates.purpose = purposeOverride;
+
+    onUpdate(updates);
   };
 
   // Sync state if external changes happen (e.g., spreadsheet upload)
@@ -778,21 +794,31 @@ export function RowItemEditor({ row, idx, cellMap, totalCols, onUpdate, onDelete
             value={row.purpose}
             onChange={(e) => {
               const newPurp = e.target.value;
-              // Re-apply segments if purpose changes
-              const leftSegs = parseSegmentsString(leftInput, 'dummy');
-              const rightSegs = parseSegmentsString(rightInput, 'dummy');
-              const leftSum = leftSegs.reduce((sum, s) => sum + s.cols, 0);
-              const rightSum = rightSegs.reduce((sum, s) => sum + s.cols, 0);
-              const segments: RowSegment[] = [];
-              if (leftSum > 0 || rightSum > 0) {
-                leftSegs.forEach(s => segments.push(s));
-                const centerCols = totalCols - leftSum - rightSum;
-                if (centerCols > 0) {
-                  segments.push({ purpose: newPurp.toLowerCase(), cols: centerCols });
+              const v = validateInputString(leftInput);
+              const rv = validateInputString(rightInput);
+              if (v.valid && rv.valid) {
+                applySegments(leftInput, rightInput, newPurp);
+              } else {
+                // When invalid, update purpose only
+                const updates: Partial<RowConfig> = { purpose: newPurp };
+                // Also update the center segment if it exists
+                if (row.segments) {
+                  const leftSegs = parseSegmentsString(row.leftStr || '', 'dummy');
+                  const rightSegs = parseSegmentsString(row.rightStr || '', 'dummy');
+                  const leftSum = leftSegs.reduce((sum, s) => sum + s.cols, 0);
+                  const rightSum = rightSegs.reduce((sum, s) => sum + s.cols, 0);
+                  const centerCols = totalCols - leftSum - rightSum;
+                  
+                  const segments = [];
+                  leftSegs.forEach(s => segments.push(s));
+                  if (centerCols > 0) {
+                    segments.push({ purpose: newPurp.toLowerCase(), cols: centerCols });
+                  }
+                  rightSegs.forEach(s => segments.push(s));
+                  updates.segments = segments.length > 0 ? segments : undefined;
                 }
-                rightSegs.forEach(s => segments.push(s));
+                onUpdate(updates);
               }
-              onUpdate({ purpose: newPurp, segments: segments.length > 0 ? segments : undefined });
             }}
             className="bg-glass-panel border border-glass-border rounded-lg px-2.5 py-1 text-xs font-mono text-glass-text focus:outline-none transition"
           >
