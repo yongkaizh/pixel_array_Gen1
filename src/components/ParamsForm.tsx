@@ -667,8 +667,31 @@ export function RowItemEditor({ row, idx, cellMap, totalCols, onUpdate, onDelete
   const [leftInput, setLeftInput] = useState(leftStr);
   const [rightInput, setRightInput] = useState(rightStr);
 
-  const isLeftValid = leftInput === '' || leftInput.split(',').every(part => /^\s*(\d+|[a-zA-Z0-9_]+\s*:\s*\d+)\s*$/.test(part));
-  const isRightValid = rightInput === '' || rightInput.split(',').every(part => /^\s*(\d+|[a-zA-Z0-9_]+\s*:\s*\d+)\s*$/.test(part));
+  const validateInputString = (input: string) => {
+    if (input === '') return { valid: true, error: '' };
+    const parts = input.split(',');
+    for (const part of parts) {
+      const trimmed = part.trim();
+      if (!/^\s*(\d+|[a-zA-Z0-9_]+\s*:\s*\d+)\s*$/.test(trimmed)) {
+        return { valid: false, error: 'Invalid format' };
+      }
+      if (trimmed.includes(':')) {
+        const purp = trimmed.split(':')[0].trim().toLowerCase();
+        if (!cellMap[purp]) {
+          return { valid: false, error: `Unmapped cell: ${purp}` };
+        }
+      }
+    }
+    return { valid: true, error: '' };
+  };
+
+  const leftValidation = validateInputString(leftInput);
+  const isLeftValid = leftValidation.valid;
+  const leftError = leftValidation.error;
+  
+  const rightValidation = validateInputString(rightInput);
+  const isRightValid = rightValidation.valid;
+  const rightError = rightValidation.error;
 
   const handleLeftChange = (val: string) => {
     setLeftInput(val);
@@ -796,7 +819,7 @@ export function RowItemEditor({ row, idx, cellMap, totalCols, onUpdate, onDelete
         <div className="flex flex-col gap-1">
           <span className="text-sm text-glass-text/80 font-black uppercase font-mono tracking-wider flex justify-between">
             <span>Left Padding (segs)</span>
-            {!isLeftValid && <span className="text-rose-500 text-[10px]">Invalid format</span>}
+            {!isLeftValid && <span className="text-rose-500 text-[10px]">{leftError}</span>}
           </span>
           <input
             type="text"
@@ -810,7 +833,7 @@ export function RowItemEditor({ row, idx, cellMap, totalCols, onUpdate, onDelete
         <div className="flex flex-col gap-1">
           <span className="text-sm text-glass-text/80 font-black uppercase font-mono tracking-wider flex justify-between">
             <span>Right Padding (segs)</span>
-            {!isRightValid && <span className="text-rose-500 text-[10px]">Invalid format</span>}
+            {!isRightValid && <span className="text-rose-500 text-[10px]">{rightError}</span>}
           </span>
           <input
             type="text"
