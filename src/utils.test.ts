@@ -7,8 +7,11 @@ import {
   generateSkillCode,
   generatePythonCode,
   parseExcelFile,
-  getExcelImportErrorDetails
+  getExcelImportErrorDetails,
+  exportToExcel,
+  LayoutConfig
 } from './utils';
+import * as XLSX from 'xlsx';
 
 describe('utils.ts', () => {
   describe('getRowCategory', () => {
@@ -155,6 +158,74 @@ describe('utils.ts', () => {
       expect(pyCode).toContain('import pandas as pd');
       // Just check it exists and has some common Python syntax
       expect(pyCode).toContain('def get_row_category');
+    });
+  });
+
+  describe('Excel Export and Parse Address Field', () => {
+    it('should correctly handle the address field with weird characters and empty strings', async () => {
+      const originalConfig: LayoutConfig = {
+        top_lib: 'test_lib',
+        top_cell: 'test_cell',
+        x_pitch: 1.5,
+        y_pitch: 2.5,
+        total_cols: 10,
+        rov_purpose: 'rov_marker',
+        rows: [
+          { purpose: 'c1', rows: 5, name: 'Core', address: 'Start of Core Array' },
+          { purpose: 'rov_marker', rows: 1, name: 'Marker', address: 'Weird chars: #!@$%^&*()_+\nNew line' },
+          { purpose: 'c2', rows: 10, name: 'Edge', address: '' },
+          { purpose: 'c3', rows: 2, name: 'Empty' } // completely missing address
+        ],
+        cell_map: {
+          'c1': { name: 'c1', lib: 'test_lib', cell: 'cell_c1', rot: 'R0' },
+          'rov_marker': { name: 'rov_marker', lib: 'test_lib', cell: 'cell_rov_marker', rot: 'R0' },
+          'c2': { name: 'c2', lib: 'test_lib', cell: 'cell_c2', rot: 'R0' },
+          'c3': { name: 'c3', lib: 'test_lib', cell: 'cell_c3', rot: 'R0' }
+        }
+      };
+
+      // Export to Excel buffer
+      const buffer = exportToExcel(originalConfig);
+
+      // Parse back
+      const parsedConfig = await parseExcelFile(buffer);
+
+      // Check address fields explicitly
+      expect(parsedConfig.rows[0].address).toBe('Start of Core Array');
+      expect(parsedConfig.rows[1].address).toBe('Weird chars: #!@$%^&*()_+\nNew line');
+      expect(parsedConfig.rows[2].address).toBe('');
+      expect(parsedConfig.rows[3].address).toBe(''); // undefined should become empty string
+    });
+
+    it('should gracefully handle Excel templates with no column F', async () => {
+      // Generate a raw format_template without column F
+      const wb = XLSX.utils.book_new();
+      
+      // Add pix_tbl
+      const pixRows = [
+        { 'Name': 'c1', 'library': 'test', 'Cell': 'cell', 'rotation': 'R0' }
+      ];
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(pixRows), 'pix_tbl');
+      
+      // Add format_template missing column F
+      // This fakes a situation where the user deleted everything to the right of Right Padding
+      const formatData = [
+        ['library', 'test_lib'],
+        ['cellname', 'test_cell'],
+        ['x pitch', 1],
+        ['y pitch', 2],
+        ['col_num', 10],
+        ['row_num', 'Row Block', 'Marker', 'Left', 'Right'],
+        [5, 'c1', '', '', ''] // No address column (only goes up to index 4)
+      ];
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(formatData), 'format_template');
+      
+      // Write out buffer
+      const buffer = XLSX.write(wb, { type: 'array', bookType: 'xlsx' });
+      
+      const parsedConfig = await parseExcelFile(buffer);
+      
+      expect(parsedConfig.rows[0].address).toBe(''); // Should not crash, just empty string
     });
   });
 });
