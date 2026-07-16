@@ -240,32 +240,29 @@ export function generateSkillCode(config: LayoutConfig): string {
     }
   });
 
-  // Iterate rows forward (bottom→top): bottom rows placed at low currentY, top rows at high currentY
-  // Combined with R180 mosaics, this produces the correct stacking in Cadence (bottom at bottom of view)
-  const rowsWithIndices = [...config.rows].map((row, idx) => ({ row, idx }));
-  rowsWithIndices.forEach(({ row, idx }) => {
-    const originalIdx = idx;
-    const purposeLower = row.purpose.toLowerCase();
-    const cellInfo = config.cell_map[purposeLower] || {
-      lib: 'unknown_lib',
-      cell: `cell_${purposeLower}`,
-      rot: 'R0'
-    };
+  // Iterate rows backwards (bottom→top) to match Cadence viewport (+Y is UP)
+  const reversedRows = [...config.rows].reverse();
+  reversedRows.forEach((row, rev_idx) => {
+    // The original row index in Excel (1-based)
+    const orig_idx = config.rows.length - 1 - rev_idx;
+    const row_num = orig_idx + 1;
+    const purpose = row.purpose;
+    const rowName = row.name || purpose;
 
-    const displayName = row.name || row.purpose;
-    const cleanPurpose = row.purpose.toLowerCase().replace(/[^a-zA-Z0-9_]/g, '_');
-    const mosaicName = `M${originalIdx + 1}_${cleanPurpose}`;
+    const cleanPurpose = purpose.toLowerCase().replace(/[^a-zA-Z0-9_]/g, '_');
+    const mosaicName = `M${row_num}_${cleanPurpose}`;
 
-    code.push(`    ; --- Creating ${displayName} Rows (${row.purpose}) ---`);
-    code.push('    printf(');
-    code.push(`      "Creating ${displayName} rows=${row.rows} y=%L\\n"`);
-    code.push('      currentY');
-    code.push('    )');
+    code.push(`  ; --- Creating ${rowName} Rows ---`);
+    code.push('  printf(');
+    code.push(`    "Creating ${rowName} (purpose: ${purpose}) rows=${row.rows} y=%L\\n"`);
+    code.push('    currentY');
+    code.push('  )');
     code.push('');
 
-    const hasSegs = row.segments && row.segments.length > 0;
-    if (!hasSegs) {
-      code.push('    master = dbOpenCellViewByType(');
+    if (!row.segments || row.segments.length === 0) {
+      const cellInfo = config.cell_map[purpose.toLowerCase()];
+      code.push('  master =');
+      code.push('    dbOpenCellViewByType(');
       code.push(`      "${cellInfo.lib}"`);
       code.push(`      "${cellInfo.cell}"`);
       code.push('      "layout"');
@@ -273,11 +270,15 @@ export function generateSkillCode(config: LayoutConfig): string {
       code.push('      "r"');
       code.push('    )');
       code.push('');
-      code.push('    when(master == nil');
-      code.push(`      error("Cannot open master cell: ${cellInfo.cell}\\n")`);
+      code.push('  when(');
+      code.push('    master == nil');
+      code.push('    error(');
+      code.push(`      "Cannot open master ${cellInfo.cell}\\n"`);
       code.push('    )');
+      code.push('  )');
       code.push('');
-      code.push('    inst = car(');
+      code.push('  inst =');
+      code.push('    car(');
       code.push('      errset(');
       code.push('        dbCreateSimpleMosaic(');
       code.push('          cv');
@@ -287,20 +288,21 @@ export function generateSkillCode(config: LayoutConfig): string {
       code.push('          "R180"');
       code.push(`          ${row.rows}`);
       code.push(`          ${config.total_cols}`);
-      code.push(`            ${config.y_pitch}`);
-      code.push(`            ${config.x_pitch}`);
+      code.push(`          ${config.y_pitch}`);
+      code.push(`          ${config.x_pitch}`);
       code.push('        )');
       code.push('      )');
       code.push('    )');
-      code.push('    unless(inst');
-      code.push('      inst = car(');
+      code.push('  unless(inst');
+      code.push('    inst =');
+      code.push('      car(');
       code.push('        errset(');
       code.push('          dbCreateMosaic(');
       code.push('            cv');
       code.push('            master');
       code.push(`            "${mosaicName}"`);
       code.push('            list(0.0 0.0)');
-      code.push('          "R180"');
+      code.push('            "R180"');
       code.push(`            ${row.rows}`);
       code.push(`            ${config.total_cols}`);
       code.push(`            ${config.y_pitch}`);
@@ -308,112 +310,138 @@ export function generateSkillCode(config: LayoutConfig): string {
       code.push('          )');
       code.push('        )');
       code.push('      )');
+      code.push('  )');
+      code.push('');
+      code.push('  when(');
+      code.push('    inst == nil');
+      code.push('    error(');
+      code.push(`      "Failed creating ${purpose}\\n"`);
+      code.push('    )');
+      code.push('  )');
+      code.push('');
+      code.push('  when(inst');
+      code.push('    bBox = inst~>bBox');
+      code.push('    ll = car(bBox)');
+      code.push('    x_ll = car(ll)');
+      code.push('    y_ll = cadr(ll)');
+      code.push('    dx = 0.0 - x_ll');
+      code.push('    dy = currentY - y_ll');
+      code.push('    inst~>xy = list(dx dy)');
+      code.push('  )');
+      code.push('');
+      code.push('  allInsts =');
+      code.push('    cons(');
+      code.push('      list(inst "R180")');
+      code.push('      allInsts');
       code.push('    )');
       code.push('');
-      code.push('    when(inst == nil');
-      code.push(`      error("Failed creating mosaic for purpose: ${row.purpose}\\n")`);
-      code.push('    )');
-      code.push('');
-      code.push('    when(inst');
-      code.push('      bBox = inst~>bBox');
-      code.push('      ll = car(bBox)');
-      code.push('      x_ll = car(ll)');
-      code.push('      y_ll = cadr(ll)');
-      code.push('      dx = 0.0 - x_ll');
-      code.push('      dy = currentY - y_ll');
-      code.push('      inst~>xy = list(dx dy)');
-      code.push('    )');
-      code.push('');
-      code.push('    allInsts = cons(list(inst "R180") allInsts)');
-      code.push('');
-
-      if (row === maxActiveRow) {
-        code.push('    printf("ACTIVE MOSAIC FOUND\\n")');
-        code.push('    rovInst = inst');
-        code.push('');
+      
+      const isRov = purpose.toLowerCase() === config.rov_purpose.toLowerCase();
+      if (isRov && row === maxActiveRow) {
+        code.push('  printf("ACTIVE MOSAIC FOUND\\n")');
+        code.push('  rovInst = inst');
       }
     } else {
-      let currentSegX = 0.0;
-      row.segments!.forEach((seg, sIdx) => {
-        const segCellInfo = config.cell_map[seg.purpose.toLowerCase()] || {
-          lib: 'unknown_lib',
-          cell: `cell_${seg.purpose}`,
-          rot: 'R0'
-        };
-        const cleanSegPurpose = seg.purpose.toLowerCase().replace(/[^a-zA-Z0-9_]/g, '_');
-        const segName = `M${originalIdx + 1}_${cleanPurpose}_seg${sIdx + 1}_${cleanSegPurpose}`;
+      let currSegX = 0.0;
+      row.segments.forEach((seg, sIdx) => {
+        const segPurpose = seg.purpose;
+        const segCols = seg.cols;
+        const cleanSegPurpose = segPurpose.toLowerCase().replace(/[^a-zA-Z0-9_]/g, '_');
+        const segMosaicName = `M${row_num}_${cleanPurpose}_seg${sIdx + 1}_${cleanSegPurpose}`;
+        
+        let segCellInfo = config.cell_map[segPurpose.toLowerCase()];
+        if (!segCellInfo) {
+          segCellInfo = {
+            name: segPurpose,
+            lib: 'pixel_lib',
+            cell: `cell_${segPurpose}`,
+            rot: 'R0'
+          };
+        }
 
-        code.push(`    ; Segment ${sIdx + 1}: ${seg.purpose} (cols=${seg.cols})`);
-        code.push('    master = dbOpenCellViewByType(');
+        code.push(`  ; Segment ${sIdx + 1}: ${segPurpose} (cols=${segCols})`);
+        code.push('  master =');
+        code.push('    dbOpenCellViewByType(');
         code.push(`      "${segCellInfo.lib}"`);
         code.push(`      "${segCellInfo.cell}"`);
         code.push('      "layout"');
-        code.push('      "maskLayout"');
+        code.push('      ""');
         code.push('      "r"');
         code.push('    )');
         code.push('');
-        code.push('    when(master == nil');
-        code.push(`      error("Cannot open master cell: ${segCellInfo.cell}\\n")`);
+        code.push('  when(');
+        code.push('    master == nil');
+        code.push('    error(');
+        code.push(`      "Cannot open master ${segCellInfo.cell}\\n"`);
         code.push('    )');
+        code.push('  )');
         code.push('');
-        code.push('    inst = car(');
+        code.push('  inst =');
+        code.push('    car(');
         code.push('      errset(');
         code.push('        dbCreateSimpleMosaic(');
         code.push('          cv');
         code.push('          master');
-        code.push(`          "${segName}"`);
+        code.push(`          "${segMosaicName}"`);
         code.push('          list(0.0 0.0)');
         code.push('          "R180"');
         code.push(`          ${row.rows}`);
-        code.push(`          ${seg.cols}`);
-        code.push(`            ${config.y_pitch}`);
-        code.push(`            ${config.x_pitch}`);
+        code.push(`          ${segCols}`);
+        code.push(`          ${config.y_pitch}`);
+        code.push(`          ${config.x_pitch}`);
         code.push('        )');
         code.push('      )');
         code.push('    )');
-        code.push('    unless(inst');
-        code.push('      inst = car(');
+        code.push('  unless(inst');
+        code.push('    inst =');
+        code.push('      car(');
         code.push('        errset(');
         code.push('          dbCreateMosaic(');
         code.push('            cv');
         code.push('            master');
-        code.push(`          "${segName}"`);
+        code.push(`            "${segMosaicName}"`);
         code.push('            list(0.0 0.0)');
-        code.push('          "R180"');
+        code.push('            "R180"');
         code.push(`            ${row.rows}`);
-        code.push(`            ${seg.cols}`);
+        code.push(`            ${segCols}`);
         code.push(`            ${config.y_pitch}`);
         code.push(`            ${config.x_pitch}`);
         code.push('          )');
         code.push('        )');
         code.push('      )');
+        code.push('  )');
+        code.push('');
+        code.push('  when(');
+        code.push('    inst == nil');
+        code.push('    error(');
+        code.push(`      "Failed creating segment ${segPurpose}\\n"`);
+        code.push('    )');
+        code.push('  )');
+        code.push('');
+        code.push('  when(inst');
+        code.push('    bBox = inst~>bBox');
+        code.push('    ll = car(bBox)');
+        code.push('    x_ll = car(ll)');
+        code.push('    y_ll = cadr(ll)');
+        code.push(`    dx = ${currSegX.toFixed(4)} - x_ll`);
+        code.push('    dy = currentY - y_ll');
+        code.push('    inst~>xy = list(dx dy)');
+        code.push('  )');
+        code.push('');
+        code.push('  allInsts =');
+        code.push('    cons(');
+        code.push('      list(inst "R180")');
+        code.push('      allInsts');
         code.push('    )');
         code.push('');
-        code.push('    when(inst == nil');
-        code.push(`      error("Failed creating segment mosaic for purpose: ${seg.purpose}\\n")`);
-        code.push('    )');
-        code.push('');
-        code.push('    when(inst');
-        code.push('      bBox = inst~>bBox');
-        code.push('      ll = car(bBox)');
-        code.push('      x_ll = car(ll)');
-        code.push('      y_ll = cadr(ll)');
-        code.push(`      dx = ${currentSegX.toFixed(4)} - x_ll`);
-        code.push('      dy = currentY - y_ll');
-        code.push('      inst~>xy = list(dx dy)');
-        code.push('    )');
-        code.push('');
-        code.push('    allInsts = cons(list(inst "R180") allInsts)');
-        code.push('');
-
-        // Use the center active segment as the centering point
-        if (row === maxActiveRow && seg.purpose.toLowerCase() === config.rov_purpose.toLowerCase()) {
-          code.push('    printf("ACTIVE SEGMENT MOSAIC FOUND\\n")');
-          code.push('    rovInst = inst');
-          code.push('');
+        
+        const isRov = segPurpose.toLowerCase() === config.rov_purpose.toLowerCase();
+        if (isRov && row === maxActiveRow) {
+          code.push('  printf("ACTIVE SEGMENT MOSAIC FOUND\\n")');
+          code.push('  rovInst = inst');
         }
-
-        currentSegX += seg.cols * config.x_pitch;
+        
+        currSegX += segCols * config.x_pitch;
       });
     }
 
@@ -454,7 +482,7 @@ export function generateSkillCode(config: LayoutConfig): string {
   let endY_rows = 0;
 
   if (firstActiveIdx !== -1 && lastActiveIdx !== -1) {
-    for (let i = 0; i < firstActiveIdx; i++) {
+    for (let i = lastActiveIdx + 1; i < config.rows.length; i++) {
       startY_rows += config.rows[i].rows;
     }
     endY_rows = startY_rows;
@@ -889,8 +917,8 @@ def main():
     max_active_row = None
     if active_rows:
         max_active_row = max(active_rows, key=lambda r: r["rows"])
-
-    for orig_idx, row in enumerate(rows):
+    for rev_idx, row in enumerate(reversed(rows)):
+        orig_idx = len(rows) - 1 - rev_idx
         row_num = orig_idx + 1
         purpose = row["purpose"]
         row_name = row.get("name", purpose)
@@ -901,53 +929,36 @@ def main():
         mosaic_name = f"M{row_num}_{clean_purpose}"
 
         skill.append(f"""
- ; --- Creating {row_name} Rows ---
- printf(
-  "Creating {row_name} (purpose: {purpose}) rows={row_count} y=%L\\\\n"
-  currentY
- )
+  ; --- Creating {row_name} Rows ---
+  printf(
+   "Creating {row_name} (purpose: {purpose}) rows={row_count} y=%L\\\\n"
+   currentY
+  )
 """)
 
         if len(segments) == 0:
             cell_info = cell_map[purpose.lower()]
             skill.append(f"""
- master =
-  dbOpenCellViewByType(
-     "{cell_info["lib"]}"
-     "{cell_info["cell"]}"
-     "layout"
-     "maskLayout"
-     "r"
-  )
-
- when(
-    master == nil
-    error(
-     "Cannot open master {cell_info["cell"]}\\\\n"
-    )
- )
-
- inst =
-  car(
-   errset(
-    dbCreateSimpleMosaic(
-       cv
-       master
-       "{mosaic_name}"
-       list(0.0 0.0)
-       "R180"
-       {row_count}
-       {total_cols}
-       {y_pitch}
-       {x_pitch}
-    )
+  master =
+   dbOpenCellViewByType(
+      "{cell_info["lib"]}"
+      "{cell_info["cell"]}"
+      "layout"
+      "maskLayout"
+      "r"
    )
+
+  when(
+     master == nil
+     error(
+      "Cannot open master {cell_info["cell"]}\\\\n"
+     )
   )
- unless(inst
+
   inst =
    car(
     errset(
-     dbCreateMosaic(
+     dbCreateSimpleMosaic(
         cv
         master
         "{mosaic_name}"
@@ -960,35 +971,52 @@ def main():
      )
     )
    )
- )
-
- when(
-    inst == nil
-    error(
-     "Failed creating {purpose}\\\\n"
+  unless(inst
+   inst =
+    car(
+     errset(
+      dbCreateMosaic(
+         cv
+         master
+         "{mosaic_name}"
+         list(0.0 0.0)
+         "R180"
+         {row_count}
+         {total_cols}
+         {y_pitch}
+         {x_pitch}
+      )
+     )
     )
- )
+  )
 
- when(inst
-    bBox = inst~>bBox
-    ll = car(bBox)
-    x_ll = car(ll)
-    y_ll = cadr(ll)
-    dx = 0.0 - x_ll
-    dy = currentY - y_ll
-    inst~>xy = list(dx dy)
- )
+  when(
+     inst == nil
+     error(
+      "Failed creating {purpose}\\\\n"
+     )
+  )
 
- allInsts =
-   cons(
-      list(inst "R180")
-      allInsts
-   )
+  when(inst
+     bBox = inst~>bBox
+     ll = car(bBox)
+     x_ll = car(ll)
+     y_ll = cadr(ll)
+     dx = 0.0 - x_ll
+     dy = currentY - y_ll
+     inst~>xy = list(dx dy)
+  )
+
+  allInsts =
+    cons(
+       list(inst "R180")
+       allInsts
+    )
 """)
             if purpose.lower() == rov_purpose.lower() and row == max_active_row:
                 skill.append("""
- printf("ACTIVE MOSAIC FOUND\\\\n")
- rovInst = inst
+  printf("ACTIVE MOSAIC FOUND\\\\n")
+  rovInst = inst
 """)
         else:
             curr_seg_x = 0.0
@@ -1004,44 +1032,27 @@ def main():
                     "rot": "R0"
                 })
                 skill.append(f"""
- ; Segment {s_idx + 1}: {seg_purpose} (cols={seg_cols})
- master =
-  dbOpenCellViewByType(
-     "{seg_cell_info["lib"]}"
-     "{seg_cell_info["cell"]}"
-     "layout"
-     ""
-     "r"
-  )
-
- when(
-    master == nil
-    error(
-     "Cannot open master {seg_cell_info["cell"]}\\\\n"
-    )
- )
-
- inst =
-  car(
-   errset(
-    dbCreateSimpleMosaic(
-       cv
-       master
-       "{seg_mosaic_name}"
-       list(0.0 0.0)
-       "R180"
-       {row_count}
-       {seg_cols}
-       {y_pitch}
-       {x_pitch}
-    )
+  ; Segment {s_idx + 1}: {seg_purpose} (cols={seg_cols})
+  master =
+   dbOpenCellViewByType(
+      "{seg_cell_info["lib"]}"
+      "{seg_cell_info["cell"]}"
+      "layout"
+      ""
+      "r"
    )
+
+  when(
+     master == nil
+     error(
+      "Cannot open master {seg_cell_info["cell"]}\\\\n"
+     )
   )
- unless(inst
+
   inst =
    car(
     errset(
-     dbCreateMosaic(
+     dbCreateSimpleMosaic(
         cv
         master
         "{seg_mosaic_name}"
@@ -1054,35 +1065,52 @@ def main():
      )
     )
    )
- )
-
- when(
-    inst == nil
-    error(
-     "Failed creating segment {seg_purpose}\\\\n"
+  unless(inst
+   inst =
+    car(
+     errset(
+      dbCreateMosaic(
+         cv
+         master
+         "{seg_mosaic_name}"
+         list(0.0 0.0)
+         "R180"
+         {row_count}
+         {seg_cols}
+         {y_pitch}
+         {x_pitch}
+      )
+     )
     )
- )
+  )
 
- when(inst
-    bBox = inst~>bBox
-    ll = car(bBox)
-    x_ll = car(ll)
-    y_ll = cadr(ll)
-    dx = {curr_seg_x:.4f} - x_ll
-    dy = currentY - y_ll
-    inst~>xy = list(dx dy)
- )
+  when(
+     inst == nil
+     error(
+      "Failed creating segment {seg_purpose}\\\\n"
+     )
+  )
 
- allInsts =
-   cons(
-      list(inst "R180")
-      allInsts
-   )
+  when(inst
+     bBox = inst~>bBox
+     ll = car(bBox)
+     x_ll = car(ll)
+     y_ll = cadr(ll)
+     dx = {curr_seg_x:.4f} - x_ll
+     dy = currentY - y_ll
+     inst~>xy = list(dx dy)
+  )
+
+  allInsts =
+    cons(
+       list(inst "R180")
+       allInsts
+    )
 """)
                 if seg_purpose.lower() == rov_purpose.lower() and row == max_active_row:
                     skill.append("""
- printf("ACTIVE SEGMENT MOSAIC FOUND\\\\n")
- rovInst = inst
+  printf("ACTIVE SEGMENT MOSAIC FOUND\\\\n")
+  rovInst = inst
 """)
                 curr_seg_x += seg_cols * x_pitch
 
@@ -1106,7 +1134,7 @@ def main():
         if segments:
             active_seg_idx = -1
             for s_idx, seg in enumerate(segments):
-                if seg["purpose"].lower() == rov_purpose.lower() or get_row_category(seg["purpose"], "", rov_purpose) == "active":
+                if seg["purpose"].lower() == rov_purpose.lower() or get_row_category(seg["purpose"], "", rov_purpose) in ("active", "rov"):
                     active_seg_idx = s_idx
                     break
             if active_seg_idx != -1:
@@ -1118,7 +1146,7 @@ def main():
     start_y_rows = 0
     end_y_rows = 0
     if first_active_idx != -1 and last_active_idx != -1:
-        for i in range(first_active_idx):
+        for i in range(last_active_idx + 1, len(rows)):
             start_y_rows += rows[i]["rows"]
         end_y_rows = start_y_rows
         for i in range(first_active_idx, last_active_idx + 1):

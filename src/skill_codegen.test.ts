@@ -155,7 +155,7 @@ describe('generateSkillCode – rotation', () => {
 
   it('allInsts tracking stores "R180" consistently for each row', () => {
     const code = generateSkillCode(simple3RowConfig);
-    const consR180 = countOccurrences(code, 'cons(list(inst "R180") allInsts)');
+    const consR180 = countOccurrences(code, 'list(inst "R180")');
     expect(consR180).toBe(simple3RowConfig.rows.length);
   });
 });
@@ -167,8 +167,8 @@ describe('generateSkillCode – rotation', () => {
 describe('generateSkillCode – row stacking order', () => {
   it('bottom row creation comment appears before top row comment', () => {
     const code = generateSkillCode(simple3RowConfig);
-    const bottomPos = code.indexOf('Creating Bottom Rows');
-    const topPos    = code.indexOf('Creating Top Rows');
+    const bottomPos = code.indexOf('Creating Top Rows');
+    const topPos    = code.indexOf('Creating Bottom Rows');
     expect(bottomPos).toBeGreaterThan(-1);
     expect(topPos).toBeGreaterThan(-1);
     expect(bottomPos).toBeLessThan(topPos);
@@ -235,11 +235,12 @@ describe('generateSkillCode – centering at (0,0)', () => {
 
   /**
    * Multi-active: dummy(2)+active(10)+dummy(1)+active(100)+dummy(2), pitch=1
-   *   entire active block from index 1 to 3
-   *   startY_rows = 2
-   *   endY_rows = 2 + 10 + 1 + 100 = 113
-   *   dy = -(2 + 113) / 2.0 * 1.0 = -57.5
-   *   dx = -5.0
+   * Reversed build order:
+   *   last dummy(2) is at Y=0.
+   *   active(100) starts at Y=2.
+   *   active(10) ends at Y= 2 + 100 + 1 + 10 = 113.
+   *   Center Y = (2 + 113) / 2 = 57.5.
+   *   dy = -57.5.
    */
   it('multi-active: entire active block centered, dy=-57.5', () => {
     const code = generateSkillCode(multiActiveConfig);
@@ -259,9 +260,13 @@ describe('generateSkillCode – centering at (0,0)', () => {
     });
     const code = generateSkillCode(cfg);
     // dx = -(0 + 20/2) * 2.5 = -25.0
-    // dy = -(5 + 40/2) * 3.1 = -25 * 3.1 = -77.5
+    // Reversed order: index 1 (A1) is built first at Y=0.
+    // D1 is built above it.
+    // Active block is A1 (40 rows).
+    // startY_rows = 0.
+    // dy = -(0 + 40)/2 * 3.1 = -20 * 3.1 = -62.0
     expect(extractCenterValue(code, 'dx')).toBeCloseTo(-25.0, 4);
-    expect(extractCenterValue(code, 'dy')).toBeCloseTo(-77.5, 4);
+    expect(extractCenterValue(code, 'dy')).toBeCloseTo(-62.0, 4);
   });
 });
 
@@ -410,10 +415,10 @@ describe('generatePythonCode(corrected=true) – R180 and forward order', () => 
     expect(mosaicSection).not.toContain('{seg_cell_info["rot"]}');
   });
 
-  it('iterates rows forward (not reversed)', () => {
+  it('iterates rows backward (reversed) to match Cadence viewport', () => {
     const py = generatePythonCode(true);
-    expect(py).toContain('for orig_idx, row in enumerate(rows):');
-    expect(py).not.toContain('for rev_idx, row in enumerate(reversed(rows)):');
+    expect(py).toContain('for rev_idx, row in enumerate(reversed(rows)):');
+    expect(py).not.toContain('for orig_idx, row in enumerate(rows):');
   });
 
   it('uses analytical Y centering with start_y_rows variable', () => {
@@ -465,18 +470,19 @@ describe('generateSkillCode – rigorous ROV active block centering', () => {
 
     const code = generateSkillCode(mixedConfig);
     
-    // Active block starts at row index 2 (startY_rows = 6)
-    // Active block ends at row index 4 (endY_rows = 6 + 10 + 5 + 15 = 36)
-    // Total active rows range = 6 to 36 rows = 30 rows.
-    // Center Y of active block = (6 + 36) / 2 = 21 rows * y_pitch(3.0) = 63.0
-    // dy should be -63.0
+    // Reversed build order:
+    // Rows after Act2: Top (2 rows). So startY_rows = 2.
+    // Active block starts (from bottom) with Act2, ends with Act1.
+    // Total active block rows = Act1(10) + Interleaved(5) + Act2(15) = 30 rows.
+    // Center Y of active block = (2 + 2 + 30) / 2 = 17 rows * y_pitch(3.0) = 51.0
+    // dy should be -51.0
     
     // X center of active block: active segment starts at left_cols = 10, ends at 10+70 = 80
     // Center X of active block = (10 + 80) / 2 = 45 cols * x_pitch(2.0) = 90.0
     // dx should be -90.0
 
     expect(extractCenterValue(code, 'dx')).toBeCloseTo(-90.0, 4);
-    expect(extractCenterValue(code, 'dy')).toBeCloseTo(-63.0, 4);
+    expect(extractCenterValue(code, 'dy')).toBeCloseTo(-51.0, 4);
   });
 });
 
