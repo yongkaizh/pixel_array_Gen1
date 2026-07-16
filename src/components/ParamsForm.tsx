@@ -823,6 +823,17 @@ export function RowItemEditor({ row, idx, cellMap, totalCols, onUpdate, onDelete
         </div>
       </div>
       
+      <div className="flex flex-col gap-1 pt-1.5 border-t border-slate-300/10">
+        <span className="text-sm text-glass-text/80 font-black uppercase font-mono tracking-wider">Address/Note</span>
+        <input
+          type="text"
+          value={row.address || ''}
+          onChange={(e) => onUpdate({ address: e.target.value })}
+          placeholder="e.g. (24, 114) or 'Start of active'"
+          className="bg-glass-panel border border-glass-border focus:ring-neon-cyan rounded-lg px-2.5 py-1 text-sm font-mono text-glass-text focus:outline-none transition"
+        />
+      </div>
+      
       {row.segments && row.segments.length > 0 && (
         <div className="bg-slate-200 text-slate-800 p-1.5 font-mono text-sm rounded-lg flex flex-wrap items-center gap-1 border border-glass-border">
           <span className="text-emerald-400 font-bold">SEGMENTS:</span>

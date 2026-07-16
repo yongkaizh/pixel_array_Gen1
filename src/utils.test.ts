@@ -8,9 +8,9 @@ import {
   generatePythonCode,
   parseExcelFile,
   getExcelImportErrorDetails,
-  exportToExcel,
-  LayoutConfig
+  exportToExcel
 } from './utils';
+import { LayoutConfig } from './types';
 import * as XLSX from 'xlsx';
 
 describe('utils.ts', () => {
