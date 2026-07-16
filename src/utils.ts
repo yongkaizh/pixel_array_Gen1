@@ -212,6 +212,8 @@ export function generateSkillCode(config: LayoutConfig): string {
   code.push('      error("Cannot create or open target layout\\n")');
   code.push('    )');
   code.push('');
+  code.push('    unwindProtect(');
+  code.push('      {');
   code.push('    ; Clear old instances and mosaics to prevent stacking when re-running');
   code.push('    when(cv');
   code.push('      foreach(inst cv~>instances');
@@ -465,7 +467,11 @@ export function generateSkillCode(config: LayoutConfig): string {
   code.push('    ; --- Rotations applied during creation ---');
   code.push('');
   code.push('    dbSave(cv)');
-  code.push('    dbClose(cv)');
+  code.push('      }');
+  code.push('      when(cv');
+  code.push('        dbClose(cv)');
+  code.push('      )');
+  code.push('    )');
   code.push('    printf("\\nPixel Array Generation Complete!\\n")');
   code.push('  )');
   code.push(')');
@@ -848,16 +854,18 @@ def main():
     error("Cannot create or open target layout\\\\n")
  )
 
- ; Clear any existing instances to avoid duplicates
- when(
-    cv
-    foreach(inst cv~>instances
-       dbDeleteObject(inst)
-    )
- )
+ unwindProtect(
+  {
+   ; Clear any existing instances to avoid duplicates
+   when(
+      cv
+      foreach(inst cv~>instances
+         dbDeleteObject(inst)
+      )
+   )
 
- currentY = 0
- allInsts = nil
+   currentY = 0
+   allInsts = nil
 """)
 
     # Create rows
@@ -1117,7 +1125,11 @@ def main():
  ; --- Rotations applied during creation ---
 
  dbSave(cv)
- dbClose(cv)
+  }
+  when(cv
+     dbClose(cv)
+  )
+ )
 
  printf("\\\\nPixel Array Generation Complete!\\\\n")
 
@@ -2050,6 +2062,9 @@ export function parseExcelFile(fileBuffer: ArrayBuffer): LayoutConfig {
 
     const segments: RowSegment[] = [];
     if (leftSum > 0 || rightSum > 0) {
+      if (leftSum + rightSum > total_cols) {
+        throw new Error(`Row '${purpose}' has segment sums (${leftSum} + ${rightSum}) exceeding total columns (${total_cols}).`);
+      }
       leftSegs.forEach(s => segments.push(s));
       const centerCols = total_cols - leftSum - rightSum;
       if (centerCols > 0) {
