@@ -206,7 +206,7 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
                   e.stopPropagation();
                   discardPendingConfig();
                 }}
-                className="px-4 py-2 text-xs font-mono font-bold uppercase tracking-wider text-slate-600 hover:text-slate-900 glass-button rounded-lg transition cursor-pointer"
+                className="px-4 py-2 text-xs font-mono font-bold uppercase tracking-wider text-slate-300 hover:text-slate-900 glass-button rounded-lg transition cursor-pointer"
               >
                 Discard
               </button>
@@ -260,7 +260,7 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
                 e.stopPropagation();
                 handleLoadExampleTemplate();
               }}
-              className="flex items-center gap-2 px-3.5 py-2 text-sm font-mono font-bold uppercase tracking-wider text-slate-800 bg-slate-200 hover:bg-slate-300 border border-glass-border rounded-lg transition-all cursor-pointer"
+              className="flex items-center gap-2 px-3.5 py-2 text-sm font-mono font-bold uppercase tracking-wider text-white bg-slate-200 hover:bg-slate-300 border border-glass-border rounded-lg transition-all cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
               Load Example Template
@@ -276,7 +276,7 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
           <span className="text-xs font-mono text-glass-text/80">Export your current config to .xlsx or load the example template if you are just getting started.</span>
         </div>
         <button
-            className="flex items-center gap-2 px-3.5 py-2 text-sm font-mono font-bold uppercase tracking-wider text-slate-800 glass-button rounded-lg transition-all cursor-pointer"
+            className="flex items-center gap-2 px-3.5 py-2 text-sm font-mono font-bold uppercase tracking-wider text-white glass-button rounded-lg transition-all cursor-pointer"
           >
           <FileDown className="w-3.5 h-3.5 text-green-400" />
           Export Active Config
@@ -284,7 +284,7 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
       </div>
 
       {/* Visual Explanation of Mixed Cell Layout (Saves user confusion) */}
-      <div className="bg-slate-100 text-slate-800 p-6 rounded-lg border border-glass-border space-y-4">
+      <div className="bg-slate-100 text-white p-6 rounded-lg border border-glass-border space-y-4">
         <div className="flex items-center gap-2 border-b border-glass-border pb-2">
           <Layers className="w-5 h-5 text-emerald-600" />
           <h4 className="text-xs font-mono font-black uppercase tracking-widest text-emerald-600">
@@ -292,55 +292,53 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
           </h4>
         </div>
         
-        <p className="text-xs leading-relaxed font-sans text-slate-600">
+        <p className="text-xs leading-relaxed font-sans text-slate-300">
           To build complex arrays (e.g. adding <strong>dummy, idle, or guardring cells</strong> to the boundaries of rows), you do not need to manually map thousands of individual coordinates. 
           The compiler automatically splits any row block into structured <strong>segments</strong> based on Columns D & E in your sheet! Here is how to indicate exactly which physical unit cell gets inserted:
         </p>
 
         {/* Dynamic Graphic Explanation Map */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 bg-white/60 border border-slate-300 p-4 font-mono text-xs tracking-tight">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 bg-[#1e1e1e] text-white border border-[#333] p-4 font-mono text-xs tracking-tight rounded-lg">
           {/* Box 1 */}
           <div>
-            <p className="text-sm mb-2">
-              In sheet <code className="text-slate-800 font-bold">format_template</code>, define row blocks. Reference your custom purpose keys for segments:
+            <div className="text-amber-400 font-bold uppercase mb-2">// 1. SPREADSHEET ROW DEFINITION</div><p className="text-slate-300 text-sm mb-2">In sheet <code className="text-white font-bold">format_template</code>, define row blocks. Reference your custom purpose keys for segments:
             </p>
-            <div className="bg-white/60 border border-slate-300 p-2 space-y-1 rounded-lg text-sm">
+            <div className="bg-[#2d2d2d] border border-[#444] p-2 space-y-1 rounded-lg text-sm">
               <div><code className="text-sky-600 font-bold">rov</code> ➔ 5 rows ➔ <code className="text-emerald-600 font-bold">dummy</code>:20, <code className="text-sky-600 font-bold">active</code>:100, <code className="text-emerald-600 font-bold">dummy</code>:20</div>
             </div>
           </div>
 
           {/* Box 2 */}
           <div>
-            <p className="text-sm mb-2">
-              In sheet <code className="text-slate-800 font-bold">pix_tbl</code> (or Cell Mapping tab), tell the compiler exactly which physical unit cell coordinates correspond to each purpose key:
+            <div className="text-amber-400 font-bold uppercase mb-2">// 2. THE CELL CLASS MAPPING</div><p className="text-slate-300 text-sm mb-2">In sheet <code className="text-white font-bold">pix_tbl</code> (or Cell Mapping tab), tell the compiler exactly which physical unit cell coordinates correspond to each purpose key:
             </p>
-            <div className="bg-white/60 border border-slate-300 p-2 space-y-1 rounded-lg text-sm">
-              <div><code className="text-sky-600 font-bold">active</code> ➔ Cell: <code className="text-slate-800 font-bold">pixel_active</code>, Lib: <code className="text-slate-800 font-bold">pixel_lib</code></div>
-              <div><code className="text-emerald-600 font-bold">dummy</code> ➔ Cell: <code className="text-slate-800 font-bold">pixel_dummy</code>, Lib: <code className="text-slate-800 font-bold">pixel_lib</code></div>
-              <div><code className="text-purple-600 font-bold">idle</code> ➔ Cell: <code className="text-slate-800 font-bold">pixel_idle_1x</code>, Lib: <code className="text-slate-800 font-bold">sensor_lib</code></div>
+            <div className="bg-[#2d2d2d] border border-[#444] p-2 space-y-1 rounded-lg text-sm">
+              <div><code className="text-sky-600 font-bold">active</code> ➔ Cell: <code className="text-white font-bold">pixel_active</code>, Lib: <code className="text-white font-bold">pixel_lib</code></div>
+              <div><code className="text-emerald-600 font-bold">dummy</code> ➔ Cell: <code className="text-white font-bold">pixel_dummy</code>, Lib: <code className="text-white font-bold">pixel_lib</code></div>
+              <div><code className="text-purple-600 font-bold">idle</code> ➔ Cell: <code className="text-white font-bold">pixel_idle_1x</code>, Lib: <code className="text-white font-bold">sensor_lib</code></div>
             </div>
           </div>
 
           {/* Box 3 */}
           <div className="space-y-2 lg:pl-4">
-            <div className="text-slate-800 font-bold uppercase">// 3. RESULTING CAD ROW LAYOUT</div>
-            <p className="text-slate-600 text-sm leading-snug">
+            <div className="text-amber-400 font-bold uppercase">// 3. RESULTING CAD ROW LAYOUT</div>
+            <p className="text-slate-300 text-sm leading-snug">
               The engine automatically calculates centering offsets &amp; outputs clean aligned simple mosaic blocks in the CAD coordinate:
             </p>
-            <div className="mt-3 p-3 bg-white/60 border border-slate-300 rounded-lg text-xs font-mono space-y-2">
-              <div className="text-slate-800 font-bold">Generated Physical Composition:</div>
+            <div className="mt-3 p-3 bg-[#2d2d2d] border border-[#444] rounded-lg text-xs font-mono space-y-2">
+              <div className="text-white font-bold">Generated Physical Composition:</div>
               <div className="flex w-full h-4 rounded overflow-hidden">
-                <span className="bg-emerald-300 border border-emerald-500 text-emerald-900 px-1 py-0.5">dummy x20</span>
-                <span className="bg-purple-300 border border-purple-500 text-purple-900 px-1 py-0.5">idle x10</span>
-                <span className="bg-sky-300 border border-sky-500 text-sky-900 px-1 py-0.5 flex-1">active (Center region)</span>
-                <span className="bg-emerald-300 border border-emerald-500 text-emerald-900 px-1 py-0.5">dummy x20</span>
+                <span className="bg-emerald-900 border border-emerald-700 text-emerald-100 px-1 py-0.5 font-bold flex items-center justify-center">dummy x20</span>
+                <span className="bg-purple-900 border border-purple-700 text-purple-100 px-1 py-0.5 font-bold flex items-center justify-center">idle x10</span>
+                <span className="bg-sky-900 border border-sky-700 text-sky-100 px-1 py-0.5 flex-1 font-bold flex items-center justify-center">active (Center region)</span>
+                <span className="bg-emerald-900 border border-emerald-700 text-emerald-100 px-1 py-0.5 font-bold flex items-center justify-center">dummy x20</span>
               </div>
             </div>
           </div>
         </div>
 
         <div className="text-sm bg-slate-200/50 p-3 rounded-lg border border-slate-300">
-            <strong>Summary:</strong> By adding a custom map key (e.g. <code className="text-slate-800 bg-slate-300 px-1 font-mono">my_cell</code>) in the cell mapping sub-tab, you can insert it anywhere in your array row layout by simply using its key name followed by the columns count (e.g. <code className="text-emerald-700 font-mono font-bold">my_cell:16</code>). 
+            <strong>Summary:</strong> By adding a custom map key (e.g. <code className="text-white bg-slate-300 px-1 font-mono">my_cell</code>) in the cell mapping sub-tab, you can insert it anywhere in your array row layout by simply using its key name followed by the columns count (e.g. <code className="text-emerald-700 font-mono font-bold">my_cell:16</code>). 
         </div>
       </div>
 
@@ -397,7 +395,7 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
               <strong> Heterogeneous Rows Support (Columns D & E):</strong> Specify left/right segment padding to create varying cell rows. 
             </p>
             <p className="text-xs text-glass-text/75 mt-2">
-              Use format <code className="bg-slate-200 text-slate-800 px-1 font-bold">count</code> (e.g. <code className="bg-slate-200 text-slate-800 px-1">20</code>, defaults to <code className="bg-slate-200 text-slate-800 px-1">dummy</code>) or <code className="bg-slate-200 text-slate-800 px-1">purpose:count</code> (e.g. <code className="bg-slate-200 text-slate-800 px-1">dummy:20</code> or <code className="bg-slate-200 text-slate-800 px-1">idle:10,dummy:10</code>). The center active region columns count is calculated automatically!
+              Use format <code className="bg-slate-200 text-white px-1 font-bold">count</code> (e.g. <code className="bg-slate-200 text-white px-1">20</code>, defaults to <code className="bg-slate-200 text-white px-1">dummy</code>) or <code className="bg-slate-200 text-white px-1">purpose:count</code> (e.g. <code className="bg-slate-200 text-white px-1">dummy:20</code> or <code className="bg-slate-200 text-white px-1">idle:10,dummy:10</code>). The center active region columns count is calculated automatically!
             </p>
             <div className="font-mono text-xs text-glass-text bg-glass-panel border border-glass-border rounded-lg overflow-hidden min-w-[600px]">
               <table className="w-full text-left border-collapse">
