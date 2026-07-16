@@ -25,7 +25,7 @@ export function TourModal({ isOpen, onClose }: TourModalProps) {
       description: "The 2D Layout CAD Viewer provides a scaled visual preview of your pixel array. You can zoom, pan, and hover over segments to inspect their properties before exporting."
     },
     {
-      icon: <Code className="w-6 h-6 text-amber-600" />,
+      icon: <Code className="w-6 h-6 text-neon-emerald" />,
       title: "4. Generate SKILL Code",
       description: "Once the layout is verified, jump to the SKILL Code Generator tab. The system automatically compiles the precise Cadence SKILL (dbCreateMosaic) syntax needed for your layout."
     },
@@ -45,7 +45,7 @@ export function TourModal({ isOpen, onClose }: TourModalProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-[#141414]/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-white/10/60 backdrop-blur-sm"
             onClick={onClose}
           />
           
@@ -54,14 +54,14 @@ export function TourModal({ isOpen, onClose }: TourModalProps) {
             initial={{ scale: 0.95, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 20 }}
-            className="relative bg-[#E4E3E0] border-4 border-[#141414] w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-[12px_12px_0px_0px_rgba(20,20,20,1)]"
+            className="relative bg-glass-bg border-4 border-[#141414] w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-lg"
           >
             {/* Header */}
-            <div className="flex items-center justify-between border-b-4 border-[#141414] bg-white p-4 sticky top-0 z-10">
+            <div className="flex items-center justify-between border-b-4 border-[#141414] bg-glass-panel p-4 sticky top-0 z-10">
               <h2 className="text-xl font-black uppercase tracking-tighter italic">Interactive Tour & Guide</h2>
               <button
                 onClick={onClose}
-                className="bg-[#141414] text-white p-1 hover:bg-rose-600 transition-colors"
+                className="bg-white/10 text-white p-1 hover:bg-rose-600 transition-colors"
                 aria-label="Close Tour"
               >
                 <X className="w-5 h-5" />
@@ -76,8 +76,8 @@ export function TourModal({ isOpen, onClose }: TourModalProps) {
               
               <div className="grid gap-4">
                 {steps.map((step, index) => (
-                  <div key={index} className="flex gap-4 p-4 border-2 border-[#141414] bg-white hover:bg-gray-50 transition-colors">
-                    <div className="shrink-0 flex items-center justify-center w-12 h-12 border-2 border-[#141414] rounded-full bg-gray-100">
+                  <div key={index} className="flex gap-4 p-4 border border-glass-border bg-glass-panel hover:bg-gray-50 transition-colors">
+                    <div className="shrink-0 flex items-center justify-center w-12 h-12 border border-glass-border rounded-full bg-gray-100">
                       {step.icon}
                     </div>
                     <div>
@@ -91,7 +91,7 @@ export function TourModal({ isOpen, onClose }: TourModalProps) {
               <div className="flex justify-end pt-4">
                 <button
                   onClick={onClose}
-                  className="bg-[#141414] text-white px-8 py-3 font-bold uppercase tracking-widest hover:bg-blue-600 transition-colors border-2 border-transparent"
+                  className="bg-white/10 text-white px-8 py-3 font-bold uppercase tracking-widest hover:bg-blue-600 transition-colors border-2 border-transparent"
                 >
                   Get Started
                 </button>

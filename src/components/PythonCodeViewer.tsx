@@ -27,17 +27,17 @@ export const PythonCodeViewer = React.memo(function PythonCodeViewer() {
   };
 
   return (
-    <div className="bg-white rounded-none border-2 border-[#141414] p-6 flex flex-col gap-4 text-[#141414]">
+    <div className="bg-glass-panel rounded-lg border border-glass-border p-6 flex flex-col gap-4 text-glass-text">
       <div>
         <h3 className="font-sans font-black uppercase italic tracking-tight text-base mb-1">
           Python Integration Automation Script
         </h3>
-        <p className="text-xs text-[#141414]/80">
+        <p className="text-xs text-glass-text/80">
           Automates the conversion of layout spreadsheet configurations to Cadence SKILL layout files.
         </p>
       </div>
 
-      <div className="bg-emerald-50 rounded-none border border-[#141414] p-4 text-[#141414] text-xs leading-relaxed">
+      <div className="bg-emerald-50 rounded-lg border border-glass-border p-4 text-glass-text text-xs leading-relaxed">
         <span className="font-bold flex items-center gap-1.5 text-emerald-950 uppercase tracking-wider mb-1 font-mono text-[10px]">
           <CheckCircle className="w-3.5 h-3.5 text-emerald-700" />
           Production-Ready Compiler Script
@@ -46,16 +46,16 @@ export const PythonCodeViewer = React.memo(function PythonCodeViewer() {
       </div>
 
       {/* Code Display Sandbox */}
-      <div className="relative rounded-none border-2 border-[#141414] bg-[#141414] overflow-hidden">
+      <div className="relative rounded-lg border border-glass-border bg-white/10 overflow-hidden">
         {/* Code Actions Toolbar */}
-        <div className="flex items-center justify-between px-5 py-3 border-b-2 border-[#141414] bg-[#E4E3E0] text-[#141414]">
-          <div className="text-[10px] text-[#141414] font-mono uppercase tracking-wider font-bold">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-glass-border bg-glass-bg text-glass-text">
+          <div className="text-[10px] text-glass-text font-mono uppercase tracking-wider font-bold">
             pixel_array_generator.py
           </div>
           <div className="flex items-center gap-1.5">
             <button
               onClick={handleCopy}
-              className="p-1.5 rounded-none text-[#141414] hover:bg-white border border-transparent hover:border-[#141414] cursor-pointer transition active:scale-95 flex items-center gap-1"
+              className="p-1.5 rounded-lg text-glass-text hover:bg-glass-panel border border-transparent hover:border-[#141414] cursor-pointer transition active:scale-95 flex items-center gap-1"
               title="Copy to Clipboard"
             >
               {copied ? <Check className="w-3.5 h-3.5 text-green-700" /> : <Copy className="w-3.5 h-3.5" />}
@@ -63,7 +63,7 @@ export const PythonCodeViewer = React.memo(function PythonCodeViewer() {
             </button>
             <button
               onClick={handleDownload}
-              className="p-1.5 rounded-none text-[#141414] hover:bg-white border border-transparent hover:border-[#141414] cursor-pointer transition active:scale-95 flex items-center gap-1"
+              className="p-1.5 rounded-lg text-glass-text hover:bg-glass-panel border border-transparent hover:border-[#141414] cursor-pointer transition active:scale-95 flex items-center gap-1"
               title="Download Script File"
             >
               <FileDown className="w-3.5 h-3.5" />

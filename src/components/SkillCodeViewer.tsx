@@ -31,49 +31,49 @@ export const SkillCodeViewer = React.memo(function SkillCodeViewer({ config }: S
   };
 
   return (
-    <div className="bg-white rounded-none border-2 border-[#141414] p-6 flex flex-col gap-5 text-[#141414]">
+    <div className="bg-glass-panel rounded-lg border border-glass-border p-6 flex flex-col gap-5 text-glass-text">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h3 className="font-sans font-black uppercase italic tracking-tight text-base mb-1 flex items-center gap-2">
-            <Database className="w-4 h-4 text-[#141414]" />
+            <Database className="w-4 h-4 text-glass-text" />
             Generated Cadence SKILL Script
           </h3>
-          <p className="text-xs text-[#141414]/85">
+          <p className="text-xs text-glass-text/85">
             Copy or download this file directly into your Cadence Virtuoso working directory to run.
           </p>
         </div>
       </div>
 
-      <div className="bg-[#E4E3E0] rounded-none p-3.5 border border-[#141414] text-xs text-[#141414] flex items-start gap-2.5">
-        <Terminal className="w-4 h-4 text-[#141414]/60 shrink-0 mt-0.5" />
+      <div className="bg-glass-bg rounded-lg p-3.5 border border-glass-border text-xs text-glass-text flex items-start gap-2.5">
+        <Terminal className="w-4 h-4 text-glass-text/60 shrink-0 mt-0.5" />
         <div className="space-y-1">
-          <span className="font-mono font-bold uppercase text-[11px] tracking-wide text-[#141414]">Execution in Cadence Virtuoso:</span>
+          <span className="font-mono font-bold uppercase text-[11px] tracking-wide text-glass-text">Execution in Cadence Virtuoso:</span>
           <p className="leading-relaxed text-[11px]">
-            1. Save as <code className="font-mono bg-[#141414] px-1 py-0.5 text-white font-bold">pixel_array.il</code> inside Virtuoso's working directory.<br />
-            2. In the CIW console, load the compiled layout view: <code className="font-mono bg-[#141414] px-1 py-0.5 text-white font-bold">load("pixel_array.il")</code>.<br />
+            1. Save as <code className="font-mono bg-white/10 px-1 py-0.5 text-white font-bold">pixel_array.il</code> inside Virtuoso's working directory.<br />
+            2. In the CIW console, load the compiled layout view: <code className="font-mono bg-white/10 px-1 py-0.5 text-white font-bold">load("pixel_array.il")</code>.<br />
             3. The layout cellview is automatically compiled, centered, and written.
           </p>
         </div>
       </div>
 
       {/* Editor Frame */}
-      <div className="relative rounded-none border-2 border-[#141414] bg-[#141414] overflow-hidden">
+      <div className="relative rounded-lg border border-glass-border bg-white/10 overflow-hidden">
         {/* Editor Toolbar */}
-        <div className="flex items-center justify-between px-5 py-3 border-b-2 border-[#141414] bg-[#E4E3E0] text-[#141414]">
-          <div className="text-[10px] text-[#141414] font-mono uppercase tracking-wider font-bold">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-glass-border bg-glass-bg text-glass-text">
+          <div className="text-[10px] text-glass-text font-mono uppercase tracking-wider font-bold">
             pixel_array.il
           </div>
           <div className="flex items-center gap-1.5">
             <button
               onClick={handleCopy}
-              className="p-1.5 rounded-none text-[#141414] hover:bg-white border border-transparent hover:border-[#141414] cursor-pointer transition active:scale-95"
+              className="p-1.5 rounded-lg text-glass-text hover:bg-glass-panel border border-transparent hover:border-[#141414] cursor-pointer transition active:scale-95"
               title="Copy SKILL Script"
             >
               {copied ? <Check className="w-4 h-4 text-green-700" /> : <Copy className="w-4 h-4" />}
             </button>
             <button
               onClick={handleDownload}
-              className="p-1.5 rounded-none text-[#141414] hover:bg-white border border-transparent hover:border-[#141414] cursor-pointer transition active:scale-95"
+              className="p-1.5 rounded-lg text-glass-text hover:bg-glass-panel border border-transparent hover:border-[#141414] cursor-pointer transition active:scale-95"
               title="Download Script File"
             >
               <FileDown className="w-4 h-4" />
@@ -82,7 +82,7 @@ export const SkillCodeViewer = React.memo(function SkillCodeViewer({ config }: S
         </div>
 
         {/* Script code with manual SKILL-like highlight */}
-        <div className="overflow-x-auto max-h-[500px] overflow-y-auto bg-[#141414]">
+        <div className="overflow-x-auto max-h-[500px] overflow-y-auto bg-white/10">
           <div className="p-5 font-mono text-[11px] leading-relaxed text-slate-300 min-w-max">
             {highlightedCode}
           </div>

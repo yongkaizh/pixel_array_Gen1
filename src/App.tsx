@@ -52,24 +52,24 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#E4E3E0] text-[#141414] flex flex-col antialiased font-sans">
+    <div className="min-h-screen bg-glass-bg text-glass-text flex flex-col antialiased font-sans">
       {/* Visual Navigation Header */}
-      <header className="border-b-2 border-[#141414] bg-white px-6 py-4 sticky top-0 z-30">
+      <header className="glass-panel sticky top-0 z-30 border-b-0 border-glass-border">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-[#141414] flex items-center justify-center font-mono font-bold text-xs text-[#E4E3E0]">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-neon-purple to-neon-cyan flex items-center justify-center font-mono font-bold text-sm text-white shadow-[0_0_15px_rgba(0,240,255,0.4)]">
               I.S.
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="font-sans font-black text-[#141414] tracking-tighter text-lg uppercase italic">
+                <h1 className="font-sans font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-glass-muted tracking-tighter text-lg uppercase">
                   Integrated Silicon Array Builder
                 </h1>
-                <span className="text-[10px] font-mono font-bold bg-[#141414] text-[#E4E3E0] px-1.5 py-0.5 uppercase tracking-wider">
+                <span className="text-[10px] font-mono font-bold bg-white/10 text-neon-cyan px-2 py-0.5 rounded-full uppercase tracking-wider border border-neon-cyan/30">
                   Layout Engine
                 </span>
               </div>
-              <p className="text-[11px] text-[#141414]/75 font-mono uppercase tracking-wide">
+              <p className="text-[11px] text-glass-muted font-mono uppercase tracking-wide">
                 Integrated Silicon Layout Script &amp; Automation Compiler
               </p>
             </div>
@@ -77,19 +77,19 @@ export default function App() {
 
           <div className="flex items-center gap-3 text-xs font-mono">
             {isModified && (
-              <span className="text-amber-600 font-bold animate-pulse text-[10px] bg-amber-50 border border-amber-600 px-2 py-0.5 uppercase tracking-wider">
+              <span className="text-neon-rose font-bold animate-pulse text-[10px] bg-neon-rose/10 border border-neon-rose/30 px-3 py-1 rounded-full uppercase tracking-wider">
                 UNAPPLIED DRAFT EDITS
               </span>
             )}
             <button
               onClick={() => setShowTour(true)}
-              className="flex items-center gap-1.5 bg-[#141414] text-[#E4E3E0] px-3 py-1 text-[10px] uppercase font-bold tracking-widest hover:bg-rose-600 hover:text-white transition-colors"
+              className="flex items-center gap-1.5 bg-white/5 text-glass-text px-4 py-1.5 rounded-full text-[10px] uppercase font-bold tracking-widest hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all hover:shadow-[0_0_10px_rgba(255,255,255,0.1)]"
             >
               <HelpCircle className="w-3.5 h-3.5" />
               Tour & Guide
             </button>
-            <span className="text-[#141414]/50">STATUS:</span>
-            <span className="font-bold bg-[#141414] text-[#E4E3E0] px-2 py-0.5 tracking-widest text-[10px]">
+            <span className="text-glass-muted">STATUS:</span>
+            <span className="font-bold bg-neon-emerald/10 text-neon-emerald border border-neon-emerald/30 px-3 py-1 rounded-full tracking-widest text-[10px]">
               READY
             </span>
           </div>
@@ -102,37 +102,38 @@ export default function App() {
         {/* Global Apply/Discard Floating Staging Banner when modified */}
         <AnimatePresence>
           {isModified && (
-            <motion.div
+              <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="p-5 bg-amber-50 border-4 border-amber-600 text-[#141414] flex flex-col sm:flex-row items-center justify-between gap-4 shadow-[4px_4px_0px_0px_rgba(217,119,6,1)] rounded-none"
+              className="p-5 glass-panel border border-neon-rose/30 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-xl shadow-[0_8px_30px_rgba(244,63,94,0.15)] relative overflow-hidden"
             >
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-amber-600 text-white rounded-none">
-                  <Cpu className="w-5 h-5" />
+              <div className="absolute inset-0 bg-gradient-to-r from-neon-rose/5 to-transparent pointer-events-none" />
+              <div className="flex items-center gap-4 relative z-10">
+                <div className="p-3 bg-neon-rose/20 text-neon-rose rounded-lg shadow-[0_0_15px_rgba(244,63,94,0.3)]">
+                  <Cpu className="w-6 h-6" />
                 </div>
                 <div>
-                  <h4 className="font-mono font-black uppercase text-xs text-amber-950 tracking-wider">
+                  <h4 className="font-mono font-black uppercase text-sm text-white tracking-wider">
                     DRAFT STAGE ACTIVE // CHANGES DETECTED
                   </h4>
-                  <p className="text-xs text-amber-900 font-sans mt-0.5">
+                  <p className="text-sm text-glass-muted font-sans mt-1">
                     You have modified layout parameters. Click the button on the right to compile and render your edits on the CAD viewport and Cadence SKILL script!
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2.5 shrink-0 w-full sm:w-auto justify-end">
+              <div className="flex items-center gap-3 shrink-0 w-full sm:w-auto justify-end relative z-10">
                 <button
                   onClick={handleDiscardChanges}
-                  className="px-4 py-2.5 text-xs font-mono font-bold uppercase tracking-widest text-amber-900 hover:text-rose-700 bg-white border-2 border-amber-600 hover:border-rose-600 rounded-none transition cursor-pointer"
+                  className="px-5 py-2.5 text-xs font-mono font-bold uppercase tracking-widest text-glass-muted hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-lg transition-all cursor-pointer"
                 >
                   Discard Draft
                 </button>
                 <button
                   onClick={handleApplyChanges}
-                  className="flex items-center gap-2 px-5 py-2.5 text-xs font-mono font-bold uppercase tracking-widest text-white bg-amber-600 hover:bg-amber-700 border-2 border-[#141414] shadow-[3px_3px_0px_0px_rgba(20,20,20,1)] active:translate-y-0.5 active:shadow-none rounded-none transition cursor-pointer"
+                  className="flex items-center gap-2 px-6 py-2.5 text-xs font-mono font-bold uppercase tracking-widest text-white bg-gradient-to-r from-neon-purple to-neon-cyan hover:opacity-90 rounded-lg shadow-[0_0_20px_rgba(0,240,255,0.4)] hover:shadow-[0_0_30px_rgba(176,38,255,0.6)] transition-all cursor-pointer"
                 >
-                  <CheckCircle className="w-4 h-4" />
+                  <CheckCircle className="w-4.5 h-4.5" />
                   Apply &amp; Compile Draft
                 </button>
               </div>
@@ -148,33 +149,33 @@ export default function App() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.25, ease: 'easeOut' }}
-              className={`p-4 border-2 border-[#141414] flex items-start justify-between gap-4 shadow-sm relative overflow-hidden ${
+              className={`p-4 glass-panel flex items-start justify-between gap-4 rounded-xl shadow-lg relative overflow-hidden ${
                 status.type === 'success' 
-                  ? 'bg-emerald-50/90 text-emerald-950 border-[#141414]' 
-                  : 'bg-rose-50/90 text-rose-950 border-rose-600'
+                  ? 'border border-neon-emerald/30 shadow-[0_4px_20px_rgba(16,185,129,0.1)]' 
+                  : 'border border-neon-rose/30 shadow-[0_4px_20px_rgba(244,63,94,0.1)]'
               }`}
             >
-              <div className="flex items-start gap-3 flex-1">
+              <div className="flex items-start gap-3 flex-1 relative z-10">
                 {status.type === 'success' ? (
-                  <CheckCircle className="w-4.5 h-4.5 text-emerald-700 shrink-0 mt-0.5" />
+                  <CheckCircle className="w-5 h-5 text-neon-emerald shrink-0 mt-0.5 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
                 ) : (
-                  <AlertCircle className="w-4.5 h-4.5 text-rose-700 shrink-0 mt-0.5" />
+                  <AlertCircle className="w-5 h-5 text-neon-rose shrink-0 mt-0.5 drop-shadow-[0_0_8px_rgba(244,63,94,0.5)]" />
                 )}
-                <div className="text-xs font-mono">
-                  <span className="font-bold uppercase block mb-1">
+                <div className="text-sm font-mono">
+                  <span className="font-bold uppercase block mb-1 text-white tracking-wider">
                     {status.type === 'success' ? 'SYSTEM OK // COMPILE SUCCESS' : 'SYSTEM CRITICAL // EXCEPTION'}
                   </span>
-                  <span className="opacity-95 leading-relaxed">{status.message}</span>
+                  <span className="text-glass-muted leading-relaxed">{status.message}</span>
                 </div>
               </div>
 
               {/* Clear button */}
               <button
                 onClick={() => setStatus({ type: 'idle', message: '' })}
-                className="text-[#141414]/65 hover:text-[#141414] hover:bg-[#141414]/10 p-1.5 border border-transparent hover:border-[#141414]/20 transition shrink-0 cursor-pointer flex items-center justify-center"
+                className="text-glass-muted hover:text-white hover:bg-white/10 p-2 rounded-lg transition-colors shrink-0 cursor-pointer flex items-center justify-center relative z-10"
                 title="Dismiss notification"
               >
-                <X className="w-3.5 h-3.5" />
+                <X className="w-4 h-4" />
               </button>
             </motion.div>
           )}
@@ -212,12 +213,11 @@ export default function App() {
         </div>
       </main>
 
-      {/* Humble aesthetic footer */}
-      <footer className="border-t-2 border-[#141414] bg-[#141414] text-[#E4E3E0] py-4 px-6 text-center text-[10px] uppercase tracking-widest">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-          <span>Session: X782-99 // Memory: 24.1 MB</span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-green-500 inline-block"></span>
+      <footer className="glass-panel border-t border-glass-border py-6 px-6 text-center text-xs uppercase tracking-widest mt-auto">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <span className="text-glass-muted font-mono">Session: X782-99 // Memory: 24.1 MB</span>
+          <span className="flex items-center gap-2 font-mono text-white">
+            <span className="w-2.5 h-2.5 rounded-full bg-neon-emerald shadow-[0_0_10px_rgba(16,185,129,0.8)] animate-pulse inline-block"></span>
             SYSTEM OK &bull; Copyright © {new Date().getFullYear()} Yongkai Zhang
           </span>
         </div>

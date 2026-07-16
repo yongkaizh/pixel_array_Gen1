@@ -1,18 +1,57 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Georgia:ital,wght@0,400;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Space Grotesk", "Helvetica Neue", Arial, sans-serif;
-  --font-serif: "Georgia", serif;
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
   --font-mono: "JetBrains Mono", monospace;
   
-  --color-industrial-bg: #E4E3E0;
-  --color-industrial-dark: #141414;
-  --color-industrial-panel: #ffffff;
+  /* Premium Dark Mode Palette */
+  --color-glass-bg: #09090b;
+  --color-glass-panel: rgba(255, 255, 255, 0.03);
+  --color-glass-border: rgba(255, 255, 255, 0.08);
+  --color-glass-text: #f4f4f5;
+  --color-glass-muted: #a1a1aa;
+  
+  /* Neon Accents */
+  --color-neon-cyan: #00f0ff;
+  --color-neon-purple: #b026ff;
+  --color-neon-emerald: #10b981;
+  --color-neon-rose: #f43f5e;
 }
 
 body {
-  background-color: var(--color-industrial-bg);
-  color: var(--color-industrial-dark);
+  background-color: var(--color-glass-bg);
+  color: var(--color-glass-text);
+  /* Dynamic mesh background pattern */
+  background-image: 
+    radial-gradient(circle at 15% 50%, rgba(176, 38, 255, 0.08), transparent 25%),
+    radial-gradient(circle at 85% 30%, rgba(0, 240, 255, 0.08), transparent 25%);
+  background-attachment: fixed;
 }
 
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Glass panel utility */
+@layer utilities {
+  .glass-panel {
+    background: var(--color-glass-panel);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--color-glass-border);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  }
+}
