@@ -463,10 +463,19 @@ export function generateSkillCode(config: LayoutConfig): string {
   let left_cols = 0;
   let active_cols = config.total_cols;
   
-  if (firstActiveIdx !== -1) {
+  // Find the exact ROV segment by strictly matching rov_purpose to ignore paddings
+  const rovRow = config.rows.find(r => r.segments && r.segments.some(s => s.purpose.toLowerCase() === config.rov_purpose.toLowerCase()));
+  if (rovRow && rovRow.segments) {
+    const activeSegIdx = rovRow.segments.findIndex(s => s.purpose.toLowerCase() === config.rov_purpose.toLowerCase());
+    for (let i = 0; i < activeSegIdx; i++) {
+      left_cols += rovRow.segments[i].cols;
+    }
+    active_cols = rovRow.segments[activeSegIdx].cols;
+  } else if (firstActiveIdx !== -1) {
+    // Fallback if no exact match
     const firstActiveRow = config.rows[firstActiveIdx];
     if (firstActiveRow.segments && firstActiveRow.segments.length > 0) {
-      const activeSegIdx = firstActiveRow.segments.findIndex(s => s.purpose.toLowerCase() === config.rov_purpose.toLowerCase() || getRowCategory(s.purpose, '', config.rov_purpose) === 'active');
+      const activeSegIdx = firstActiveRow.segments.findIndex(s => getRowCategory(s.purpose, '', config.rov_purpose) === 'active');
       if (activeSegIdx !== -1) {
         for (let i = 0; i < activeSegIdx; i++) {
           left_cols += firstActiveRow.segments[i].cols;
@@ -1128,13 +1137,31 @@ def main():
 
     left_cols = 0
     active_cols = total_cols
-    if first_active_idx != -1:
+    
+    # Strictly find the exact ROV segment to ignore paddings
+    rov_row = None
+    for r in rows:
+        if r.get("segments") and any(s["purpose"].lower() == rov_purpose.lower() for s in r["segments"]):
+            rov_row = r
+            break
+            
+    if rov_row:
+        segments = rov_row["segments"]
+        active_seg_idx = -1
+        for s_idx, seg in enumerate(segments):
+            if seg["purpose"].lower() == rov_purpose.lower():
+                active_seg_idx = s_idx
+                break
+        if active_seg_idx != -1:
+            left_cols = sum(seg["cols"] for seg in segments[:active_seg_idx])
+            active_cols = segments[active_seg_idx]["cols"]
+    elif first_active_idx != -1:
         first_active_row = rows[first_active_idx]
         segments = first_active_row.get("segments", [])
         if segments:
             active_seg_idx = -1
             for s_idx, seg in enumerate(segments):
-                if seg["purpose"].lower() == rov_purpose.lower() or get_row_category(seg["purpose"], "", rov_purpose) in ("active", "rov"):
+                if get_row_category(seg["purpose"], "", rov_purpose) in ("active", "rov"):
                     active_seg_idx = s_idx
                     break
             if active_seg_idx != -1:
