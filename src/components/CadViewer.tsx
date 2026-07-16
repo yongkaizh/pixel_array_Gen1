@@ -57,6 +57,8 @@ export const CadViewer = React.memo(function CadViewer({ config }: CadViewerProp
   const [showCoordinates, setShowCoordinates] = useState(true);
   const [hoveredRowIdx, setHoveredRowIdx] = useState<number | null>(null);
   const [hoveredSegIdx, setHoveredSegIdx] = useState<number | null>(null);
+  const [lockedRowIdx, setLockedRowIdx] = useState<number | null>(null);
+  const [lockedSegIdx, setLockedSegIdx] = useState<number | null>(null);
   const [hoveredCoord, setHoveredCoord] = useState<{ x: number; y: number } | null>(null);
   
   // Viewport zoom & pan state
@@ -1017,6 +1019,10 @@ export const CadViewer = React.memo(function CadViewer({ config }: CadViewerProp
       <div 
         id="cad-canvas-container"
         ref={containerRef}
+        onClick={() => {
+          setLockedRowIdx(null);
+          setLockedSegIdx(null);
+        }}
         className={`cad-viewer-canvas flex-1 relative overflow-hidden bg-glass-panel cursor-crosshair select-none ${isDragging ? 'cursor-grabbing' : ''}`}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
@@ -1078,6 +1084,15 @@ export const CadViewer = React.memo(function CadViewer({ config }: CadViewerProp
                 return (
                   <g 
                     key={bIdx}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (lockedRowIdx === bIdx && lockedSegIdx === null) {
+                        setLockedRowIdx(null);
+                      } else {
+                        setLockedRowIdx(bIdx);
+                        setLockedSegIdx(null);
+                      }
+                    }}
                     onMouseEnter={() => { setHoveredRowIdx(bIdx); setHoveredSegIdx(null); }}
                     onMouseLeave={() => { setHoveredRowIdx(null); setHoveredSegIdx(null); }}
                     className="cursor-pointer transition-all duration-150"
@@ -1111,6 +1126,16 @@ export const CadViewer = React.memo(function CadViewer({ config }: CadViewerProp
                               y={y}
                               width={rw}
                               height={h}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (lockedRowIdx === bIdx && lockedSegIdx === sIdx) {
+                                  setLockedRowIdx(null);
+                                  setLockedSegIdx(null);
+                                } else {
+                                  setLockedRowIdx(bIdx);
+                                  setLockedSegIdx(sIdx);
+                                }
+                              }}
                               onMouseEnter={() => setHoveredSegIdx(sIdx)}
                               onMouseLeave={() => setHoveredSegIdx(null)}
                               fill={isSegHovered || (isHovered && hoveredSegIdx === null) ? segColor.fill.replace('0.15', '0.30') : segColor.fill}
@@ -1264,19 +1289,21 @@ export const CadViewer = React.memo(function CadViewer({ config }: CadViewerProp
         </svg>
 
         {/* Floating Tooltip details on hover */}
-        {hoveredRowIdx !== null && (
+        {(lockedRowIdx !== null || hoveredRowIdx !== null) && (
           <div 
-            className="absolute top-3 right-4 bg-glass-panel/95 backdrop-blur-xs border border-glass-border p-4 w-auto min-w-[300px] max-w-[420px] shadow-lg animate-fade-in pointer-events-none z-20 text-glass-text"
+            className={`absolute top-3 right-4 bg-glass-panel/95 backdrop-blur-xs border border-glass-border p-4 w-auto min-w-[300px] max-w-[420px] shadow-lg animate-fade-in z-20 text-glass-text ${lockedRowIdx !== null ? 'pointer-events-auto select-text ring-1 ring-neon-cyan' : 'pointer-events-none'}`}
           >
             {(() => {
-              const b = layout.blocks[hoveredRowIdx];
+              const activeBIdx = lockedRowIdx !== null ? lockedRowIdx : hoveredRowIdx;
+              const b = layout.blocks[activeBIdx!];
               let purposeToShow = b.purpose.toLowerCase();
               let nameToShow = b.name || b.purpose;
               let isSegment = false;
               let segCols = total_cols;
               
-              if (b.segments && hoveredSegIdx !== null && b.segments[hoveredSegIdx]) {
-                const seg = b.segments[hoveredSegIdx];
+              const activeSIdx = lockedRowIdx !== null ? lockedSegIdx : hoveredSegIdx;
+              if (b.segments && activeSIdx !== null && b.segments[activeSIdx]) {
+                const seg = b.segments[activeSIdx];
                 purposeToShow = seg.purpose.toLowerCase();
                 nameToShow = `${seg.purpose} (Segment)`;
                 isSegment = true;
@@ -1292,6 +1319,7 @@ export const CadViewer = React.memo(function CadViewer({ config }: CadViewerProp
                     <span className="font-black text-xs uppercase italic tracking-tight flex items-center gap-1.5">
                       <span className={`w-2 h-2 ${isRov ? 'bg-neon-emerald' : 'bg-emerald-500'}`} />
                       {nameToShow.toUpperCase()} {isSegment ? '' : 'Block'}
+                      {lockedRowIdx !== null && <span className="ml-2 text-[9px] bg-neon-cyan/20 text-neon-cyan px-1.5 py-0.5 rounded-full normal-case">Locked (Click to copy)</span>}
                     </span>
                     <span className="text-xs font-mono text-white bg-white/10 uppercase tracking-widest px-1.5 py-0.5 font-bold">
                       {isSegment ? `${segCols} Cols` : `${b.rows} Rows`}
