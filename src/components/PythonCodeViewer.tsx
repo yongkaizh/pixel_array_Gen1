@@ -38,7 +38,7 @@ export const PythonCodeViewer = React.memo(function PythonCodeViewer() {
       </div>
 
       <div className="bg-emerald-50 rounded-lg border border-glass-border p-4 text-glass-text text-xs leading-relaxed">
-        <span className="font-bold flex items-center gap-1.5 text-emerald-950 uppercase tracking-wider mb-1 font-mono text-[10px]">
+        <span className="font-bold flex items-center gap-1.5 text-emerald-950 uppercase tracking-wider mb-1 font-mono text-xs">
           <CheckCircle className="w-3.5 h-3.5 text-emerald-700" />
           Production-Ready Compiler Script
         </span>
@@ -49,7 +49,7 @@ export const PythonCodeViewer = React.memo(function PythonCodeViewer() {
       <div className="relative rounded-lg border border-glass-border bg-white/10 overflow-hidden">
         {/* Code Actions Toolbar */}
         <div className="flex items-center justify-between px-5 py-3 border-b border-glass-border bg-glass-bg text-glass-text">
-          <div className="text-[10px] text-glass-text font-mono uppercase tracking-wider font-bold">
+          <div className="text-xs text-glass-text font-mono uppercase tracking-wider font-bold">
             pixel_array_generator.py
           </div>
           <div className="flex items-center gap-1.5">
@@ -59,7 +59,7 @@ export const PythonCodeViewer = React.memo(function PythonCodeViewer() {
               title="Copy to Clipboard"
             >
               {copied ? <Check className="w-3.5 h-3.5 text-green-700" /> : <Copy className="w-3.5 h-3.5" />}
-              <span className="text-[9px] font-bold font-mono">COPY</span>
+              <span className="text-sm font-bold font-mono">COPY</span>
             </button>
             <button
               onClick={handleDownload}
@@ -67,14 +67,14 @@ export const PythonCodeViewer = React.memo(function PythonCodeViewer() {
               title="Download Script File"
             >
               <FileDown className="w-3.5 h-3.5" />
-              <span className="text-[9px] font-bold font-mono">DOWNLOAD</span>
+              <span className="text-sm font-bold font-mono">DOWNLOAD</span>
             </button>
           </div>
         </div>
 
         {/* Highlighted Editor Body */}
         <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
-          <pre className="p-5 font-mono text-[11px] leading-relaxed text-slate-300">
+          <pre className="p-5 font-mono text-sm leading-relaxed text-slate-300">
             <code>
               {highlightPythonCode(correctedCode)}
             </code>
@@ -96,8 +96,8 @@ function highlightPythonCode(code: string) {
     if (line.trim().startsWith('#')) {
       return (
         <div key={idx} className="table-row">
-          <span className="table-cell text-right pr-4 text-slate-650 select-none w-10 text-[9px] border-r border-slate-900/80 pr-2 mr-3">{idx + 1}</span>
-          <span className="text-slate-500 italic pl-3">{line}</span>
+          <span className="table-cell text-right pr-4 text-slate-650 select-none w-10 text-sm border-r border-slate-900/80 pr-2 mr-3">{idx + 1}</span>
+          <span className="text-slate-400 italic pl-3">{line}</span>
         </div>
       );
     }
@@ -134,10 +134,10 @@ function highlightPythonCode(code: string) {
 
     return (
       <div key={idx} className="table-row hover:bg-slate-900/40">
-        <span className="table-cell text-right pr-4 text-slate-600 select-none w-10 text-[9px] border-r border-slate-900/80 pr-2 mr-3">{idx + 1}</span>
+        <span className="table-cell text-right pr-4 text-slate-400 select-none w-10 text-sm border-r border-slate-900/80 pr-2 mr-3">{idx + 1}</span>
         <span className="pl-3">
           {styledCode}
-          {trailingComment && <span className="text-slate-500 italic">{trailingComment}</span>}
+          {trailingComment && <span className="text-slate-400 italic">{trailingComment}</span>}
         </span>
       </div>
     );

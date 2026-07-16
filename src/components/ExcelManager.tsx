@@ -126,7 +126,7 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
         <p className="text-xs text-glass-text/80 leading-relaxed">
           Start by uploading an .xlsx layout file. The workbook feeds the same layout data that is later used to generate the final SKILL script, so the required structure stays important.
         </p>
-        <div className="flex flex-wrap items-center gap-2 text-[10px] font-mono uppercase tracking-wider text-glass-text/65">
+        <div className="flex flex-wrap items-center gap-2 text-xs font-mono uppercase tracking-wider text-glass-text/80">
           <span className="bg-glass-bg px-2 py-1 border border-glass-border/20">1. Upload</span>
           <span>→</span>
           <span className="bg-glass-bg px-2 py-1 border border-glass-border/20">2. Review</span>
@@ -136,10 +136,10 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
       </div>
 
       <div className="border border-glass-border/20 bg-[#F7F6F2] p-4 space-y-2.5">
-        <p className="text-[10px] font-mono font-black uppercase tracking-[0.2em] text-glass-text/70">
+        <p className="text-xs font-mono font-black uppercase tracking-[0.2em] text-glass-text/90">
           What the workbook should contain
         </p>
-        <ul className="text-[11px] text-glass-text/80 space-y-1.5 list-disc pl-4 leading-relaxed">
+        <ul className="text-sm text-glass-text/80 space-y-1.5 list-disc pl-4 leading-relaxed">
           <li>A sheet named <span className="font-semibold">pix_tbl</span> with the logical-to-physical cell mappings.</li>
           <li>A sheet named <span className="font-semibold">format_template</span> with the row and column layout parameters.</li>
           <li>Enough filled values for the parser to build the same config used by the final SKILL layout generator.</li>
@@ -177,7 +177,7 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
               <p className="text-xs font-mono font-bold uppercase tracking-wider text-glass-text">
                 Parsing Excel sheets...
               </p>
-              <p className="text-[10px] uppercase font-mono text-glass-text/50 mt-1">
+              <p className="text-xs uppercase font-mono text-glass-text/90 mt-1">
                 Reading pix_tbl and format_template definitions
               </p>
             </div>
@@ -192,7 +192,7 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
               <p className="text-xs text-glass-text font-bold">
                 File: <code className="font-mono bg-glass-panel px-1.5 py-0.5 border border-glass-border/20 text-amber-800">{pendingFileName}</code>
               </p>
-              <div className="flex items-center justify-center gap-4 text-[10px] font-mono text-glass-text/65 mt-1">
+              <div className="flex items-center justify-center gap-4 text-xs font-mono text-glass-text/80 mt-1">
                 <span>Row blocks: <strong className="text-black">{pendingConfig.rows.length}</strong></span>
                 <span>•</span>
                 <span>Total width: <strong className="text-black">{pendingConfig.total_cols} columns</strong></span>
@@ -206,7 +206,7 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
                   e.stopPropagation();
                   discardPendingConfig();
                 }}
-                className="px-4 py-2 text-[10px] font-mono font-bold uppercase tracking-wider text-glass-text/75 hover:text-white glass-button rounded-lg transition cursor-pointer"
+                className="px-4 py-2 text-xs font-mono font-bold uppercase tracking-wider text-glass-text/75 hover:text-white glass-button rounded-lg transition cursor-pointer"
               >
                 Discard
               </button>
@@ -215,25 +215,25 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
                   e.stopPropagation();
                   applyPendingConfig();
                 }}
-                className="flex items-center gap-1.5 px-5 py-2.5 text-[10px] font-mono font-black uppercase tracking-widest text-white bg-amber-600 hover:bg-amber-700 border border-glass-border shadow-lg rounded-lg transition active:translate-y-0.5 active:shadow-none cursor-pointer"
+                className="flex items-center gap-1.5 px-5 py-2.5 text-xs font-mono font-black uppercase tracking-widest text-white bg-amber-600 hover:bg-amber-700 border border-glass-border shadow-lg rounded-lg transition active:translate-y-0.5 active:shadow-none cursor-pointer"
               >
                 <Play className="w-3.5 h-3.5 fill-white" />
                 Apply &amp; Compile Spreadsheet
               </button>
             </div>
 
-            <p className="text-[9px] uppercase font-mono text-glass-text/50 mt-2">
+            <p className="text-sm uppercase font-mono text-glass-text/90 mt-2">
               Or drag another file here / <span className="underline cursor-pointer text-indigo-700 hover:text-indigo-900 font-bold" onClick={() => fileInputRef.current?.click()}>click to replace</span>
             </p>
           </div>
         ) : (
           <>
-            <Upload className={`w-10 h-10 ${isDragging ? 'text-emerald-600' : 'text-glass-text/60'}`} />
+            <Upload className={`w-10 h-10 ${isDragging ? 'text-emerald-600' : 'text-glass-text/80'}`} />
             <div className="max-w-md">
               <p className="text-xs font-mono font-bold uppercase tracking-wider text-glass-text">
                 Drop your layout workbook here to begin
               </p>
-              <p className="text-[10px] uppercase font-mono text-glass-text/60 mt-1 leading-relaxed">
+              <p className="text-xs uppercase font-mono text-glass-text/80 mt-1 leading-relaxed">
                 Use a valid .xlsx file with the required sheets and columns. If you are unsure, start with the example template.
               </p>
             </div>
@@ -249,9 +249,9 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
               <p className="text-xs font-mono font-black uppercase tracking-wider text-rose-800">{errorDetails.title}</p>
               <p className="text-xs text-rose-900 mt-1">{errorDetails.summary}</p>
               {errorDetails.missingItem && (
-                <p className="text-[11px] text-rose-900 mt-1"><span className="font-bold">Missing item:</span> {errorDetails.missingItem}</p>
+                <p className="text-sm text-rose-900 mt-1"><span className="font-bold">Missing item:</span> {errorDetails.missingItem}</p>
               )}
-              <p className="text-[11px] text-rose-900 mt-2 leading-relaxed">{errorDetails.fixSuggestion}</p>
+              <p className="text-sm text-rose-900 mt-2 leading-relaxed">{errorDetails.fixSuggestion}</p>
             </div>
           </div>
           {errorDetails.showTemplateButton && (
@@ -260,7 +260,7 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
                 e.stopPropagation();
                 handleLoadExampleTemplate();
               }}
-              className="flex items-center gap-2 px-3.5 py-2 text-[11px] font-mono font-bold uppercase tracking-wider text-white bg-white/10 hover:bg-black border border-glass-border rounded-lg transition-all cursor-pointer"
+              className="flex items-center gap-2 px-3.5 py-2 text-sm font-mono font-bold uppercase tracking-wider text-white bg-white/10 hover:bg-black border border-glass-border rounded-lg transition-all cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
               Load Example Template
@@ -273,11 +273,11 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
       <div className="flex items-center justify-between gap-4 p-4 bg-glass-bg rounded-lg border border-glass-border">
         <div className="flex flex-col gap-0.5">
           <span className="text-xs font-bold uppercase tracking-wide">Need a starting point?</span>
-          <span className="text-[10px] font-mono text-glass-text/60">Export your current config to .xlsx or load the example template if you are just getting started.</span>
+          <span className="text-xs font-mono text-glass-text/80">Export your current config to .xlsx or load the example template if you are just getting started.</span>
         </div>
         <button
           onClick={handleExportExcel}
-          className="flex items-center gap-2 px-3.5 py-2 text-[11px] font-mono font-bold uppercase tracking-wider text-white glass-button rounded-lg transition-all cursor-pointer"
+          className="flex items-center gap-2 px-3.5 py-2 text-sm font-mono font-bold uppercase tracking-wider text-white glass-button rounded-lg transition-all cursor-pointer"
         >
           <FileDown className="w-3.5 h-3.5 text-green-400" />
           Export Active Config
@@ -299,14 +299,14 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
         </p>
 
         {/* Dynamic Graphic Explanation Map */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 bg-zinc-900 border border-zinc-800 p-4 font-mono text-[10px] tracking-tight">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 bg-zinc-900 border border-zinc-800 p-4 font-mono text-xs tracking-tight">
           {/* Box 1 */}
           <div className="space-y-2 border-b lg:border-b-0 lg:border-r border-zinc-800 pb-3 lg:pb-0 lg:pr-4">
             <div className="text-amber-400 font-bold uppercase">// 1. SPREADSHEET ROW DEFINITION</div>
-            <p className="text-slate-400 text-[9px] leading-snug">
+            <p className="text-slate-300 text-sm leading-snug">
               In sheet <code className="text-white">format_template</code>, define row blocks. Reference your custom purpose keys for segments:
             </p>
-            <div className="bg-black/40 border border-zinc-700 p-2 space-y-1 rounded-lg text-[9px]">
+            <div className="bg-black/40 border border-zinc-700 p-2 space-y-1 rounded-lg text-sm">
               <div>Row purpose: <code className="text-sky-300 font-bold">active</code></div>
               <div>Col D (Left Padding): <code className="text-emerald-400 font-bold">dummy:20, idle:10</code></div>
               <div>Col E (Right Padding): <code className="text-emerald-400 font-bold">dummy:20</code></div>
@@ -316,10 +316,10 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
           {/* Box 2 */}
           <div className="space-y-2 border-b lg:border-b-0 lg:border-r border-zinc-800 pb-3 lg:pb-0 lg:px-4">
             <div className="text-amber-400 font-bold uppercase">// 2. THE CELL CLASS MAPPING</div>
-            <p className="text-slate-400 text-[9px] leading-snug">
+            <p className="text-slate-300 text-sm leading-snug">
               In sheet <code className="text-white">pix_tbl</code> (or Cell Mapping tab), tell the compiler exactly which physical unit cell coordinates correspond to each purpose key:
             </p>
-            <div className="bg-black/40 border border-zinc-700 p-2 space-y-1 rounded-lg text-[9px]">
+            <div className="bg-black/40 border border-zinc-700 p-2 space-y-1 rounded-lg text-sm">
               <div><code className="text-sky-300">active</code> ➔ Cell: <code className="text-white">pixel_active</code>, Lib: <code className="text-white">pixel_lib</code></div>
               <div><code className="text-emerald-400">dummy</code> ➔ Cell: <code className="text-white">pixel_dummy</code>, Lib: <code className="text-white">pixel_lib</code></div>
               <div><code className="text-purple-400">idle</code> ➔ Cell: <code className="text-white">pixel_idle_1x</code>, Lib: <code className="text-white">sensor_lib</code></div>
@@ -329,25 +329,25 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
           {/* Box 3 */}
           <div className="space-y-2 lg:pl-4">
             <div className="text-amber-400 font-bold uppercase">// 3. RESULTING CAD ROW LAYOUT</div>
-            <p className="text-slate-400 text-[9px] leading-snug">
+            <p className="text-slate-300 text-sm leading-snug">
               The engine automatically calculates centering offsets &amp; outputs clean aligned simple mosaic blocks in the CAD coordinate:
             </p>
-            <div className="border border-emerald-800 bg-emerald-950/20 p-2 text-center rounded-lg font-bold text-[9px] space-y-1">
+            <div className="border border-emerald-800 bg-emerald-950/20 p-2 text-center rounded-lg font-bold text-sm space-y-1">
               <div className="text-white">Generated Physical Composition:</div>
               <div className="flex items-center gap-0.5 justify-center mt-1.5 text-[8px]">
                 <span className="bg-emerald-900 border border-emerald-700 text-white px-1 py-0.5">dummy x20</span>
-                <span className="text-slate-500 font-normal">➔</span>
+                <span className="text-slate-400 font-normal">➔</span>
                 <span className="bg-purple-900 border border-purple-700 text-white px-1 py-0.5">idle x10</span>
-                <span className="text-slate-500 font-normal">➔</span>
+                <span className="text-slate-400 font-normal">➔</span>
                 <span className="bg-sky-900 border border-sky-700 text-white px-1 py-0.5 flex-1">active (Center region)</span>
-                <span className="text-slate-500 font-normal">➔</span>
+                <span className="text-slate-400 font-normal">➔</span>
                 <span className="bg-emerald-900 border border-emerald-700 text-white px-1 py-0.5">dummy x20</span>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="flex items-start gap-2 text-zinc-400 text-[11px] leading-relaxed font-sans bg-zinc-900/60 p-3 border border-zinc-800">
+        <div className="flex items-start gap-2 text-zinc-300 text-sm leading-relaxed font-sans bg-zinc-900/60 p-3 border border-zinc-800">
           <Info className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
           <div>
             <strong>Summary:</strong> By adding a custom map key (e.g. <code className="text-white bg-black px-1 font-mono">my_cell</code>) in the cell mapping sub-tab, you can insert it anywhere in your array row layout by simply using its key name followed by the columns count (e.g. <code className="text-emerald-400 font-mono font-bold">my_cell:16</code>). 
@@ -357,14 +357,14 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
 
       {/* File Format Instructions */}
       <div className="space-y-2">
-        <h4 className="text-[11px] font-black uppercase tracking-wider text-glass-text/60">Excel File Sheet Layout Specifications</h4>
+        <h4 className="text-sm font-black uppercase tracking-wider text-glass-text/80">Excel File Sheet Layout Specifications</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
           <div className="bg-glass-bg/30 p-3 rounded-lg border border-glass-border overflow-x-auto">
-            <div className="font-bold text-glass-text mb-1 font-mono text-[11px] uppercase italic">1. pix_tbl (Cell Library Map)</div>
-            <p className="text-glass-text/70 text-[11px] leading-relaxed mb-2">
+            <div className="font-bold text-glass-text mb-1 font-mono text-sm uppercase italic">1. pix_tbl (Cell Library Map)</div>
+            <p className="text-glass-text/90 text-sm leading-relaxed mb-2">
               Defines physical libraries, cell names, and placement rotations for purpose classes.
             </p>
-            <div className="font-mono text-[10px] text-glass-text bg-glass-panel border border-glass-border rounded-lg overflow-hidden min-w-[300px]">
+            <div className="font-mono text-xs text-glass-text bg-glass-panel border border-glass-border rounded-lg overflow-hidden min-w-[300px]">
               <table className="w-full text-left border-collapse">
                 <thead className="bg-[#F0F0F0] text-glass-text">
                   <tr>
@@ -402,13 +402,13 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
             </div>
           </div>
           <div className="bg-glass-bg/30 p-3 rounded-lg border border-glass-border overflow-x-auto col-span-1 md:col-span-2">
-            <div className="font-bold text-glass-text mb-1 font-mono text-[11px] uppercase italic">2. format_template (Params & Grid)</div>
-            <p className="text-glass-text/70 text-[11px] leading-relaxed mb-3">
+            <div className="font-bold text-glass-text mb-1 font-mono text-sm uppercase italic">2. format_template (Params & Grid)</div>
+            <p className="text-glass-text/90 text-sm leading-relaxed mb-3">
               Contains scalar metadata, column count, and stacked row blocks. 
               <strong> Heterogeneous Rows Support (Columns D & E):</strong> Specify left/right segment padding to create varying cell rows. 
               Use format <code className="bg-white/10/10 px-1 font-bold">count</code> (e.g. <code className="bg-white/10/10 px-1">20</code>, defaults to <code className="bg-white/10/10 px-1">dummy</code>) or <code className="bg-white/10/10 px-1">purpose:count</code> (e.g. <code className="bg-white/10/10 px-1">dummy:20</code> or <code className="bg-white/10/10 px-1">idle:10,dummy:10</code>). The center active region columns count is calculated automatically!
             </p>
-            <div className="font-mono text-[10px] text-glass-text bg-glass-panel border border-glass-border rounded-lg overflow-hidden min-w-[600px]">
+            <div className="font-mono text-xs text-glass-text bg-glass-panel border border-glass-border rounded-lg overflow-hidden min-w-[600px]">
               <table className="w-full text-left border-collapse">
                 <thead className="bg-[#F0F0F0] text-glass-text">
                   <tr>
@@ -421,7 +421,7 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className="border-b border-[#E4E3E0] text-glass-text/40 italic bg-[#FAFAFA]">
+                  <tr className="border-b border-[#E4E3E0] text-glass-text/80 italic bg-[#FAFAFA]">
                     <td className="p-1 border-r border-[#141414] bg-[#F0F0F0] text-center">...</td>
                     <td className="p-1 border-r border-[#E4E3E0]">...</td>
                     <td className="p-1 border-r border-[#E4E3E0]">...</td>

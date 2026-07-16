@@ -73,11 +73,11 @@ export default function App() {
                 <h1 className="font-sans font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-glass-muted tracking-tighter text-lg uppercase">
                   Integrated Silicon Array Builder
                 </h1>
-                <span className="text-[10px] font-mono font-bold bg-white/10 text-neon-cyan px-2 py-0.5 rounded-full uppercase tracking-wider border border-neon-cyan/30">
+                <span className="text-xs font-mono font-bold bg-white/10 text-neon-cyan px-2 py-0.5 rounded-full uppercase tracking-wider border border-neon-cyan/30">
                   Layout Engine
                 </span>
               </div>
-              <p className="text-[11px] text-glass-muted font-mono uppercase tracking-wide">
+              <p className="text-sm text-glass-muted font-mono uppercase tracking-wide">
                 Integrated Silicon Layout Script &amp; Automation Compiler
               </p>
             </div>
@@ -85,7 +85,7 @@ export default function App() {
 
           <div className="flex items-center gap-3 text-xs font-mono">
             {isModified && (
-              <span className="text-neon-rose font-bold animate-pulse text-[10px] bg-neon-rose/10 border border-neon-rose/30 px-3 py-1 rounded-full uppercase tracking-wider">
+              <span className="text-neon-rose font-bold animate-pulse text-xs bg-neon-rose/10 border border-neon-rose/30 px-3 py-1 rounded-full uppercase tracking-wider">
                 UNAPPLIED DRAFT EDITS
               </span>
             )}
@@ -93,13 +93,13 @@ export default function App() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => setShowTour(true)}
-              className="flex items-center gap-1.5 glass-button text-glass-text px-4 py-1.5 rounded-full text-[10px] uppercase font-bold tracking-widest cursor-pointer"
+              className="flex items-center gap-1.5 glass-button text-glass-text px-4 py-1.5 rounded-full text-xs uppercase font-bold tracking-widest cursor-pointer"
             >
               <HelpCircle className="w-3.5 h-3.5" />
               Tour & Guide
             </motion.button>
             <span className="text-glass-muted">STATUS:</span>
-            <span className="font-bold bg-neon-emerald/10 text-neon-emerald border border-neon-emerald/30 px-3 py-1 rounded-full tracking-widest text-[10px] shadow-[0_0_10px_rgba(16,185,129,0.2)]">
+            <span className="font-bold bg-neon-emerald/10 text-neon-emerald border border-neon-emerald/30 px-3 py-1 rounded-full tracking-widest text-xs shadow-[0_0_10px_rgba(16,185,129,0.2)]">
               READY
             </span>
           </div>

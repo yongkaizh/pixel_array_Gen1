@@ -248,10 +248,10 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
       <div className="flex items-center gap-1 bg-glass-bg p-1 border border-glass-border rounded-lg">
         <button
           onClick={() => setActiveSubTab('globals')}
-          className={`flex-1 py-1.5 rounded-lg text-[10px] font-mono font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+          className={`flex-1 py-1.5 rounded-lg text-xs font-mono font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
             activeSubTab === 'globals'
               ? 'glass-button bg-white/10 text-white shadow-[inset_0_0_10px_rgba(255,255,255,0.05)]'
-              : 'text-glass-text/60 hover:text-white hover:bg-white/5'
+              : 'text-glass-text/80 hover:text-white hover:bg-white/5'
           }`}
         >
           <Settings className="w-3.5 h-3.5" />
@@ -259,10 +259,10 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
         </button>
         <button
           onClick={() => setActiveSubTab('rows')}
-          className={`flex-1 py-1.5 rounded-lg text-[10px] font-mono font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+          className={`flex-1 py-1.5 rounded-lg text-xs font-mono font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
             activeSubTab === 'rows'
               ? 'glass-button bg-white/10 text-white shadow-[inset_0_0_10px_rgba(255,255,255,0.05)]'
-              : 'text-glass-text/60 hover:text-white hover:bg-white/5'
+              : 'text-glass-text/80 hover:text-white hover:bg-white/5'
           }`}
         >
           <Layers className="w-3.5 h-3.5" />
@@ -270,10 +270,10 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
         </button>
         <button
           onClick={() => setActiveSubTab('cells')}
-          className={`flex-1 py-1.5 rounded-lg text-[10px] font-mono font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+          className={`flex-1 py-1.5 rounded-lg text-xs font-mono font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
             activeSubTab === 'cells'
               ? 'glass-button bg-white/10 text-white shadow-[inset_0_0_10px_rgba(255,255,255,0.05)]'
-              : 'text-glass-text/60 hover:text-white hover:bg-white/5'
+              : 'text-glass-text/80 hover:text-white hover:bg-white/5'
           }`}
         >
           <RefreshCw className="w-3.5 h-3.5" />
@@ -285,7 +285,7 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
       {activeSubTab === 'globals' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <label className="text-[10px] font-mono font-black text-glass-text/60 uppercase tracking-widest">Top Library Name</label>
+            <label className="text-xs font-mono font-black text-glass-text/80 uppercase tracking-widest">Top Library Name</label>
             <input
               type="text"
               value={config.top_lib}
@@ -294,7 +294,7 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-[10px] font-mono font-black text-glass-text/60 uppercase tracking-widest">Top Cell Name</label>
+            <label className="text-xs font-mono font-black text-glass-text/80 uppercase tracking-widest">Top Cell Name</label>
             <input
               type="text"
               value={config.top_cell}
@@ -303,7 +303,7 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-[10px] font-mono font-black text-glass-text/60 uppercase tracking-widest">X Pitch (μm)</label>
+            <label className="text-xs font-mono font-black text-glass-text/80 uppercase tracking-widest">X Pitch (μm)</label>
             <input
               type="number"
               step="0.01"
@@ -313,7 +313,7 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-[10px] font-mono font-black text-glass-text/60 uppercase tracking-widest">Y Pitch (μm)</label>
+            <label className="text-xs font-mono font-black text-glass-text/80 uppercase tracking-widest">Y Pitch (μm)</label>
             <input
               type="number"
               step="0.01"
@@ -323,7 +323,7 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-[10px] font-mono font-black text-glass-text/60 uppercase tracking-widest">Total Columns (Cols)</label>
+            <label className="text-xs font-mono font-black text-glass-text/80 uppercase tracking-widest">Total Columns (Cols)</label>
             <input
               type="number"
               value={config.total_cols}
@@ -332,7 +332,7 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-[10px] font-mono font-black text-glass-text/60 uppercase tracking-widest">ROV Target Purpose</label>
+            <label className="text-xs font-mono font-black text-glass-text/80 uppercase tracking-widest">ROV Target Purpose</label>
             <select
               value={config.rov_purpose}
               onChange={(e) => updateGlobal('rov_purpose', e.target.value)}
@@ -396,7 +396,7 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
                       />
                       <button
                         onClick={() => executeRenameCellPurpose(key)}
-                        className="text-[10px] font-mono bg-white/10 text-white hover:bg-emerald-700 px-1.5 py-0.5 font-bold uppercase tracking-wider transition cursor-pointer"
+                        className="text-xs font-mono bg-white/10 text-white hover:bg-emerald-700 px-1.5 py-0.5 font-bold uppercase tracking-wider transition cursor-pointer"
                       >
                         Save
                       </button>
@@ -405,12 +405,12 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
                           setEditingPurposeKey(null);
                           setEditingPurposeError('');
                         }}
-                        className="text-[10px] font-mono text-glass-text/60 hover:text-black font-bold uppercase tracking-wider transition cursor-pointer"
+                        className="text-xs font-mono text-glass-text/80 hover:text-black font-bold uppercase tracking-wider transition cursor-pointer"
                       >
                         Cancel
                       </button>
                       {editingPurposeError && (
-                        <span className="text-[9px] text-rose-600 font-bold font-mono ml-2">
+                        <span className="text-sm text-rose-600 font-bold font-mono ml-2">
                           {editingPurposeError}
                         </span>
                       )}
@@ -427,13 +427,13 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
                             setEditingPurposeName(key);
                             setEditingPurposeError('');
                           }}
-                          className="text-[10px] font-mono text-glass-text/60 hover:text-indigo-600 font-bold uppercase tracking-wider transition cursor-pointer flex items-center gap-1"
+                          className="text-xs font-mono text-glass-text/80 hover:text-indigo-600 font-bold uppercase tracking-wider transition cursor-pointer flex items-center gap-1"
                           title="Rename purpose class"
                         >
                           <Edit className="w-3 h-3" />
                           Rename
                         </button>
-                        <span className="text-glass-text/20 select-none">|</span>
+                        <span className="text-glass-text/80 select-none">|</span>
                         <button
                           onClick={() => {
                             const keys = Object.keys(config.cell_map);
@@ -443,7 +443,7 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
                             }
                             setConfirmDeletePurposeKey(key);
                           }}
-                          className="text-[10px] font-mono text-glass-text/60 hover:text-rose-600 font-bold uppercase tracking-wider transition cursor-pointer flex items-center gap-1"
+                          className="text-xs font-mono text-glass-text/80 hover:text-rose-600 font-bold uppercase tracking-wider transition cursor-pointer flex items-center gap-1"
                           title="Delete purpose class"
                         >
                           <Trash className="w-3 h-3" />
@@ -460,19 +460,19 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
                       <AlertCircle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
                       Confirm Deletion
                     </div>
-                    <p className="text-[10px] text-rose-900 leading-normal font-mono">
+                    <p className="text-xs text-rose-900 leading-normal font-mono">
                       Are you sure you want to delete the "{key}" cell mapping? Row blocks referencing this purpose will be updated.
                     </p>
                     <div className="flex items-center gap-2 justify-end">
                       <button
                         onClick={() => setConfirmDeletePurposeKey(null)}
-                        className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-wider bg-glass-panel border border-glass-border/30 hover:border-black text-glass-text transition cursor-pointer"
+                        className="px-2 py-1 text-sm font-mono font-bold uppercase tracking-wider bg-glass-panel border border-glass-border/30 hover:border-black text-glass-text transition cursor-pointer"
                       >
                         Cancel
                       </button>
                       <button
                         onClick={() => executeDeleteCellPurpose(key)}
-                        className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-wider bg-rose-600 hover:bg-rose-700 text-white transition cursor-pointer"
+                        className="px-2 py-1 text-sm font-mono font-bold uppercase tracking-wider bg-rose-600 hover:bg-rose-700 text-white transition cursor-pointer"
                       >
                         Delete
                       </button>
@@ -481,7 +481,7 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
                 ) : (
                   <div className="grid grid-cols-3 gap-2.5">
                     <div className="space-y-1">
-                      <span className="text-[9px] text-glass-text/50 font-black uppercase font-mono tracking-wider">Library</span>
+                      <span className="text-sm text-glass-text/90 font-black uppercase font-mono tracking-wider">Library</span>
                       <input
                         type="text"
                         value={cell.lib}
@@ -490,7 +490,7 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
                       />
                     </div>
                     <div className="space-y-1">
-                      <span className="text-[9px] text-glass-text/50 font-black uppercase font-mono tracking-wider">Cell Name</span>
+                      <span className="text-sm text-glass-text/90 font-black uppercase font-mono tracking-wider">Cell Name</span>
                       <input
                         type="text"
                         value={cell.cell}
@@ -499,7 +499,7 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
                       />
                     </div>
                     <div className="space-y-1">
-                      <span className="text-[9px] text-glass-text/50 font-black uppercase font-mono tracking-wider">Rotation</span>
+                      <span className="text-sm text-glass-text/90 font-black uppercase font-mono tracking-wider">Rotation</span>
                       <select
                         value={cell.rot}
                         onChange={(e) => handleCellChange(key, 'rot', e.target.value)}
@@ -526,7 +526,7 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
               
               <div className="grid grid-cols-2 gap-2.5">
                 <div className="space-y-1">
-                  <span className="text-[9px] text-glass-text/60 font-black uppercase font-mono tracking-wider">Purpose Name</span>
+                  <span className="text-sm text-glass-text/80 font-black uppercase font-mono tracking-wider">Purpose Name</span>
                   <input
                     type="text"
                     placeholder="e.g. guardring"
@@ -539,7 +539,7 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
                   />
                 </div>
                 <div className="space-y-1">
-                  <span className="text-[9px] text-glass-text/60 font-black uppercase font-mono tracking-wider">Library</span>
+                  <span className="text-sm text-glass-text/80 font-black uppercase font-mono tracking-wider">Library</span>
                   <input
                     type="text"
                     value={newPurposeLib}
@@ -548,7 +548,7 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
                   />
                 </div>
                 <div className="space-y-1">
-                  <span className="text-[9px] text-glass-text/60 font-black uppercase font-mono tracking-wider">Cell Name</span>
+                  <span className="text-sm text-glass-text/80 font-black uppercase font-mono tracking-wider">Cell Name</span>
                   <input
                     type="text"
                     placeholder="pixel_guardring"
@@ -558,7 +558,7 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
                   />
                 </div>
                 <div className="space-y-1">
-                  <span className="text-[9px] text-glass-text/60 font-black uppercase font-mono tracking-wider">Rotation</span>
+                  <span className="text-sm text-glass-text/80 font-black uppercase font-mono tracking-wider">Rotation</span>
                   <select
                     value={newPurposeRot}
                     onChange={(e) => setNewPurposeRot(e.target.value)}
@@ -574,7 +574,7 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
               </div>
 
               {addPurposeError && (
-                <p className="text-[10px] text-rose-600 font-bold font-mono">
+                <p className="text-xs text-rose-600 font-bold font-mono">
                   Error: {addPurposeError}
                 </p>
               )}
@@ -617,7 +617,7 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
       {/* Form Level Action Bar */}
       {isModified && (
         <div className="mt-4 pt-4 border-t-2 border-[#141414] flex items-center justify-between gap-4 bg-amber-50 p-4 border border-glass-border rounded-lg animate-in fade-in duration-150">
-          <div className="text-[11px] font-mono leading-normal">
+          <div className="text-sm font-mono leading-normal">
             <span className="font-bold uppercase text-amber-950 block mb-0.5">// Draft Staged</span>
             <span className="text-glass-text/80">Apply changes to regenerate layout.</span>
           </div>
@@ -625,7 +625,7 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
             {onDiscardChanges && (
               <button
                 onClick={onDiscardChanges}
-                className="px-3 py-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-glass-text/70 hover:text-rose-700 bg-glass-panel border border-glass-border/30 hover:border-rose-600 rounded-lg transition cursor-pointer"
+                className="px-3 py-1.5 text-xs font-mono font-bold uppercase tracking-wider text-glass-text/90 hover:text-rose-700 bg-glass-panel border border-glass-border/30 hover:border-rose-600 rounded-lg transition cursor-pointer"
               >
                 Discard
               </button>
@@ -633,7 +633,7 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
             {onApplyChanges && (
               <button
                 onClick={onApplyChanges}
-                className="flex items-center gap-1 px-3 py-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-white bg-emerald-700 hover:bg-emerald-800 border border-glass-border shadow-lg rounded-lg transition active:translate-y-0.5 active:shadow-none cursor-pointer"
+                className="flex items-center gap-1 px-3 py-1.5 text-xs font-mono font-bold uppercase tracking-wider text-white bg-emerald-700 hover:bg-emerald-800 border border-glass-border shadow-lg rounded-lg transition active:translate-y-0.5 active:shadow-none cursor-pointer"
               >
                 <Play className="w-3 h-3 fill-white" />
                 Apply
@@ -706,7 +706,7 @@ export function RowItemEditor({ row, idx, cellMap, totalCols, onUpdate, onDelete
     <div className="flex flex-col gap-3 bg-glass-bg/30 p-3 rounded-lg border border-glass-border group hover:border-[#141414] hover:bg-glass-bg/40 transition-all">
       <div className="flex items-center justify-between border-b border-[#141414]/10 pb-1.5">
         <div className="flex items-center gap-2">
-          <span className="text-glass-text/60 text-[10px] font-mono select-none font-bold">#{idx + 1}</span>
+          <span className="text-glass-text/80 text-xs font-mono select-none font-bold">#{idx + 1}</span>
           <span className="text-xs font-mono font-bold text-glass-text tracking-wide uppercase italic">
             // Block Config
           </span>
@@ -714,7 +714,7 @@ export function RowItemEditor({ row, idx, cellMap, totalCols, onUpdate, onDelete
         
         <button
           onClick={onDelete}
-          className="p-1 rounded-lg text-glass-text/60 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-[#141414] transition-all active:scale-95 cursor-pointer"
+          className="p-1 rounded-lg text-glass-text/80 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-[#141414] transition-all active:scale-95 cursor-pointer"
           title="Remove Row Block"
         >
           <Trash className="w-3.5 h-3.5" />
@@ -723,7 +723,7 @@ export function RowItemEditor({ row, idx, cellMap, totalCols, onUpdate, onDelete
 
       <div className="grid grid-cols-2 gap-3">
         <div className="flex flex-col gap-1">
-          <span className="text-[9px] text-glass-text/50 font-black uppercase font-mono tracking-wider">Purpose Name</span>
+          <span className="text-sm text-glass-text/90 font-black uppercase font-mono tracking-wider">Purpose Name</span>
           <select
             value={row.purpose}
             onChange={(e) => {
@@ -754,7 +754,7 @@ export function RowItemEditor({ row, idx, cellMap, totalCols, onUpdate, onDelete
           </select>
         </div>
         <div className="flex flex-col gap-1">
-          <span className="text-[9px] text-glass-text/50 font-black uppercase font-mono tracking-wider">Row Count</span>
+          <span className="text-sm text-glass-text/90 font-black uppercase font-mono tracking-wider">Row Count</span>
           <input
             type="number"
             value={row.rows}
@@ -767,7 +767,7 @@ export function RowItemEditor({ row, idx, cellMap, totalCols, onUpdate, onDelete
       {/* Advanced Row Segments (Mixed Cells) Editing */}
       <div className="grid grid-cols-2 gap-3 pt-1.5 border-t border-[#141414]/10">
         <div className="flex flex-col gap-1">
-          <span className="text-[9px] text-glass-text/60 font-black uppercase font-mono tracking-wider">
+          <span className="text-sm text-glass-text/80 font-black uppercase font-mono tracking-wider">
             Left Padding (segs)
           </span>
           <input
@@ -775,12 +775,12 @@ export function RowItemEditor({ row, idx, cellMap, totalCols, onUpdate, onDelete
             value={leftInput}
             onChange={(e) => handleLeftChange(e.target.value)}
             placeholder="e.g. dummy:20 or 20"
-            className="bg-glass-panel border border-glass-border rounded-lg px-2.5 py-1 text-[11px] font-mono text-glass-text focus:outline-none transition"
+            className="bg-glass-panel border border-glass-border rounded-lg px-2.5 py-1 text-sm font-mono text-glass-text focus:outline-none transition"
             title="Specify columns on the left. Format: purpose:cols or count (e.g. dummy:20 or simply 20)"
           />
         </div>
         <div className="flex flex-col gap-1">
-          <span className="text-[9px] text-glass-text/60 font-black uppercase font-mono tracking-wider">
+          <span className="text-sm text-glass-text/80 font-black uppercase font-mono tracking-wider">
             Right Padding (segs)
           </span>
           <input
@@ -788,14 +788,14 @@ export function RowItemEditor({ row, idx, cellMap, totalCols, onUpdate, onDelete
             value={rightInput}
             onChange={(e) => handleRightChange(e.target.value)}
             placeholder="e.g. dummy:20 or 20"
-            className="bg-glass-panel border border-glass-border rounded-lg px-2.5 py-1 text-[11px] font-mono text-glass-text focus:outline-none transition"
+            className="bg-glass-panel border border-glass-border rounded-lg px-2.5 py-1 text-sm font-mono text-glass-text focus:outline-none transition"
             title="Specify columns on the right. Format: purpose:cols or count (e.g. dummy:20 or simply 20)"
           />
         </div>
       </div>
       
       {row.segments && row.segments.length > 0 && (
-        <div className="bg-white/10 text-white/90 p-1.5 font-mono text-[9px] rounded-lg flex flex-wrap items-center gap-1 border border-glass-border">
+        <div className="bg-white/10 text-white/90 p-1.5 font-mono text-sm rounded-lg flex flex-wrap items-center gap-1 border border-glass-border">
           <span className="text-emerald-400 font-bold">SEGMENTS:</span>
           {row.segments.map((seg, sIdx) => (
             <span key={sIdx} className="bg-zinc-800 px-1 py-0.5 border border-zinc-700">
