@@ -835,10 +835,10 @@ export function RowItemEditor({ row, idx, cellMap, totalCols, onUpdate, onDelete
       </div>
       
       {row.segments && row.segments.length > 0 && (
-        <div className="bg-slate-200 text-slate-800 p-1.5 font-mono text-sm rounded-lg flex flex-wrap items-center gap-1 border border-glass-border">
-          <span className="text-emerald-400 font-bold">SEGMENTS:</span>
+        <div className="bg-slate-800 text-slate-200 p-2 font-mono text-xs rounded-lg flex flex-wrap items-center gap-1.5 border border-slate-700 shadow-inner">
+          <span className="text-neon-cyan font-bold tracking-widest uppercase">Segments:</span>
           {row.segments.map((seg, sIdx) => (
-            <span key={sIdx} className="bg-zinc-800 px-1 py-0.5 border border-zinc-700">
+            <span key={sIdx} className="bg-slate-900 text-emerald-400 px-1.5 py-0.5 border border-slate-600 rounded">
               {seg.purpose}:{seg.cols}
             </span>
           ))}
