@@ -17,6 +17,7 @@ export interface RowConfig {
   segments?: RowSegment[];
   leftStr?: string;
   rightStr?: string;
+  address?: string;
 }
 
 export interface LayoutConfig {

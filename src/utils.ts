@@ -124,7 +124,7 @@ export function getDefaultLayoutConfig(): LayoutConfig {
       { purpose: 'bsun', rows: 4, name: 'ECL_Bsun_Ext' },
       { purpose: 'ecl', rows: 4, name: 'ECL_Sig_Ext' },
       { purpose: 'dummy', rows: 2, name: 'Dummy_Mid' },
-      { purpose: 'c1', rows: 1300, name: 'Active_Core_v2' },
+      { purpose: 'c1', rows: 1300, name: 'Active_Core_v2', address: '(Core Array Start)' },
       { purpose: 'dummy', rows: 2, name: 'Dummy_Top' },
       { purpose: 'top', rows: 2, name: 'Top_Row_v2' }
     ],
@@ -2130,6 +2130,7 @@ export function parseExcelFile(fileBuffer: ArrayBuffer): LayoutConfig {
     // Parse left and right segments
     const leftTxt = colsCount > rc + 3 ? grid[r][rc + 3] : '';
     const rightTxt = colsCount > rc + 4 ? grid[r][rc + 4] : '';
+    const addressTxt = colsCount > rc + 5 ? grid[r][rc + 5] : '';
 
     const leftSegs = parseSegmentsString(leftTxt, 'dummy');
     const rightSegs = parseSegmentsString(rightTxt, 'dummy');
@@ -2155,7 +2156,8 @@ export function parseExcelFile(fileBuffer: ArrayBuffer): LayoutConfig {
       rows: row_count,
       name: rowName,
       leftStr: leftTxt,
-      rightStr: rightTxt
+      rightStr: rightTxt,
+      address: addressTxt
     };
 
     if (segments.length > 0) {
@@ -2258,7 +2260,7 @@ export function exportToExcel(config: LayoutConfig): ArrayBuffer {
     [config.total_cols, '', '', '', '', '', ''],
     ['', '', '', '', '', '', ''],
     ['--- ROW STACK LAYOUT (ORDERED BOTTOM TO TOP) ---', '', '', '', '', '', ''],
-    ['row_num', 'Row Block Purpose Name', 'Marker (ROV)', 'Left Columns (Padding)', 'Right Columns (Padding)', 'Notes', ''],
+    ['row_num', 'Row Block Purpose Name', 'Marker (ROV)', 'Left Columns (Padding)', 'Right Columns (Padding)', 'Notes / Address', ''],
     ['(Number of rows)', '(Which cell from pix_tbl?)', '(Type "ROV" here to mark)', '(e.g. dummy:20)', '(e.g. dummy:20)', '', '']
   ];
 
@@ -2286,7 +2288,7 @@ export function exportToExcel(config: LayoutConfig): ArrayBuffer {
       isRov ? 'ROV' : '',
       leftStr,
       rightStr,
-      '',
+      row.address || '',
       ''
     ];
     formatData.push(rowCells);
