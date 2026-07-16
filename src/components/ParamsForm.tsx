@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { LayoutConfig, RowConfig, CellInfo, RowSegment } from '../types';
-import { Plus, Trash, Settings, RefreshCw, Layers, CheckCircle, Edit, Info, AlertCircle, Play } from 'lucide-react';
+import { Plus, Trash, Settings, RefreshCw, Layers, CheckCircle, Edit, Info, AlertCircle, Play, ArrowUp, ArrowDown } from 'lucide-react';
 import { parseSegmentsString, getLeftRightStringsFromSegments } from '../utils';
 
 interface ParamsFormProps {
@@ -95,6 +95,26 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
 
   const deleteRow = (index: number) => {
     const updatedRows = config.rows.filter((_, idx) => idx !== index);
+    onConfigChange({
+      ...config,
+      rows: updatedRows
+    });
+  };
+
+  const moveRowUp = (index: number) => {
+    if (index <= 0) return;
+    const updatedRows = [...config.rows];
+    [updatedRows[index - 1], updatedRows[index]] = [updatedRows[index], updatedRows[index - 1]];
+    onConfigChange({
+      ...config,
+      rows: updatedRows
+    });
+  };
+
+  const moveRowDown = (index: number) => {
+    if (index >= config.rows.length - 1) return;
+    const updatedRows = [...config.rows];
+    [updatedRows[index + 1], updatedRows[index]] = [updatedRows[index], updatedRows[index + 1]];
     onConfigChange({
       ...config,
       rows: updatedRows
@@ -361,6 +381,10 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
                 totalCols={config.total_cols}
                 onUpdate={(updatedFields) => handleRowChange(idx, updatedFields)}
                 onDelete={() => deleteRow(idx)}
+                onMoveUp={() => moveRowUp(idx)}
+                onMoveDown={() => moveRowDown(idx)}
+                isFirst={idx === 0}
+                isLast={idx === config.rows.length - 1}
               />
             ))}
           </div>
@@ -615,33 +639,7 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
       )}
 
       {/* Form Level Action Bar */}
-      {isModified && (
-        <div className="mt-4 pt-4 border-t-2 border-[#141414] flex items-center justify-between gap-4 bg-amber-50 p-4 border border-glass-border rounded-lg animate-in fade-in duration-150">
-          <div className="text-sm font-mono leading-normal">
-            <span className="font-bold uppercase text-amber-950 block mb-0.5">// Draft Staged</span>
-            <span className="text-glass-text/80">Apply changes to regenerate layout.</span>
-          </div>
-          <div className="flex items-center gap-2">
-            {onDiscardChanges && (
-              <button
-                onClick={onDiscardChanges}
-                className="px-3 py-1.5 text-xs font-mono font-bold uppercase tracking-wider text-glass-text/90 hover:text-rose-700 bg-glass-panel border border-glass-border/30 hover:border-rose-600 rounded-lg transition cursor-pointer"
-              >
-                Discard
-              </button>
-            )}
-            {onApplyChanges && (
-              <button
-                onClick={onApplyChanges}
-                className="flex items-center gap-1 px-3 py-1.5 text-xs font-mono font-bold uppercase tracking-wider text-white bg-emerald-700 hover:bg-emerald-800 border border-glass-border shadow-lg rounded-lg transition active:translate-y-0.5 active:shadow-none cursor-pointer"
-              >
-                <Play className="w-3 h-3 fill-white" />
-                Apply
-              </button>
-            )}
-          </div>
-        </div>
-      )}
+      {/* (Duplicate banner removed. Using global App.tsx banner instead.) */}
     </div>
   );
 }
@@ -654,12 +652,19 @@ interface RowItemEditorProps {
   totalCols: number;
   onUpdate: (updatedFields: Partial<RowConfig>) => void;
   onDelete: () => void;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+  isFirst: boolean;
+  isLast: boolean;
 }
 
-export function RowItemEditor({ row, idx, cellMap, totalCols, onUpdate, onDelete }: RowItemEditorProps) {
+export function RowItemEditor({ row, idx, cellMap, totalCols, onUpdate, onDelete, onMoveUp, onMoveDown, isFirst, isLast }: RowItemEditorProps) {
   const { leftStr, rightStr } = getLeftRightStringsFromSegments(row.segments, row.purpose);
   const [leftInput, setLeftInput] = useState(leftStr);
   const [rightInput, setRightInput] = useState(rightStr);
+
+  const isLeftValid = leftInput === '' || leftInput.split(',').every(part => /^\s*(\d+|[a-zA-Z0-9_]+\s*:\s*\d+)\s*$/.test(part));
+  const isRightValid = rightInput === '' || rightInput.split(',').every(part => /^\s*(\d+|[a-zA-Z0-9_]+\s*:\s*\d+)\s*$/.test(part));
 
   const handleLeftChange = (val: string) => {
     setLeftInput(val);
@@ -712,13 +717,31 @@ export function RowItemEditor({ row, idx, cellMap, totalCols, onUpdate, onDelete
           </span>
         </div>
         
-        <button
-          onClick={onDelete}
-          className="p-1 rounded-lg text-glass-text/80 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-[#141414] transition-all active:scale-95 cursor-pointer"
-          title="Remove Row Block"
-        >
-          <Trash className="w-3.5 h-3.5" />
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={onMoveUp}
+            disabled={isFirst}
+            className={`p-1 rounded-lg border transition-all ${isFirst ? 'text-glass-text/30 border-transparent cursor-not-allowed' : 'text-glass-text/80 hover:text-white border-transparent hover:border-[#141414] hover:bg-white/5 active:scale-95 cursor-pointer'}`}
+            title="Move Row Up"
+          >
+            <ArrowUp className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={onMoveDown}
+            disabled={isLast}
+            className={`p-1 rounded-lg border transition-all ${isLast ? 'text-glass-text/30 border-transparent cursor-not-allowed' : 'text-glass-text/80 hover:text-white border-transparent hover:border-[#141414] hover:bg-white/5 active:scale-95 cursor-pointer'}`}
+            title="Move Row Down"
+          >
+            <ArrowDown className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={onDelete}
+            className="p-1 rounded-lg text-glass-text/80 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-[#141414] transition-all active:scale-95 cursor-pointer ml-1"
+            title="Remove Row Block"
+          >
+            <Trash className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -767,28 +790,30 @@ export function RowItemEditor({ row, idx, cellMap, totalCols, onUpdate, onDelete
       {/* Advanced Row Segments (Mixed Cells) Editing */}
       <div className="grid grid-cols-2 gap-3 pt-1.5 border-t border-[#141414]/10">
         <div className="flex flex-col gap-1">
-          <span className="text-sm text-glass-text/80 font-black uppercase font-mono tracking-wider">
-            Left Padding (segs)
+          <span className="text-sm text-glass-text/80 font-black uppercase font-mono tracking-wider flex justify-between">
+            <span>Left Padding (segs)</span>
+            {!isLeftValid && <span className="text-rose-500 text-[10px]">Invalid format</span>}
           </span>
           <input
             type="text"
             value={leftInput}
             onChange={(e) => handleLeftChange(e.target.value)}
             placeholder="e.g. dummy:20 or 20"
-            className="bg-glass-panel border border-glass-border rounded-lg px-2.5 py-1 text-sm font-mono text-glass-text focus:outline-none transition"
+            className={`bg-glass-panel border ${!isLeftValid ? 'border-rose-500 focus:ring-rose-500' : 'border-glass-border focus:ring-neon-cyan'} rounded-lg px-2.5 py-1 text-sm font-mono text-glass-text focus:outline-none transition`}
             title="Specify columns on the left. Format: purpose:cols or count (e.g. dummy:20 or simply 20)"
           />
         </div>
         <div className="flex flex-col gap-1">
-          <span className="text-sm text-glass-text/80 font-black uppercase font-mono tracking-wider">
-            Right Padding (segs)
+          <span className="text-sm text-glass-text/80 font-black uppercase font-mono tracking-wider flex justify-between">
+            <span>Right Padding (segs)</span>
+            {!isRightValid && <span className="text-rose-500 text-[10px]">Invalid format</span>}
           </span>
           <input
             type="text"
             value={rightInput}
             onChange={(e) => handleRightChange(e.target.value)}
             placeholder="e.g. dummy:20 or 20"
-            className="bg-glass-panel border border-glass-border rounded-lg px-2.5 py-1 text-sm font-mono text-glass-text focus:outline-none transition"
+            className={`bg-glass-panel border ${!isRightValid ? 'border-rose-500 focus:ring-rose-500' : 'border-glass-border focus:ring-neon-cyan'} rounded-lg px-2.5 py-1 text-sm font-mono text-glass-text focus:outline-none transition`}
             title="Specify columns on the right. Format: purpose:cols or count (e.g. dummy:20 or simply 20)"
           />
         </div>
