@@ -964,28 +964,28 @@ export const CadViewer = React.memo(function CadViewer({ config }: CadViewerProp
           <div className="w-px h-4 bg-black/10 mx-1" />
           <button
             onClick={handlePanUp}
-            className="p-1.5 rounded-lg text-glass-text hover:bg-glass-panel border border-transparent hover:border-[#141414] cursor-pointer transition"
+            className="p-1.5 rounded-lg text-glass-text hover:bg-glass-panel border border-transparent hover:border-slate-300 cursor-pointer transition"
             title="Pan Up"
           >
             <ArrowUp className="w-4 h-4" />
           </button>
           <button
             onClick={handlePanDown}
-            className="p-1.5 rounded-lg text-glass-text hover:bg-glass-panel border border-transparent hover:border-[#141414] cursor-pointer transition"
+            className="p-1.5 rounded-lg text-glass-text hover:bg-glass-panel border border-transparent hover:border-slate-300 cursor-pointer transition"
             title="Pan Down"
           >
             <ArrowDown className="w-4 h-4" />
           </button>
           <button
             onClick={handlePanLeft}
-            className="p-1.5 rounded-lg text-glass-text hover:bg-glass-panel border border-transparent hover:border-[#141414] cursor-pointer transition"
+            className="p-1.5 rounded-lg text-glass-text hover:bg-glass-panel border border-transparent hover:border-slate-300 cursor-pointer transition"
             title="Pan Left"
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
           <button
             onClick={handlePanRight}
-            className="p-1.5 rounded-lg text-glass-text hover:bg-glass-panel border border-transparent hover:border-[#141414] cursor-pointer transition"
+            className="p-1.5 rounded-lg text-glass-text hover:bg-glass-panel border border-transparent hover:border-slate-300 cursor-pointer transition"
             title="Pan Right"
           >
             <ArrowRight className="w-4 h-4" />
@@ -993,21 +993,21 @@ export const CadViewer = React.memo(function CadViewer({ config }: CadViewerProp
           <div className="w-px h-4 bg-black/10 mx-1" />
           <button
             onClick={handleZoomIn}
-            className="p-1.5 rounded-lg text-glass-text hover:bg-glass-panel border border-transparent hover:border-[#141414] cursor-pointer transition"
+            className="p-1.5 rounded-lg text-glass-text hover:bg-glass-panel border border-transparent hover:border-slate-300 cursor-pointer transition"
             title="Zoom In"
           >
             <ZoomIn className="w-4 h-4" />
           </button>
           <button
             onClick={handleZoomOut}
-            className="p-1.5 rounded-lg text-glass-text hover:bg-glass-panel border border-transparent hover:border-[#141414] cursor-pointer transition"
+            className="p-1.5 rounded-lg text-glass-text hover:bg-glass-panel border border-transparent hover:border-slate-300 cursor-pointer transition"
             title="Zoom Out"
           >
             <ZoomOut className="w-4 h-4" />
           </button>
           <button
             onClick={handleReset}
-            className="p-1.5 rounded-lg text-glass-text hover:bg-glass-panel border border-transparent hover:border-[#141414] cursor-pointer transition"
+            className="p-1.5 rounded-lg text-glass-text hover:bg-glass-panel border border-transparent hover:border-slate-300 cursor-pointer transition"
             title="Fit to Screen"
           >
             <Maximize className="w-4 h-4" />

@@ -54,10 +54,10 @@ export function TourModal({ isOpen, onClose }: TourModalProps) {
             initial={{ scale: 0.95, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 20 }}
-            className="relative bg-glass-bg border-4 border-[#141414] w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-lg"
+            className="relative bg-glass-bg border-4 border-slate-300 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-lg"
           >
             {/* Header */}
-            <div className="flex items-center justify-between border-b-4 border-[#141414] bg-glass-panel p-4 sticky top-0 z-10">
+            <div className="flex items-center justify-between border-b-4 border-slate-300 bg-glass-panel p-4 sticky top-0 z-10">
               <h2 className="text-xl font-black uppercase tracking-tighter italic">Interactive Tour & Guide</h2>
               <button
                 onClick={onClose}

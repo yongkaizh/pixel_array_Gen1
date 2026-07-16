@@ -430,7 +430,7 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
                   }}
                   className="flex flex-col gap-2.5 bg-glass-bg/30 p-3 rounded-lg border border-glass-border"
                 >
-                  <div className="flex items-center justify-between border-b border-[#141414]/30 pb-1.5">
+                  <div className="flex items-center justify-between border-b border-slate-300/30 pb-1.5">
                     {editingPurposeKey === key ? (
                       <div className="flex items-center gap-1.5 w-full">
                         <input
@@ -547,7 +547,7 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
           </div>
 
           {isAddingPurpose ? (
-            <div className="bg-glass-bg/50 p-4 border-2 border-dashed border-[#141414] space-y-3 rounded-lg">
+            <div className="bg-glass-bg/50 p-4 border-2 border-dashed border-slate-300 space-y-3 rounded-lg">
               <div className="text-xs font-mono font-bold text-glass-text uppercase tracking-wider italic">
                 // Create New Purpose Mapping
               </div>
@@ -712,8 +712,8 @@ export function RowItemEditor({ row, idx, cellMap, totalCols, onUpdate, onDelete
   }, [row.segments, row.purpose, row.leftStr, row.rightStr]);
 
   return (
-    <div className="flex flex-col gap-3 bg-glass-bg/30 p-3 rounded-lg border border-glass-border group hover:border-[#141414] hover:bg-glass-bg/40 transition-all">
-      <div className="flex items-center justify-between border-b border-[#141414]/10 pb-1.5">
+    <div className="flex flex-col gap-3 bg-glass-bg/30 p-3 rounded-lg border border-glass-border group hover:border-slate-300 hover:bg-glass-bg/40 transition-all">
+      <div className="flex items-center justify-between border-b border-slate-300/10 pb-1.5">
         <div className="flex items-center gap-2">
           <span className="text-glass-text/80 text-xs font-mono select-none font-bold">#{idx + 1}</span>
           <span className="text-xs font-mono font-bold text-glass-text tracking-wide uppercase italic">
@@ -725,7 +725,7 @@ export function RowItemEditor({ row, idx, cellMap, totalCols, onUpdate, onDelete
           <button
             onClick={onMoveUp}
             disabled={isFirst}
-            className={`p-1 rounded-lg border transition-all ${isFirst ? 'text-glass-text/30 border-transparent cursor-not-allowed' : 'text-slate-600 hover:text-slate-900 border-transparent hover:border-[#141414] hover:bg-slate-200 active:scale-95 cursor-pointer'}`}
+            className={`p-1 rounded-lg border transition-all ${isFirst ? 'text-glass-text/30 border-transparent cursor-not-allowed' : 'text-slate-600 hover:text-slate-900 border-transparent hover:border-slate-300 hover:bg-slate-200 active:scale-95 cursor-pointer'}`}
             title="Move Row Up"
           >
             <ArrowUp className="w-3.5 h-3.5" />
@@ -733,14 +733,14 @@ export function RowItemEditor({ row, idx, cellMap, totalCols, onUpdate, onDelete
           <button
             onClick={onMoveDown}
             disabled={isLast}
-            className={`p-1 rounded-lg border transition-all ${isLast ? 'text-glass-text/30 border-transparent cursor-not-allowed' : 'text-slate-600 hover:text-slate-900 border-transparent hover:border-[#141414] hover:bg-slate-200 active:scale-95 cursor-pointer'}`}
+            className={`p-1 rounded-lg border transition-all ${isLast ? 'text-glass-text/30 border-transparent cursor-not-allowed' : 'text-slate-600 hover:text-slate-900 border-transparent hover:border-slate-300 hover:bg-slate-200 active:scale-95 cursor-pointer'}`}
             title="Move Row Down"
           >
             <ArrowDown className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={onDelete}
-            className="p-1 rounded-lg text-glass-text/80 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-[#141414] transition-all active:scale-95 cursor-pointer ml-1"
+            className="p-1 rounded-lg text-glass-text/80 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-slate-300 transition-all active:scale-95 cursor-pointer ml-1"
             title="Remove Row Block"
           >
             <Trash className="w-3.5 h-3.5" />
@@ -792,7 +792,7 @@ export function RowItemEditor({ row, idx, cellMap, totalCols, onUpdate, onDelete
       </div>
 
       {/* Advanced Row Segments (Mixed Cells) Editing */}
-      <div className="grid grid-cols-2 gap-3 pt-1.5 border-t border-[#141414]/10">
+      <div className="grid grid-cols-2 gap-3 pt-1.5 border-t border-slate-300/10">
         <div className="flex flex-col gap-1">
           <span className="text-sm text-glass-text/80 font-black uppercase font-mono tracking-wider flex justify-between">
             <span>Left Padding (segs)</span>

@@ -157,7 +157,7 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
         }}
         className={`border-2 border-dashed p-8 flex flex-col items-center justify-center text-center gap-3 transition-all rounded-lg glass-panel ${
           pendingConfig
-            ? 'border-amber-500/50 bg-amber-500/10 text-amber-2000/10 hover:bg-amber-500/10 text-amber-2000/20 shadow-[0_0_20px_rgba(245,158,11,0.15)]'
+            ? 'border-amber-500/50 bg-amber-500/10 text-amber-700 hover:bg-amber-500/20 shadow-[0_0_20px_rgba(245,158,11,0.15)]'
             : isDragging
             ? 'border-neon-cyan bg-white/60 ring-2 ring-neon-cyan/50 shadow-[0_0_15px_rgba(6,182,212,0.3)]'
             : 'border-glass-border hover:border-glass-border-hover bg-white/40 hover:bg-white/60 cursor-pointer'
@@ -276,6 +276,7 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
           <span className="text-xs font-mono text-glass-text/80">Export your current config to .xlsx or load the example template if you are just getting started.</span>
         </div>
         <button
+            onClick={handleExportExcel}
             className="flex items-center gap-2 px-3.5 py-2 text-sm font-mono font-bold uppercase tracking-wider text-slate-800 glass-button rounded-lg transition-all cursor-pointer"
           >
           <FileDown className="w-3.5 h-3.5 text-green-400" />
@@ -338,7 +339,7 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
         </div>
 
         <div className="text-sm bg-slate-200/50 p-3 rounded-lg border border-slate-300">
-            <strong>Summary:</strong> By adding a custom map key (e.g. <code className="text-white bg-slate-300 px-1 font-mono">my_cell</code>) in the cell mapping sub-tab, you can insert it anywhere in your array row layout by simply using its key name followed by the columns count (e.g. <code className="text-emerald-700 font-mono font-bold">my_cell:16</code>). 
+            <strong>Summary:</strong> By adding a custom map key (e.g. <code className="text-slate-800 bg-slate-300 px-1 font-mono">my_cell</code>) in the cell mapping sub-tab, you can insert it anywhere in your array row layout by simply using its key name followed by the columns count (e.g. <code className="text-emerald-700 font-mono font-bold">my_cell:16</code>). 
         </div>
       </div>
 
