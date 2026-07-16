@@ -25,11 +25,18 @@ body {
   color: var(--color-glass-text);
   /* Dynamic mesh background pattern */
   background-image: 
-    radial-gradient(circle at 15% 50%, rgba(124, 58, 237, 0.08), transparent 35%),
-    radial-gradient(circle at 85% 30%, rgba(2, 132, 199, 0.08), transparent 35%);
+    radial-gradient(circle at 15% 50%, rgba(124, 58, 237, 0.08), transparent 45%),
+    radial-gradient(circle at 85% 30%, rgba(2, 132, 199, 0.08), transparent 45%),
+    radial-gradient(circle at 50% 80%, rgba(5, 150, 105, 0.06), transparent 45%);
   background-attachment: fixed;
-  background-size: cover;
+  background-size: 200% 200%;
+  animation: bg-drift 20s ease-in-out infinite alternate;
   min-height: 100vh;
+}
+
+@keyframes bg-drift {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 100% 100%; }
 }
 
 /* Custom Scrollbar */
@@ -61,7 +68,8 @@ body {
   
   .glass-panel:hover {
     border-color: var(--color-glass-border-hover);
-    box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.08), inset 0 0 0 1px rgba(0,0,0,0.02);
+    box-shadow: 0 12px 40px -8px rgba(0, 0, 0, 0.12), inset 0 0 0 1px rgba(0,0,0,0.02);
+    transform: translateY(-2px);
   }
 
   .glass-button {
@@ -69,14 +77,14 @@ body {
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid var(--color-glass-border);
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   
   .glass-button:hover {
     background: rgba(0, 0, 0, 0.06);
     border-color: rgba(0, 0, 0, 0.15);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
   }
 
   .glass-input {

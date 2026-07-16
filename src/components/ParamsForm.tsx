@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { LayoutConfig, RowConfig, CellInfo, RowSegment } from '../types';
 import { Plus, Trash, Settings, RefreshCw, Layers, CheckCircle, Edit, Info, AlertCircle, Play, ArrowUp, ArrowDown } from 'lucide-react';
 import { parseSegmentsString, getLeftRightStringsFromSegments } from '../utils';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface ParamsFormProps {
   config: LayoutConfig;
@@ -372,21 +373,34 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
       {activeSubTab === 'rows' && (
         <div className="space-y-3">
           <div className="max-h-[380px] overflow-y-auto space-y-3.5 pr-1">
-            {config.rows.map((row, idx) => (
-              <RowItemEditor
-                key={idx}
-                row={row}
-                idx={idx}
-                cellMap={config.cell_map}
-                totalCols={config.total_cols}
-                onUpdate={(updatedFields) => handleRowChange(idx, updatedFields)}
-                onDelete={() => deleteRow(idx)}
-                onMoveUp={() => moveRowUp(idx)}
-                onMoveDown={() => moveRowDown(idx)}
-                isFirst={idx === 0}
-                isLast={idx === config.rows.length - 1}
-              />
-            ))}
+            <AnimatePresence initial={false}>
+              {config.rows.map((row, idx) => (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -15 }}
+                  transition={{ 
+                    duration: 0.3, 
+                    delay: idx * 0.05,
+                    ease: [0.4, 0, 0.2, 1] 
+                  }}
+                >
+                  <RowItemEditor
+                    row={row}
+                    idx={idx}
+                    cellMap={config.cell_map}
+                    totalCols={config.total_cols}
+                    onUpdate={(updatedFields) => handleRowChange(idx, updatedFields)}
+                    onDelete={() => deleteRow(idx)}
+                    onMoveUp={() => moveRowUp(idx)}
+                    onMoveDown={() => moveRowDown(idx)}
+                    isFirst={idx === 0}
+                    isLast={idx === config.rows.length - 1}
+                  />
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
 
           <button
@@ -402,145 +416,134 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
       {activeSubTab === 'cells' && (
         <div className="space-y-3">
           <div className="max-h-[220px] overflow-y-auto space-y-2 pr-1">
-            {Object.entries(config.cell_map).map(([key, cell]) => (
-              <div key={key} className="flex flex-col gap-2.5 bg-glass-bg/30 p-3 rounded-lg border border-glass-border">
-                <div className="flex items-center justify-between border-b border-[#141414]/30 pb-1.5">
-                  {editingPurposeKey === key ? (
-                    <div className="flex items-center gap-1.5 w-full">
-                      <input
-                        type="text"
-                        value={editingPurposeName}
-                        onChange={(e) => {
-                          setEditingPurposeName(e.target.value);
-                          setEditingPurposeError('');
-                        }}
-                        placeholder="new name"
-                        className="glass-input px-1.5 py-0.5 text-xs font-mono w-32 rounded focus:ring-1 focus:ring-neon-cyan"
-                        autoFocus
-                      />
-                      <button
-                        onClick={() => executeRenameCellPurpose(key)}
-                        className="text-xs font-mono bg-slate-200 text-slate-800 hover:bg-emerald-600 hover:text-white px-1.5 py-0.5 font-bold uppercase tracking-wider transition cursor-pointer"
-                        title="Delete unmapped physical cell template"
-                      >
-                        Save
-                      </button>
-                      <button
-                        onClick={() => {
-                          setEditingPurposeKey(null);
-                          setEditingPurposeError('');
-                        }}
-                        className="text-xs font-mono text-glass-text/80 hover:text-black font-bold uppercase tracking-wider transition cursor-pointer"
-                      >
-                        Cancel
-                      </button>
-                      {editingPurposeError && (
-                        <span className="text-sm text-rose-600 font-bold font-mono ml-2">
-                          {editingPurposeError}
-                        </span>
-                      )}
-                    </div>
-                  ) : (
-                    <>
-                      <span className="text-xs font-mono font-bold text-glass-text tracking-wide uppercase italic">
-                        // {key} Mapping
-                      </span>
-                      <div className="flex items-center gap-2.5">
-                        <button
-                          onClick={() => {
-                            setEditingPurposeKey(key);
-                            setEditingPurposeName(key);
+            <AnimatePresence initial={false}>
+              {Object.entries(config.cell_map).map(([key, cell], idx) => (
+                <motion.div
+                  key={key}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -15 }}
+                  transition={{ 
+                    duration: 0.3, 
+                    delay: idx * 0.05,
+                    ease: [0.4, 0, 0.2, 1] 
+                  }}
+                  className="flex flex-col gap-2.5 bg-glass-bg/30 p-3 rounded-lg border border-glass-border"
+                >
+                  <div className="flex items-center justify-between border-b border-[#141414]/30 pb-1.5">
+                    {editingPurposeKey === key ? (
+                      <div className="flex items-center gap-1.5 w-full">
+                        <input
+                          type="text"
+                          value={editingPurposeName}
+                          onChange={(e) => {
+                            setEditingPurposeName(e.target.value);
                             setEditingPurposeError('');
                           }}
-                          className="text-xs font-mono text-glass-text/80 hover:text-indigo-600 font-bold uppercase tracking-wider transition cursor-pointer flex items-center gap-1"
-                          title="Rename purpose class"
+                          placeholder="new name"
+                          className="glass-input px-1.5 py-0.5 text-xs font-mono w-32 rounded focus:ring-1 focus:ring-neon-cyan"
+                          autoFocus
+                        />
+                        <button
+                          onClick={() => executeRenameCellPurpose(key)}
+                          className="text-xs font-mono bg-slate-200 text-slate-800 hover:bg-emerald-600 hover:text-white px-1.5 py-0.5 font-bold uppercase tracking-wider transition cursor-pointer"
+                          title="Delete unmapped physical cell template"
                         >
-                          <Edit className="w-3 h-3" />
-                          Rename
+                          Save
                         </button>
-                        <span className="text-glass-text/80 select-none">|</span>
                         <button
                           onClick={() => {
-                            const keys = Object.keys(config.cell_map);
-                            if (keys.length <= 1) {
-                              alert('Cannot delete the last remaining cell mapping!');
-                              return;
-                            }
-                            setConfirmDeletePurposeKey(key);
+                            setEditingPurposeKey(null);
+                            setEditingPurposeError('');
                           }}
-                          className="text-xs font-mono text-glass-text/80 hover:text-rose-600 font-bold uppercase tracking-wider transition cursor-pointer flex items-center gap-1"
-                          title="Delete purpose class"
+                          className="text-xs font-mono bg-slate-200 text-slate-800 hover:bg-slate-600 hover:text-white px-1.5 py-0.5 font-bold uppercase tracking-wider transition cursor-pointer"
                         >
-                          <Trash className="w-3 h-3" />
-                          Delete
+                          Cancel
                         </button>
+                        {editingPurposeError && <span className="text-rose-500 text-xs">{editingPurposeError}</span>}
                       </div>
-                    </>
+                    ) : confirmDeletePurposeKey === key ? (
+                      <div className="flex items-center gap-2 w-full justify-between">
+                        <span className="text-sm font-bold text-rose-600">Delete mapping & remove from rows?</span>
+                        <div className="flex gap-1.5">
+                          <button
+                            onClick={() => setConfirmDeletePurposeKey(null)}
+                            className="px-2 py-1 text-xs font-mono bg-slate-200 text-slate-800 hover:bg-slate-300 font-bold uppercase tracking-wider transition cursor-pointer"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={() => executeDeleteCellPurpose(key)}
+                            className="px-2 py-1 text-sm font-mono font-bold uppercase tracking-wider bg-rose-600 hover:bg-rose-700 text-white transition cursor-pointer"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 w-full justify-between">
+                        <span className="text-sm font-black text-emerald-700 font-mono tracking-widest">{key}</span>
+                        <div className="flex gap-1.5">
+                          <button
+                            onClick={() => {
+                              setEditingPurposeKey(key);
+                              setEditingPurposeName(key);
+                            }}
+                            className="p-1 hover:bg-glass-panel rounded text-glass-text/70 hover:text-neon-cyan transition cursor-pointer"
+                            title="Rename Purpose"
+                          >
+                            <Edit className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => setConfirmDeletePurposeKey(key)}
+                            className="p-1 hover:bg-glass-panel rounded text-glass-text/70 hover:text-rose-600 transition cursor-pointer"
+                          >
+                            <Trash className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {editingPurposeKey !== key && confirmDeletePurposeKey !== key && (
+                    <div className="grid grid-cols-3 gap-2.5">
+                      <div className="space-y-1">
+                        <span className="text-sm text-glass-text/90 font-black uppercase font-mono tracking-wider">Library</span>
+                        <input
+                          type="text"
+                          value={cell.lib}
+                          onChange={(e) => handleCellChange(key, 'lib', e.target.value)}
+                          className="w-full bg-glass-panel border border-glass-border rounded-lg px-2.5 py-1 text-xs font-mono text-glass-text focus:outline-none transition"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-sm text-glass-text/90 font-black uppercase font-mono tracking-wider">Cell Name</span>
+                        <input
+                          type="text"
+                          value={cell.cell}
+                          onChange={(e) => handleCellChange(key, 'cell', e.target.value)}
+                          className="w-full bg-glass-panel border border-glass-border rounded-lg px-2.5 py-1 text-xs font-mono text-glass-text focus:outline-none transition"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-sm text-glass-text/90 font-black uppercase font-mono tracking-wider">Rotation</span>
+                        <select
+                          value={cell.rot || 'R0'}
+                          onChange={(e) => handleCellChange(key, 'rot', e.target.value)}
+                          className="w-full bg-glass-panel border border-glass-border rounded-lg px-2.5 py-1 text-xs font-mono text-glass-text focus:outline-none transition"
+                        >
+                          {['R0', 'R90', 'R180', 'R270', 'MX', 'MY', 'MXR90', 'MYR90'].map(rot => (
+                            <option key={rot} value={rot}>
+                              {rot}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
                   )}
-                </div>
-
-                {confirmDeletePurposeKey === key ? (
-                  <div className="flex flex-col gap-3 bg-rose-50 border border-rose-600 p-2.5">
-                    <div className="text-xs text-rose-950 font-bold flex items-center gap-1.5 uppercase font-mono">
-                      <AlertCircle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
-                      Confirm Deletion
-                    </div>
-                    <p className="text-xs text-rose-900 leading-normal font-mono">
-                      Are you sure you want to delete the "{key}" cell mapping? Row blocks referencing this purpose will be updated.
-                    </p>
-                    <div className="flex items-center gap-2 justify-end">
-                      <button
-                        onClick={() => setConfirmDeletePurposeKey(null)}
-                        className="px-2 py-1 text-sm font-mono font-bold uppercase tracking-wider bg-glass-panel border border-glass-border/30 hover:border-black text-glass-text transition cursor-pointer"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        onClick={() => executeDeleteCellPurpose(key)}
-                        className="px-2 py-1 text-sm font-mono font-bold uppercase tracking-wider bg-rose-600 hover:bg-rose-700 text-white transition cursor-pointer"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-3 gap-2.5">
-                    <div className="space-y-1">
-                      <span className="text-sm text-glass-text/90 font-black uppercase font-mono tracking-wider">Library</span>
-                      <input
-                        type="text"
-                        value={cell.lib}
-                        onChange={(e) => handleCellChange(key, 'lib', e.target.value)}
-                        className="w-full bg-glass-panel border border-glass-border rounded-lg px-2.5 py-1 text-xs font-mono text-glass-text focus:outline-none transition"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <span className="text-sm text-glass-text/90 font-black uppercase font-mono tracking-wider">Cell Name</span>
-                      <input
-                        type="text"
-                        value={cell.cell}
-                        onChange={(e) => handleCellChange(key, 'cell', e.target.value)}
-                        className="w-full bg-glass-panel border border-glass-border rounded-lg px-2.5 py-1 text-xs font-mono text-glass-text focus:outline-none transition"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <span className="text-sm text-glass-text/90 font-black uppercase font-mono tracking-wider">Rotation</span>
-                      <select
-                        value={cell.rot}
-                        onChange={(e) => handleCellChange(key, 'rot', e.target.value)}
-                        className="w-full bg-glass-panel border border-glass-border rounded-lg px-2.5 py-1 text-xs font-mono text-glass-text focus:outline-none transition"
-                      >
-                        {['R0', 'R90', 'R180', 'R270', 'MX', 'MY', 'MXR90', 'MYR90'].map((rot) => (
-                          <option key={rot} value={rot}>
-                            {rot}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
 
           {isAddingPurpose ? (
