@@ -206,7 +206,7 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
                   e.stopPropagation();
                   discardPendingConfig();
                 }}
-                className="px-4 py-2 text-xs font-mono font-bold uppercase tracking-wider text-slate-300 hover:text-slate-900 glass-button rounded-lg transition cursor-pointer"
+                className="px-4 py-2 text-xs font-mono font-bold uppercase tracking-wider text-slate-600 hover:text-slate-900 glass-button rounded-lg transition cursor-pointer"
               >
                 Discard
               </button>
@@ -260,7 +260,7 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
                 e.stopPropagation();
                 handleLoadExampleTemplate();
               }}
-              className="flex items-center gap-2 px-3.5 py-2 text-sm font-mono font-bold uppercase tracking-wider text-white bg-slate-200 hover:bg-slate-300 border border-glass-border rounded-lg transition-all cursor-pointer"
+              className="flex items-center gap-2 px-3.5 py-2 text-sm font-mono font-bold uppercase tracking-wider text-slate-800 bg-slate-200 hover:bg-slate-300 border border-glass-border rounded-lg transition-all cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
               Load Example Template
@@ -276,7 +276,7 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
           <span className="text-xs font-mono text-glass-text/80">Export your current config to .xlsx or load the example template if you are just getting started.</span>
         </div>
         <button
-            className="flex items-center gap-2 px-3.5 py-2 text-sm font-mono font-bold uppercase tracking-wider text-white glass-button rounded-lg transition-all cursor-pointer"
+            className="flex items-center gap-2 px-3.5 py-2 text-sm font-mono font-bold uppercase tracking-wider text-slate-800 glass-button rounded-lg transition-all cursor-pointer"
           >
           <FileDown className="w-3.5 h-3.5 text-green-400" />
           Export Active Config
@@ -284,7 +284,7 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
       </div>
 
       {/* Visual Explanation of Mixed Cell Layout (Saves user confusion) */}
-      <div className="bg-slate-100 text-white p-6 rounded-lg border border-glass-border space-y-4">
+      <div className="bg-slate-100 text-slate-800 p-6 rounded-lg border border-glass-border space-y-4">
         <div className="flex items-center gap-2 border-b border-glass-border pb-2">
           <Layers className="w-5 h-5 text-emerald-600" />
           <h4 className="text-xs font-mono font-black uppercase tracking-widest text-emerald-600">
@@ -292,7 +292,7 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
           </h4>
         </div>
         
-        <p className="text-xs leading-relaxed font-sans text-slate-300">
+        <p className="text-xs leading-relaxed font-sans text-slate-600">
           To build complex arrays (e.g. adding <strong>dummy, idle, or guardring cells</strong> to the boundaries of rows), you do not need to manually map thousands of individual coordinates. 
           The compiler automatically splits any row block into structured <strong>segments</strong> based on Columns D & E in your sheet! Here is how to indicate exactly which physical unit cell gets inserted:
         </p>
@@ -395,7 +395,7 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
               <strong> Heterogeneous Rows Support (Columns D & E):</strong> Specify left/right segment padding to create varying cell rows. 
             </p>
             <p className="text-xs text-glass-text/75 mt-2">
-              Use format <code className="bg-slate-200 text-white px-1 font-bold">count</code> (e.g. <code className="bg-slate-200 text-white px-1">20</code>, defaults to <code className="bg-slate-200 text-white px-1">dummy</code>) or <code className="bg-slate-200 text-white px-1">purpose:count</code> (e.g. <code className="bg-slate-200 text-white px-1">dummy:20</code> or <code className="bg-slate-200 text-white px-1">idle:10,dummy:10</code>). The center active region columns count is calculated automatically!
+              Use format <code className="bg-slate-200 text-slate-800 px-1 font-bold">count</code> (e.g. <code className="bg-slate-200 text-slate-800 px-1">20</code>, defaults to <code className="bg-slate-200 text-slate-800 px-1">dummy</code>) or <code className="bg-slate-200 text-slate-800 px-1">purpose:count</code> (e.g. <code className="bg-slate-200 text-slate-800 px-1">dummy:20</code> or <code className="bg-slate-200 text-slate-800 px-1">idle:10,dummy:10</code>). The center active region columns count is calculated automatically!
             </p>
             <div className="font-mono text-xs text-glass-text bg-glass-panel border border-glass-border rounded-lg overflow-hidden min-w-[600px]">
               <table className="w-full text-left border-collapse">
