@@ -238,9 +238,10 @@ export function generateSkillCode(config: LayoutConfig): string {
     }
   });
 
-  // Track each row creation (reversed to build bottom-up)
-  const reversedWithIndices = [...config.rows].map((row, idx) => ({ row, idx })).reverse();
-  reversedWithIndices.forEach(({ row, idx }) => {
+  // Iterate rows forward (bottom→top): bottom rows placed at low currentY, top rows at high currentY
+  // Combined with R180 mosaics, this produces the correct stacking in Cadence (bottom at bottom of view)
+  const rowsWithIndices = [...config.rows].map((row, idx) => ({ row, idx }));
+  rowsWithIndices.forEach(({ row, idx }) => {
     const originalIdx = idx;
     const purposeLower = row.purpose.toLowerCase();
     const cellInfo = config.cell_map[purposeLower] || {
@@ -281,7 +282,7 @@ export function generateSkillCode(config: LayoutConfig): string {
       code.push('          master');
       code.push(`          "${mosaicName}"`);
       code.push('          list(0.0 0.0)');
-      code.push(`          "${cellInfo.rot}"`);
+      code.push('          "R180"');
       code.push(`          ${row.rows}`);
       code.push(`          ${config.total_cols}`);
       code.push(`            ${config.y_pitch}`);
@@ -297,7 +298,7 @@ export function generateSkillCode(config: LayoutConfig): string {
       code.push('            master');
       code.push(`            "${mosaicName}"`);
       code.push('            list(0.0 0.0)');
-      code.push(`          "${cellInfo.rot}"`);
+      code.push('          "R180"');
       code.push(`            ${row.rows}`);
       code.push(`            ${config.total_cols}`);
       code.push(`            ${config.y_pitch}`);
@@ -321,7 +322,7 @@ export function generateSkillCode(config: LayoutConfig): string {
       code.push('      inst~>xy = list(dx dy)');
       code.push('    )');
       code.push('');
-      code.push(`    allInsts = cons(list(inst "${cellInfo.rot}") allInsts)`);
+      code.push('    allInsts = cons(list(inst "R180") allInsts)');
       code.push('');
 
       if (row === maxActiveRow) {
@@ -360,7 +361,7 @@ export function generateSkillCode(config: LayoutConfig): string {
         code.push('          master');
         code.push(`          "${segName}"`);
         code.push('          list(0.0 0.0)');
-        code.push(`          "${segCellInfo.rot}"`);
+        code.push('          "R180"');
         code.push(`          ${row.rows}`);
         code.push(`          ${seg.cols}`);
         code.push(`            ${config.y_pitch}`);
@@ -376,7 +377,7 @@ export function generateSkillCode(config: LayoutConfig): string {
         code.push('            master');
         code.push(`          "${segName}"`);
         code.push('            list(0.0 0.0)');
-        code.push(`          "${segCellInfo.rot}"`);
+        code.push('          "R180"');
         code.push(`            ${row.rows}`);
         code.push(`            ${seg.cols}`);
         code.push(`            ${config.y_pitch}`);
@@ -400,7 +401,7 @@ export function generateSkillCode(config: LayoutConfig): string {
         code.push('      inst~>xy = list(dx dy)');
         code.push('    )');
         code.push('');
-        code.push(`    allInsts = cons(list(inst "${segCellInfo.rot}") allInsts)`);
+        code.push('    allInsts = cons(list(inst "R180") allInsts)');
         code.push('');
 
         // Use the center active segment as the centering point
@@ -434,23 +435,20 @@ export function generateSkillCode(config: LayoutConfig): string {
   }
   const targetDx = - (left_cols + active_cols / 2.0) * config.x_pitch;
 
-  // Y-axis: find bottom rows below active core block
-  let bottom_rows = 0;
+  // Y-axis: count rows physically BELOW the active core block in forward (bottom→top) build order
+  let below_active_rows = 0;
   let active_rows = 0;
-  let passedActive = false;
-  const reversedRowsForY = [...config.rows].reverse();
-  reversedRowsForY.forEach(r => {
+  let reachedActive = false;
+  config.rows.forEach(r => {
     const isAct = getRowCategory(r.purpose, r.name || '', config.rov_purpose) === 'active';
     if (isAct) {
       active_rows += r.rows;
-      passedActive = true;
-    } else {
-      if (!passedActive) {
-        bottom_rows += r.rows;
-      }
+      reachedActive = true;
+    } else if (!reachedActive) {
+      below_active_rows += r.rows;
     }
   });
-  const targetDy = - (bottom_rows + active_rows / 2.0) * config.y_pitch;
+  const targetDy = - (below_active_rows + active_rows / 2.0) * config.y_pitch;
 
   code.push('    ; --- Center Array at (0, 0) ---');
   code.push('    printf("\\nFinding Global Array Center...\\n")');
@@ -869,8 +867,7 @@ def main():
     if active_rows:
         max_active_row = max(active_rows, key=lambda r: r["rows"])
 
-    for rev_idx, row in enumerate(reversed(rows)):
-        orig_idx = len(rows) - 1 - rev_idx
+    for orig_idx, row in enumerate(rows):
         row_num = orig_idx + 1
         purpose = row["purpose"]
         row_name = row.get("name", purpose)
@@ -915,7 +912,7 @@ def main():
        master
        "{mosaic_name}"
        list(0.0 0.0)
-       "{cell_info["rot"]}"
+       "R180"
        {row_count}
        {total_cols}
        {y_pitch}
@@ -932,7 +929,7 @@ def main():
         master
         "{mosaic_name}"
         list(0.0 0.0)
-        "{cell_info["rot"]}"
+        "R180"
         {row_count}
         {total_cols}
         {y_pitch}
@@ -961,7 +958,7 @@ def main():
 
  allInsts =
    cons(
-      list(inst "{cell_info["rot"]}")
+      list(inst "R180")
       allInsts
    )
 """)
@@ -1009,7 +1006,7 @@ def main():
        master
        "{seg_mosaic_name}"
        list(0.0 0.0)
-       "{seg_cell_info["rot"]}"
+       "R180"
        {row_count}
        {seg_cols}
        {y_pitch}
@@ -1026,7 +1023,7 @@ def main():
         master
         "{seg_mosaic_name}"
         list(0.0 0.0)
-        "{seg_cell_info["rot"]}"
+        "R180"
         {row_count}
         {seg_cols}
         {y_pitch}
@@ -1055,7 +1052,7 @@ def main():
 
  allInsts =
    cons(
-      list(inst "{seg_cell_info["rot"]}")
+      list(inst "R180")
       allInsts
    )
 """)
@@ -1088,19 +1085,18 @@ def main():
 
     target_dx = - (left_cols + active_cols / 2.0) * x_pitch
 
-    # Calculate Y-centering (bottom rows up to active rows block)
-    bottom_rows = 0
+    # Calculate Y-centering: rows below the active block in forward (bottom->top) build order
+    below_active_rows = 0
     active_rows_count = 0
-    passed_active = False
-    for r in reversed(rows):
+    reached_active = False
+    for r in rows:
         is_act = get_row_category(r["purpose"], r.get("name", ""), rov_purpose) == "active"
         if is_act:
             active_rows_count += r["rows"]
-            passed_active = True
-        else:
-            if not passed_active:
-                bottom_rows += r["rows"]
-    target_dy = - (bottom_rows + active_rows_count / 2.0) * y_pitch
+            reached_active = True
+        elif not reached_active:
+            below_active_rows += r["rows"]
+    target_dy = - (below_active_rows + active_rows_count / 2.0) * y_pitch
 
     # Center Array at (0,0) based on collective center of all rows
     skill.append(f"""
@@ -1573,7 +1569,7 @@ for row in reversed(rows):
         master
         nil
         list(0 0)
-        "{cell_info["rot"]}"
+        "R180"
         {row_count}
         {total_cols}
         {y_pitch}
