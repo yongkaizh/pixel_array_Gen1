@@ -321,21 +321,26 @@ export function generateSkillCode(config: LayoutConfig): string {
   // So the centering math below remains the same (left_cols in column units, active_cols in column units).
   const targetDx = - (config.total_cols / 2.0) * config.x_pitch;
 
-  // Y-axis: Find the physical Y-offset of the primary ROV block
   let startY_rows = 0;
   let endY_rows = 0;
+  let maxActiveIdx = -1;
+  let maxRows = 0;
+  config.rows.forEach((row, idx) => {
+    const isAct = getRowCategory(row.purpose, row.name || '', config.rov_purpose) === 'active' || getRowCategory(row.purpose, row.name || '', config.rov_purpose) === 'rov';
+    if (isAct && row.rows > maxRows) {
+      maxRows = row.rows;
+      maxActiveIdx = idx;
+    }
+  });
 
-  if (firstActiveIdx !== -1 && lastActiveIdx !== -1) {
-    for (let i = lastActiveIdx + 1; i < config.rows.length; i++) {
+  if (maxActiveIdx !== -1) {
+    for (let i = maxActiveIdx + 1; i < config.rows.length; i++) {
       startY_rows += config.rows[i].rows;
     }
-    endY_rows = startY_rows;
-    for (let i = firstActiveIdx; i <= lastActiveIdx; i++) {
-      endY_rows += config.rows[i].rows;
-    }
+    endY_rows = startY_rows + config.rows[maxActiveIdx].rows;
   }
 
-  const targetDy = (firstActiveIdx !== -1)
+  const targetDy = (maxActiveIdx !== -1)
     ? - (startY_rows + endY_rows) / 2.0 * config.y_pitch
     : - (config.rows.reduce((sum, r) => sum + r.rows, 0) / 2.0) * config.y_pitch;
 

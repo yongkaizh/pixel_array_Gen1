@@ -617,14 +617,20 @@ def main():
 
     target_dx = - (left_cols + active_cols / 2.0) * x_pitch
 
+    max_active_idx = -1
+    max_rows = 0
+    for i, r in enumerate(rows):
+        is_act = get_row_category(r["purpose"], r.get("name", ""), rov_purpose) in ("active", "rov")
+        if is_act and r["rows"] > max_rows:
+            max_rows = r["rows"]
+            max_active_idx = i
+
     start_y_rows = 0
     end_y_rows = 0
-    if first_active_idx != -1 and last_active_idx != -1:
-        for i in range(last_active_idx + 1, len(rows)):
+    if max_active_idx != -1:
+        for i in range(max_active_idx + 1, len(rows)):
             start_y_rows += rows[i]["rows"]
-        end_y_rows = start_y_rows
-        for i in range(first_active_idx, last_active_idx + 1):
-            end_y_rows += rows[i]["rows"]
+        end_y_rows = start_y_rows + rows[max_active_idx]["rows"]
         
         target_dy = - (start_y_rows + end_y_rows) / 2.0 * y_pitch
     else:

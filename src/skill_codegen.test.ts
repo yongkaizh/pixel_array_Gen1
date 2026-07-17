@@ -245,7 +245,8 @@ describe('generateSkillCode – centering at (0,0)', () => {
   it('multi-active: entire active block centered, dy=-57.5', () => {
     const code = generateSkillCode(multiActiveConfig);
     expect(extractCenterValue(code, 'dx')).toBeCloseTo(-5.0, 4);
-    expect(extractCenterValue(code, 'dy')).toBeCloseTo(-57.5, 4);
+    // startY_rows = 2, endY_rows = 2 + 100 = 102 -> dy = -104 / 2 = -52.0
+    expect(extractCenterValue(code, 'dy')).toBeCloseTo(-52.0, 4);
   });
 
   it('scales correctly with non-trivial pitches', () => {
@@ -473,17 +474,16 @@ describe('generateSkillCode – rigorous ROV active block centering', () => {
     
     // Reversed build order:
     // Rows after Act2: Top (2 rows). So startY_rows = 2.
-    // Active block starts (from bottom) with Act2, ends with Act1.
-    // Total active block rows = Act1(10) + Interleaved(5) + Act2(15) = 30 rows.
-    // Center Y of active block = (2 + 2 + 30) / 2 = 17 rows * y_pitch(3.0) = 51.0
-    // dy should be -51.0
+    // maxActiveRow is Act2 (15 rows).
+    // endY_rows = 2 + 15 = 17 rows.
+    // targetDy = - (2 + 17) / 2 * 3.0 = -28.5
     
     // X center is now always based on the entire chip width (total_cols)
     // total_cols = 100, x_pitch = 2.0 -> Center X = 100 * 2.0 / 2 = 100.0
     // dx should be -100.0
 
     expect(extractCenterValue(code, 'dx')).toBeCloseTo(-100.0, 4);
-    expect(extractCenterValue(code, 'dy')).toBeCloseTo(-51.0, 4);
+    expect(extractCenterValue(code, 'dy')).toBeCloseTo(-28.5, 4);
   });
 });
 
@@ -657,18 +657,26 @@ function simulateLayout(config: LayoutConfig): MosaicPhysical[] {
   const targetDx = -(left_cols + active_cols / 2.0) * x_pitch;
 
   let startY_rows = 0;
+  let maxActiveIdx = -1;
+  let maxRows = 0;
+  config.rows.forEach((r, idx) => {
+    const cat = _getRowCat(r.purpose, r.name || '', config.rov_purpose);
+    if ((cat === 'active' || cat === 'rov') && r.rows > maxRows) {
+      maxRows = r.rows;
+      maxActiveIdx = idx;
+    }
+  });
+
   let endY_rows = 0;
-  if (firstActiveIdx !== -1 && lastActiveIdx !== -1) {
-    for (let i = lastActiveIdx + 1; i < config.rows.length; i++) {
+  if (maxActiveIdx !== -1) {
+    for (let i = maxActiveIdx + 1; i < config.rows.length; i++) {
       startY_rows += config.rows[i].rows;
     }
-    endY_rows = startY_rows;
-    for (let i = firstActiveIdx; i <= lastActiveIdx; i++) {
-      endY_rows += config.rows[i].rows;
-    }
+    endY_rows = startY_rows + config.rows[maxActiveIdx].rows;
   }
+  
   const targetDy =
-    firstActiveIdx !== -1
+    maxActiveIdx !== -1
       ? -((startY_rows + endY_rows) / 2.0) * y_pitch
       : -(config.rows.reduce((s, r) => s + r.rows, 0) / 2.0) * y_pitch;
 
@@ -767,18 +775,14 @@ describe('Physical simulation – simple (non-segmented) configs', () => {
     expect(m.right).toBeCloseTo(+5.0, 9);
   });
 
-  it('multiActiveConfig: entire active block centered at Y=0', () => {
+  it('multiActiveConfig: max active block centered at Y=0', () => {
     const mosaics = simulateLayout(multiActiveConfig);
-    // Active rows are indices 1 (10 rows) and 3 (100 rows)
-    const activeMosaics = mosaics.filter(m => m.purpose === 'active');
-    expect(activeMosaics.length).toBe(2);
-
-    const blockBottom = Math.min(...activeMosaics.map(m => m.bottom));
-    const blockTop    = Math.max(...activeMosaics.map(m => m.top));
-    expect((blockBottom + blockTop) / 2).toBeCloseTo(0.0, 9);
-    // startY_rows=2, endY_rows=113, dy=-57.5 → block=[2-57.5, 113-57.5]=[-55.5, 55.5]
-    expect(blockBottom).toBeCloseTo(-55.5, 9);
-    expect(blockTop).toBeCloseTo(+55.5, 9);
+    // Find the max active block (M4_active with 100 rows)
+    const maxActiveMosaic = mosaics.find(m => m.name === 'M4_active')!;
+    expect((maxActiveMosaic.bottom + maxActiveMosaic.top) / 2).toBeCloseTo(0.0, 9);
+    // startY_rows=2, endY_rows=2+100=102, dy=-52.0. So it spans [-50, 50]
+    expect(maxActiveMosaic.bottom).toBeCloseTo(-50.0, 9);
+    expect(maxActiveMosaic.top).toBeCloseTo(+50.0, 9);
   });
 
   it('multiActiveConfig: dummy rows between active rows are contiguous with active block', () => {
@@ -1005,10 +1009,11 @@ describe('Physical simulation – segmented (mixed-cell) configs', () => {
     // Act2 segs: rawY = 6 + 15*3 = 51, top = 51-51=0, bottom = 0-45=-45
     // Act1 segs: rawY = 66 + 10*3 = 96, top = 96-51=45, bottom=45-30=15
     // Combined active block: bottom=-45, top=45 → center=0 ✓
-    const allActives = mosaics.filter(m => m.isSegment && m.purpose === 'active');
-    const blockBottom = Math.min(...allActives.map(m => m.bottom));
-    const blockTop    = Math.max(...allActives.map(m => m.top));
-    expect((blockBottom + blockTop) / 2).toBeCloseTo(0.0, 9);
+    // maxActiveRow is Act2 (15 rows) at rowIdx=4. It should be exactly centered at Y=0.
+    const maxAct = mosaics.filter(m => m.isSegment && m.rowIdx === 4 && m.purpose === 'active');
+    const maxActBottom = Math.min(...maxAct.map(m => m.bottom));
+    const maxActTop    = Math.max(...maxAct.map(m => m.top));
+    expect((maxActBottom + maxActTop) / 2).toBeCloseTo(0.0, 9);
   });
 });
 
@@ -1045,17 +1050,16 @@ describe('Physical simulation – cross-check with parsed SKILL code', () => {
     const code = generateSkillCode(multiActiveConfig);
     const parsedDy = extractCenterValue(code, 'dy');
 
-    // Verify that the combined active bottom is negative and top is positive
-    const activeMosaics = mosaics.filter(m => m.purpose === 'active');
-    const blockBottom = Math.min(...activeMosaics.map(m => m.bottom));
-    const blockTop    = Math.max(...activeMosaics.map(m => m.top));
-    expect(blockBottom).toBeLessThan(0);
-    expect(blockTop).toBeGreaterThan(0);
-    expect(Math.abs(blockBottom + blockTop)).toBeLessThan(EPS);
+    // Verify that the max active mosaic is centered at Y=0
+    const maxActiveMosaic = mosaics.find(m => m.name === 'M4_active')!;
+    expect(maxActiveMosaic.bottom).toBeLessThan(0);
+    expect(maxActiveMosaic.top).toBeGreaterThan(0);
+    expect(Math.abs(maxActiveMosaic.bottom + maxActiveMosaic.top)).toBeLessThan(EPS);
 
     // The dy extracted from SKILL code must equal the simulation shift
+    // startY_rows = 2, endY_rows = 2 + 100 = 102
     expect(parsedDy).toBeCloseTo(
-      -((2 + 113) / 2) * simple3RowConfig.y_pitch,  // re-use y_pitch=1.0
+      -((2 + 102) / 2) * simple3RowConfig.y_pitch,  // re-use y_pitch=1.0
       4
     );
   });
