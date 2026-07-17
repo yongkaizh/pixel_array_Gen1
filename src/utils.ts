@@ -238,12 +238,10 @@ export function generateSkillCode(config: LayoutConfig): string {
     }
   });
 
-  // Iterate rows backwards (bottom→top) to match Cadence viewport (+Y is UP)
-  const reversedRows = [...config.rows].reverse();
-  reversedRows.forEach((row, rev_idx) => {
-    // The original row index in Excel (1-based)
-    const orig_idx = config.rows.length - 1 - rev_idx;
-    const row_num = orig_idx + 1;
+  // Iterate rows in the exact order they are defined (bottom→top)
+  const forwardRows = [...config.rows];
+  forwardRows.forEach((row, row_idx) => {
+    const row_num = row_idx + 1;
     const purpose = row.purpose;
     const rowName = row.name || purpose;
 
@@ -469,7 +467,7 @@ export function generateSkillCode(config: LayoutConfig): string {
   let endY_rows = 0;
 
   if (firstActiveIdx !== -1 && lastActiveIdx !== -1) {
-    for (let i = lastActiveIdx + 1; i < config.rows.length; i++) {
+    for (let i = 0; i < firstActiveIdx; i++) {
       startY_rows += config.rows[i].rows;
     }
     endY_rows = startY_rows;
@@ -904,8 +902,8 @@ def main():
     max_active_row = None
     if active_rows:
         max_active_row = max(active_rows, key=lambda r: r["rows"])
-    for rev_idx, row in enumerate(reversed(rows)):
-        orig_idx = len(rows) - 1 - rev_idx
+    for i, row in enumerate(rows):
+        orig_idx = i
         row_num = orig_idx + 1
         purpose = row["purpose"]
         row_name = row.get("name", purpose)
@@ -1121,7 +1119,7 @@ def main():
     start_y_rows = 0
     end_y_rows = 0
     if first_active_idx != -1 and last_active_idx != -1:
-        for i in range(last_active_idx + 1, len(rows)):
+        for i in range(0, first_active_idx):
             start_y_rows += rows[i]["rows"]
         end_y_rows = start_y_rows
         for i in range(first_active_idx, last_active_idx + 1):
@@ -1548,7 +1546,7 @@ skill.append(f'''
 # Create rows
 # =========================================================
 
-for row in reversed(rows):
+for row in rows:
 
     purpose = row["purpose"]
     row_count = row["rows"]
