@@ -248,10 +248,6 @@ def main():
 
         left_segs = parse_segments_string(left_txt, 'dummy')
         right_segs = parse_segments_string(right_txt, 'dummy')
-
-        if len(left_segs) > 0 and len(right_segs) == 0:
-            right_segs = list(reversed(left_segs))
-
         left_sum = sum(s['cols'] for s in left_segs)
         right_sum = sum(s['cols'] for s in right_segs)
 

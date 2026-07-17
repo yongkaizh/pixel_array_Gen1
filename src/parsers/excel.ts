@@ -351,11 +351,6 @@ export function parseExcelFile(fileBuffer: ArrayBuffer): LayoutConfig {
 
     const segments: RowSegment[] = [];
     if (leftSegments.length > 0 || rightSegments.length > 0) {
-      // Rule 1: If right is omitted, mirror left exactly
-      if (leftSegments.length > 0 && rightSegments.length === 0) {
-        rightSegments = [...leftSegments].reverse();
-      }
-
       let leftCols = leftSegments.reduce((sum, s) => sum + s.cols, 0);
       let rightCols = rightSegments.reduce((sum, s) => sum + s.cols, 0);
 
