@@ -204,7 +204,7 @@ def main():
                 if cols > 0:
                     segs.append({"purpose": default_purpose, "cols": cols})
             else:
-                m = re.match(r"^([a-zA-Z0-9_]+):(d+)$", clean)
+                m = re.match(r"^([a-zA-Z0-9_]+):(\d+)$", clean)
                 if m:
                     purp = m.group(1).strip().lower()
                     cols = int(m.group(2))
@@ -232,7 +232,7 @@ def main():
 
         # Extract row name (e.g. "BLC (c1)" -> name="BLC", purpose="c1")
         row_name = purpose_txt
-        m = re.match(r"^(.*?)s*((.*?))", purpose_txt)
+        m = re.match(r"^(.*?)\s*\((.*?)\)", purpose_txt)
         if m:
             row_name = m.group(1).strip()
             purpose = m.group(2).strip()
