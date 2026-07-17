@@ -15,7 +15,7 @@ export function getRowCategory(purpose: string, name: string, rov_purpose: strin
   if (n.includes('rov') || p.includes('rov')) return 'rov';
 
   // 3. Active Pixel Array:
-  if (n === 'c1' || n.includes('active') || p.includes('active') || p === 'act' || n === 'act' || (p === 'c1' && !n.includes('blc'))) return 'active';
+  if (n === 'c1' || n.includes('active') || p.includes('active') || p === 'act' || n === 'act' || (p === 'c1' && !n.includes('blc')) || p.includes('core') || n.includes('core')) return 'active';
 
   // 4. ROV / Optical Black (Fallback)
   if (p === rovLower || p.includes('ob') || p.includes('black')) return 'rov';
