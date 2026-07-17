@@ -165,10 +165,8 @@ export function generateSkillCode(config: LayoutConfig): string {
       code.push('  )');
       code.push('');
       code.push('  when(inst');
-      code.push('    bBox = inst~>bBox');
-      code.push('    y_ll = cadr(car(bBox))');
       code.push(`    dx = ${config.total_cols} * ${config.x_pitch}`);
-      code.push('    dy = currentY - y_ll');
+      code.push(`    dy = currentY + (${row.rows} * ${config.y_pitch})`);
       code.push('    inst~>xy = list(dx dy)');
       code.push('  )');
       code.push('');

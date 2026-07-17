@@ -249,16 +249,32 @@ def main():
         left_segs = parse_segments_string(left_txt, 'dummy')
         right_segs = parse_segments_string(right_txt, 'dummy')
 
+        if len(left_segs) > 0 and len(right_segs) == 0:
+            right_segs = list(reversed(left_segs))
+
         left_sum = sum(s['cols'] for s in left_segs)
         right_sum = sum(s['cols'] for s in right_segs)
 
         segments = []
-        if left_sum > 0 or right_sum > 0:
+        if len(left_segs) > 0 or len(right_segs) > 0:
+            if left_sum < right_sum:
+                diff = right_sum - left_sum
+                left_segs.append({"purpose": "dummy", "cols": diff})
+                left_sum += diff
+            elif right_sum < left_sum:
+                diff = left_sum - right_sum
+                right_segs.insert(0, {"purpose": "dummy", "cols": diff})
+                right_sum += diff
+
+            if left_sum + right_sum >= total_cols:
+                raise RuntimeError(f"Row {purpose} padding exceeds total columns!")
+
             for s in left_segs:
                 segments.append(s)
+            
             center_cols = total_cols - left_sum - right_sum
-            if center_cols > 0:
-                segments.append({"purpose": purpose.lower(), "cols": center_cols})
+            segments.append({"purpose": purpose.lower(), "cols": center_cols})
+            
             for s in right_segs:
                 segments.append(s)
 
@@ -458,8 +474,8 @@ def main():
   )
 
   when(inst
-     dx = 0.0
-     dy = currentY
+     dx = {total_cols} * {x_pitch}
+     dy = currentY + ({row_count} * {y_pitch})
      inst~>xy = list(dx dy)
   )
 
@@ -537,10 +553,8 @@ def main():
   )
 
   when(inst
-     bBox = inst~>bBox
-     y_ll = cadr(car(bBox))
      dx = {curr_seg_x:.4f} + ({seg_cols} * {x_pitch})
-     dy = currentY - y_ll
+     dy = currentY + ({row_count} * {y_pitch})
      inst~>xy = list(dx dy)
   )
 
