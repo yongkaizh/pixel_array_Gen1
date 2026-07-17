@@ -238,10 +238,11 @@ export function generateSkillCode(config: LayoutConfig): string {
     }
   });
 
-  // Iterate rows in the exact order they are defined (bottom→top)
-  const forwardRows = [...config.rows];
-  forwardRows.forEach((row, row_idx) => {
-    const row_num = row_idx + 1;
+    // Iterate rows backwards (bottom→top) to match Cadence viewport (+Y is UP)
+  const reversedRows = [...config.rows].reverse();
+  reversedRows.forEach((row, rev_idx) => {
+    const orig_idx = config.rows.length - 1 - rev_idx;
+    const row_num = orig_idx + 1;
     const purpose = row.purpose;
     const rowName = row.name || purpose;
 
@@ -306,8 +307,10 @@ export function generateSkillCode(config: LayoutConfig): string {
       code.push('  )');
       code.push('');
       code.push('  when(inst');
+      code.push('    bBox = inst~>bBox');
+      code.push('    y_ll = cadr(car(bBox))');
       code.push(`    dx = ${config.total_cols} * ${config.x_pitch}`);
-      code.push(`    dy = currentY + (${row.rows} * ${config.y_pitch})`);
+      code.push('    dy = currentY - y_ll');
       code.push('    inst~>xy = list(dx dy)');
       code.push('  )');
       code.push('');
@@ -467,7 +470,7 @@ export function generateSkillCode(config: LayoutConfig): string {
   let endY_rows = 0;
 
   if (firstActiveIdx !== -1 && lastActiveIdx !== -1) {
-    for (let i = 0; i < firstActiveIdx; i++) {
+    for (let i = lastActiveIdx + 1; i < config.rows.length; i++) {
       startY_rows += config.rows[i].rows;
     }
     endY_rows = startY_rows;
@@ -803,7 +806,7 @@ def main():
     # =========================================================
     # Validate purpose names & auto-populate missing cells
     # =========================================================
-    for row in rows:
+    for row in reversed(rows):
         purpose = row["purpose"].lower()
         if purpose not in cell_map:
             cell_map[purpose] = {
@@ -902,8 +905,8 @@ def main():
     max_active_row = None
     if active_rows:
         max_active_row = max(active_rows, key=lambda r: r["rows"])
-    for i, row in enumerate(rows):
-        orig_idx = i
+    for rev_idx, row in enumerate(reversed(rows)):
+        orig_idx = len(rows) - 1 - rev_idx
         row_num = orig_idx + 1
         purpose = row["purpose"]
         row_name = row.get("name", purpose)
@@ -1052,8 +1055,10 @@ def main():
   )
 
   when(inst
+     bBox = inst~>bBox
+     y_ll = cadr(car(bBox))
      dx = {curr_seg_x:.4f} + ({seg_cols} * {x_pitch})
-     dy = currentY + ({row_count} * {y_pitch})
+     dy = currentY - y_ll
      inst~>xy = list(dx dy)
   )
 
@@ -1119,7 +1124,7 @@ def main():
     start_y_rows = 0
     end_y_rows = 0
     if first_active_idx != -1 and last_active_idx != -1:
-        for i in range(0, first_active_idx):
+        for i in range(last_active_idx + 1, len(rows)):
             start_y_rows += rows[i]["rows"]
         end_y_rows = start_y_rows
         for i in range(first_active_idx, last_active_idx + 1):
@@ -1432,7 +1437,7 @@ print("ROV PURPOSE =", rov_purpose)
 # Validate purpose names
 # =========================================================
 
-for row in rows:
+for row in reversed(rows):
 
     purpose = row["purpose"].lower()
 
@@ -1546,7 +1551,7 @@ skill.append(f'''
 # Create rows
 # =========================================================
 
-for row in rows:
+for row in reversed(rows):
 
     purpose = row["purpose"]
     row_count = row["rows"]
