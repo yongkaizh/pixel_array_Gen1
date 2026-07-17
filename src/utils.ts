@@ -942,10 +942,7 @@ def main():
      )
   )
 
-  inst =
-   car(
-    errset(
-     dbCreateSimpleMosaic(
+  inst = dbCreateSimpleMosaic(
         cv
         master
         "{mosaic_name}"
@@ -955,14 +952,9 @@ def main():
         {total_cols}
         {y_pitch}
         {x_pitch}
-     )
-    )
-   )
+  )
   unless(inst
-   inst =
-    car(
-     errset(
-      dbCreateMosaic(
+   inst = dbCreateMosaic(
          cv
          master
          "{mosaic_name}"
@@ -972,9 +964,7 @@ def main():
          {total_cols}
          {y_pitch}
          {x_pitch}
-      )
-     )
-    )
+  )
   )
 
   when(
@@ -999,7 +989,6 @@ def main():
             if purpose.lower() == rov_purpose.lower() and row == max_active_row:
                 skill.append("""
   printf("ACTIVE MOSAIC FOUND\\\\n")
-  rovInst = inst
 """)
         else:
             curr_seg_x = 0.0
@@ -1021,7 +1010,7 @@ def main():
       "{seg_cell_info["lib"]}"
       "{seg_cell_info["cell"]}"
       "layout"
-      ""
+      "maskLayout"
       "r"
    )
 
@@ -1032,10 +1021,7 @@ def main():
      )
   )
 
-  inst =
-   car(
-    errset(
-     dbCreateSimpleMosaic(
+  inst = dbCreateSimpleMosaic(
         cv
         master
         "{seg_mosaic_name}"
@@ -1045,14 +1031,9 @@ def main():
         {seg_cols}
         {y_pitch}
         {x_pitch}
-     )
-    )
-   )
+  )
   unless(inst
-   inst =
-    car(
-     errset(
-      dbCreateMosaic(
+   inst = dbCreateMosaic(
          cv
          master
          "{seg_mosaic_name}"
@@ -1062,9 +1043,7 @@ def main():
          {seg_cols}
          {y_pitch}
          {x_pitch}
-      )
-     )
-    )
+  )
   )
 
   when(
@@ -1075,12 +1054,8 @@ def main():
   )
 
   when(inst
-     bBox = inst~>bBox
-     ll = car(bBox)
-     x_ll = car(ll)
-     y_ll = cadr(ll)
-     dx = {curr_seg_x:.4f} - x_ll
-     dy = currentY - y_ll
+     dx = {curr_seg_x:.4f} + ({seg_cols} * {x_pitch})
+     dy = currentY + ({row_count} * {y_pitch})
      inst~>xy = list(dx dy)
   )
 
@@ -1093,7 +1068,6 @@ def main():
                 if seg_purpose.lower() == rov_purpose.lower() and row == max_active_row:
                     skill.append("""
   printf("ACTIVE SEGMENT MOSAIC FOUND\\\\n")
-  rovInst = inst
 """)
                 curr_seg_x += seg_cols * x_pitch
 
@@ -1510,7 +1484,6 @@ skill.append("""
       cv
       master
       inst
-      rovInst
       allInsts
       center
       dx
@@ -1596,8 +1569,8 @@ for row in reversed(rows):
      "{cell_info["lib"]}"
      "{cell_info["cell"]}"
      "layout"
-     ""
-     "r"
+      "maskLayout"
+      "r"
   )
 
  when(
@@ -1637,9 +1610,7 @@ for row in reversed(rows):
         {total_cols}
         {y_pitch}
         {x_pitch}
-     )
-    )
-   )
+  )
  )
 
  when(
