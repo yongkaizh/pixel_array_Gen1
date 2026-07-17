@@ -253,15 +253,6 @@ def main():
 
         segments = []
         if len(left_segs) > 0 or len(right_segs) > 0:
-            if left_sum < right_sum:
-                diff = right_sum - left_sum
-                left_segs.append({"purpose": "dummy", "cols": diff})
-                left_sum += diff
-            elif right_sum < left_sum:
-                diff = left_sum - right_sum
-                right_segs.insert(0, {"purpose": "dummy", "cols": diff})
-                right_sum += diff
-
             if left_sum + right_sum >= total_cols:
                 raise RuntimeError(f"Row {purpose} padding exceeds total columns!")
 

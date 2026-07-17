@@ -354,17 +354,6 @@ export function parseExcelFile(fileBuffer: ArrayBuffer): LayoutConfig {
       let leftCols = leftSegments.reduce((sum, s) => sum + s.cols, 0);
       let rightCols = rightSegments.reduce((sum, s) => sum + s.cols, 0);
 
-      // Rule 2: Auto-balance padding to keep the main active segment perfectly centered
-      if (leftCols < rightCols) {
-        const diff = rightCols - leftCols;
-        leftSegments.push({ purpose: 'dummy', cols: diff });
-        leftCols += diff;
-      } else if (rightCols < leftCols) {
-        const diff = leftCols - rightCols;
-        rightSegments.unshift({ purpose: 'dummy', cols: diff });
-        rightCols += diff;
-      }
-
       if (leftCols + rightCols >= total_cols) {
         throw new Error(`Row '${purpose}' padding exceeds total columns!`);
       }
