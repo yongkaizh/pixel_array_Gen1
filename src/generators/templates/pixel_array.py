@@ -341,6 +341,10 @@ def main():
     skill.append("      dx")
     skill.append("      dy")
     skill.append("      currentY")
+    skill.append("      maxActiveInst")
+    skill.append("      cx")
+    skill.append("      cy")
+    skill.append("      bBox")
     skill.append(" ))")
 
     skill.append(f"""
@@ -488,6 +492,7 @@ def main():
             if purpose.lower() == rov_purpose.lower() and row == max_active_row:
                 skill.append("""
   printf("ACTIVE MOSAIC FOUND\\n")
+  maxActiveInst = inst
 """)
         else:
             curr_seg_x = 0.0
@@ -567,6 +572,7 @@ def main():
                 if seg_purpose.lower() == rov_purpose.lower() and row == max_active_row:
                     skill.append("""
   printf("ACTIVE SEGMENT MOSAIC FOUND\\n")
+  maxActiveInst = inst
 """)
                 curr_seg_x += seg_cols * x_pitch
 
@@ -639,9 +645,18 @@ def main():
     # Center Array at (0, 0)
     skill.append(f"""
  printf("\\nFinding Global Array Center...\\n")
- dx = - ({total_cols} / 2.0) * {x_pitch}
- dy = {target_dy:.4f}
- printf("Global Center: cx=%L cy=%L\\n" 0.0 - dx 0.0 - dy)
+ if(maxActiveInst then
+   bBox = maxActiveInst~>bBox
+   cx = (caar(bBox) + caadr(bBox)) / 2.0
+   cy = (cadar(bBox) + cadadr(bBox)) / 2.0
+   dx = 0.0 - cx
+   dy = 0.0 - cy
+   printf("Max Active Array measured center: cx=%L cy=%L\\n" cx cy)
+ else
+   dx = - ({total_cols} / 2.0) * {x_pitch}
+   dy = {target_dy:.4f}
+   printf("Fallback mathematical center: cx=%L cy=%L\\n" 0.0 - dx 0.0 - dy)
+ )
  printf("Move dx=%L dy=%L\\n" dx dy)
 
  foreach(

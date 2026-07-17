@@ -34,16 +34,22 @@ function countOccurrences(haystack: string, needle: string): number {
  *  and contains lines like "    dx = -5.0000" (toFixed(4) format).
  */
 function extractCenterValue(code: string, varName: 'dx' | 'dy'): number {
-  // Slice to the centering section so we don't pick up per-instance "dx = 0.0 - x_ll"
-  const centerMarker = '; --- Center Array at (0, 0) ---';
-  const centerIdx = code.indexOf(centerMarker);
-  if (centerIdx === -1) throw new Error('Could not find centering block in generated code');
-  const centerSection = code.slice(centerIdx);
-  // Match "    dx = -5.0000" (exactly the toFixed(4) output, no trailing text)
-  const re = new RegExp(`^\\s+${varName} = ([\\-0-9.]+)\\s*$`, 'm');
-  const m = centerSection.match(re);
-  if (!m) throw new Error(`Could not find '${varName} = ...' in centering block`);
-  return parseFloat(m[1]);
+  const lines = code.split('\n');
+  const fallbackIdx = lines.findIndex(l => l.includes('Fallback mathematical center'));
+  if (fallbackIdx !== -1) {
+    // Scan backwards from the fallback print statement to find dx and dy
+    for (let i = fallbackIdx - 1; i >= 0; i--) {
+      const match = lines[i].match(new RegExp(`\\b${varName}\\s*=\\s*(-?\\d+\\.?\\d*)`));
+      if (match) return parseFloat(match[1]);
+      if (lines[i].includes('else')) break;
+    }
+  }
+  
+  // If not found above, just search normally (for Python generator or old code)
+  const regex = new RegExp(`\\b${varName}\\s*=\\s*(-?\\d+\\.?\\d*)`);
+  const match = code.match(regex);
+  if (!match) throw new Error(`Could not find ${varName} assignment in generated code.`);
+  return parseFloat(match[1]);
 }
 
 /** Build a minimal valid LayoutConfig for testing */

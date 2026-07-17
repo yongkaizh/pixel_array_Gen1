@@ -20,6 +20,10 @@ export function generateSkillCode(config: LayoutConfig): string {
   code.push('    dx');
   code.push('    dy');
   code.push('    currentY');
+  code.push('    maxActiveInst');
+  code.push('    cx');
+  code.push('    cy');
+  code.push('    bBox');
   code.push('  )');
   code.push('');
   code.push('    printf("\\n===============================\\n")');
@@ -180,6 +184,7 @@ export function generateSkillCode(config: LayoutConfig): string {
       const isRov = purpose.toLowerCase() === config.rov_purpose.toLowerCase();
       if (isRov && row === maxActiveRow) {
         code.push('  printf("ACTIVE MOSAIC FOUND\\n")');
+        code.push('  maxActiveInst = inst');
       }
     } else {
       let currSegX = 0.0;
@@ -264,6 +269,7 @@ export function generateSkillCode(config: LayoutConfig): string {
         const isRov = segPurpose.toLowerCase() === config.rov_purpose.toLowerCase();
         if (isRov && row === maxActiveRow) {
           code.push('  printf("ACTIVE SEGMENT MOSAIC FOUND\\n")');
+          code.push('  maxActiveInst = inst');
         }
         
         currSegX += segCols * config.x_pitch;
@@ -346,9 +352,19 @@ export function generateSkillCode(config: LayoutConfig): string {
 
   code.push('    ; --- Center Array at (0, 0) ---');
   code.push('    printf("\\nFinding Global Array Center...\\n")');
-  code.push(`    dx = ${targetDx.toFixed(4)}`);
-  code.push(`    dy = ${targetDy.toFixed(4)}`);
-  code.push('    printf("Global Center: cx=%L cy=%L\\n" 0.0 - dx 0.0 - dy)');
+  code.push('    if(maxActiveInst then');
+  code.push('      bBox = maxActiveInst~>bBox');
+  code.push('      cx = (caar(bBox) + caadr(bBox)) / 2.0');
+  code.push('      cy = (cadar(bBox) + cadadr(bBox)) / 2.0');
+  code.push('      dx = 0.0 - cx');
+  code.push('      dy = 0.0 - cy');
+  code.push('      printf("Max Active Array measured center: cx=%L cy=%L\\n" cx cy)');
+  code.push('    else');
+  code.push(`      dx = ${targetDx.toFixed(4)}`);
+  code.push(`      dy = ${targetDy.toFixed(4)}`);
+  code.push('      printf("Fallback mathematical center: cx=%L cy=%L\\n" 0.0 - dx 0.0 - dy)');
+  code.push('    )');
+  code.push('');
   code.push('    printf("Shifting all parts by dx=%L dy=%L\\n" dx dy)');
   code.push('');
   code.push('    foreach(item allInsts');
