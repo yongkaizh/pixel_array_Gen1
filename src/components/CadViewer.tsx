@@ -31,10 +31,10 @@ const usePurposeColors = (rows: RowConfig[], cell_map: Record<string, any>) => {
     const uniquePurposes = Array.from(new Set([...rowPurposes, ...cellMapPurposes]));
     
     uniquePurposes.forEach((purpose, idx) => {
-      // Use Slate for dummy
-      if (purpose.includes('dummy')) {
+      // Exact match for base dummy/active purposes so variants get unique colors
+      if (purpose === 'dummy') {
         map[purpose] = PALETTE[14];
-      } else if (purpose.includes('active') || purpose === 'c1') {
+      } else if (purpose === 'active' || purpose === 'c1') {
         map[purpose] = PALETTE[0];
       } else {
         // Assign from palette, avoiding 0 and 14 if possible
