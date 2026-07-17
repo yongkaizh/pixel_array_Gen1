@@ -346,38 +346,49 @@ export function parseExcelFile(fileBuffer: ArrayBuffer): LayoutConfig {
     const leftTxt = colsCount > rc + 3 ? grid[r][rc + 3] : '';
     const rightTxt = colsCount > rc + 4 ? grid[r][rc + 4] : '';
     const addressTxt = colsCount > rc + 5 ? grid[r][rc + 5] : '';
-
-    const leftSegs = parseSegmentsString(leftTxt, 'dummy');
-    const rightSegs = parseSegmentsString(rightTxt, 'dummy');
-
-    const leftSum = leftSegs.reduce((sum, s) => sum + s.cols, 0);
-    const rightSum = rightSegs.reduce((sum, s) => sum + s.cols, 0);
+    let leftSegments = parseSegmentsString(leftTxt, 'dummy');
+    let rightSegments = parseSegmentsString(rightTxt, 'dummy');
 
     const segments: RowSegment[] = [];
-    if (leftSum > 0 || rightSum > 0) {
-      if (leftSum + rightSum > total_cols) {
-        throw new Error(`Row '${purpose}' has segment sums (${leftSum} + ${rightSum}) exceeding total columns (${total_cols}).`);
+    if (leftSegments.length > 0 || rightSegments.length > 0) {
+      // Rule 1: If right is omitted, mirror left exactly
+      if (leftSegments.length > 0 && rightSegments.length === 0) {
+        rightSegments = [...leftSegments].reverse();
       }
-      leftSegs.forEach(s => segments.push(s));
-      const centerCols = total_cols - leftSum - rightSum;
-      if (centerCols > 0) {
-        segments.push({ purpose: purpose.toLowerCase(), cols: centerCols });
+
+      let leftCols = leftSegments.reduce((sum, s) => sum + s.cols, 0);
+      let rightCols = rightSegments.reduce((sum, s) => sum + s.cols, 0);
+
+      // Rule 2: Auto-balance padding to keep the main active segment perfectly centered
+      if (leftCols < rightCols) {
+        const diff = rightCols - leftCols;
+        leftSegments.push({ purpose: 'dummy', cols: diff });
+        leftCols += diff;
+      } else if (rightCols < leftCols) {
+        const diff = leftCols - rightCols;
+        rightSegments.unshift({ purpose: 'dummy', cols: diff });
+        rightCols += diff;
       }
-      rightSegs.forEach(s => segments.push(s));
+
+      if (leftCols + rightCols >= total_cols) {
+        throw new Error(`Row '${purpose}' padding exceeds total columns!`);
+      }
+
+      const activeCols = total_cols - leftCols - rightCols;
+      segments.push(...leftSegments);
+      segments.push({ purpose: purpose.toLowerCase(), cols: activeCols });
+      segments.push(...rightSegments);
     }
 
     const rowConf: RowConfig = {
       purpose: purpose,
       rows: row_count,
       name: rowName,
-      leftStr: leftTxt,
-      rightStr: rightTxt,
       address: addressTxt
     };
-
-    if (segments.length > 0) {
-      rowConf.segments = segments;
-    }
+    if (leftTxt !== '') rowConf.leftStr = leftTxt;
+    if (rightTxt !== '') rowConf.rightStr = rightTxt;
+    if (segments.length > 0) rowConf.segments = segments;
 
     rows.push(rowConf);
 

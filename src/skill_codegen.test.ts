@@ -478,11 +478,11 @@ describe('generateSkillCode – rigorous ROV active block centering', () => {
     // Center Y of active block = (2 + 2 + 30) / 2 = 17 rows * y_pitch(3.0) = 51.0
     // dy should be -51.0
     
-    // X center of active block: active segment starts at left_cols = 10, ends at 10+70 = 80
-    // Center X of active block = (10 + 80) / 2 = 45 cols * x_pitch(2.0) = 90.0
-    // dx should be -90.0
+    // X center is now always based on the entire chip width (total_cols)
+    // total_cols = 100, x_pitch = 2.0 -> Center X = 100 * 2.0 / 2 = 100.0
+    // dx should be -100.0
 
-    expect(extractCenterValue(code, 'dx')).toBeCloseTo(-90.0, 4);
+    expect(extractCenterValue(code, 'dx')).toBeCloseTo(-100.0, 4);
     expect(extractCenterValue(code, 'dy')).toBeCloseTo(-51.0, 4);
   });
 });

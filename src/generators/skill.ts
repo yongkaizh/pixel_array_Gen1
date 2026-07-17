@@ -321,7 +321,7 @@ export function generateSkillCode(config: LayoutConfig): string {
   // BUT: since each mosaic origin is at (segCols*xPitch + currSegX), the actual content X range is
   //   [currSegX, currSegX + segCols*xPitch]
   // So the centering math below remains the same (left_cols in column units, active_cols in column units).
-  const targetDx = - (left_cols + active_cols / 2.0) * config.x_pitch;
+  const targetDx = - (config.total_cols / 2.0) * config.x_pitch;
 
   // Y-axis: Find the physical Y-offset of the primary ROV block
   let startY_rows = 0;

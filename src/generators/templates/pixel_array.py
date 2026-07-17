@@ -616,10 +616,10 @@ def main():
     else:
         target_dy = - (sum(r["rows"] for r in rows) / 2.0) * y_pitch
 
-    # Center Array at (0,0) based on collective center of all rows
+    # Center Array at (0, 0)
     skill.append(f"""
  printf("\\nFinding Global Array Center...\\n")
- dx = {target_dx:.4f}
+ dx = - ({total_cols} / 2.0) * {x_pitch}
  dy = {target_dy:.4f}
  printf("Global Center: cx=%L cy=%L\\n" 0.0 - dx 0.0 - dy)
  printf("Move dx=%L dy=%L\\n" dx dy)

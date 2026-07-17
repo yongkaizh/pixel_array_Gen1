@@ -470,7 +470,7 @@ skill.append(f"""
  printf("\\nFinding Global Array Center...\\n")
  if( rovInst != nil then
    C = centerBox(rovInst~>bBox)
-   dx = 0.0 - car(C)
+   dx = 0.0 - ({total_cols * x_pitch} / 2.0)
    dy = 0.0 - cadr(C)
  else
    dx = 0.0 - ({total_cols * x_pitch} / 2.0)
