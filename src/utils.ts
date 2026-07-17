@@ -320,8 +320,8 @@ export function generateSkillCode(config: LayoutConfig): string {
       code.push('  )');
       code.push('');
       code.push('  when(inst');
-      code.push('    dx = 0.0');
-      code.push('    dy = currentY');
+      code.push(`    dx = ${config.total_cols} * ${config.x_pitch}`);
+      code.push(`    dy = currentY + (${row.rows} * ${config.y_pitch})`);
       code.push('    inst~>xy = list(dx dy)');
       code.push('  )');
       code.push('');
@@ -415,8 +415,8 @@ export function generateSkillCode(config: LayoutConfig): string {
         code.push('  )');
         code.push('');
         code.push('  when(inst');
-        code.push(`    dx = ${currSegX.toFixed(4)}`);
-        code.push('    dy = currentY');
+        code.push(`    dx = ${currSegX.toFixed(4)} + (${segCols} * ${config.x_pitch})`);
+        code.push('    dy = currentY + (' + row.rows + ' * ' + config.y_pitch + ')');
         code.push('    inst~>xy = list(dx dy)');
         code.push('  )');
         code.push('');
@@ -476,6 +476,16 @@ export function generateSkillCode(config: LayoutConfig): string {
       }
     }
   }
+  // With R180 rotation, the mosaic's physical lower-left is at (origin.x - cols*xPitch, origin.y - rows*yPitch).
+  // We place origin at (currSegX + segCols*xPitch, currentY + rows*yPitch) so LL lands at (currSegX, currentY).
+  // For the centering calculation, the physical left edge of the ROV content is at:
+  //   left_physical_x = left_cols * x_pitch
+  // And the physical center X of the ROV content is:
+  //   center_x = (left_cols + active_cols/2) * x_pitch
+  // We want center_x + targetDx = 0, so targetDx = -(left_cols + active_cols/2) * x_pitch
+  // BUT: since each mosaic origin is at (segCols*xPitch + currSegX), the actual content X range is
+  //   [currSegX, currSegX + segCols*xPitch]
+  // So the centering math below remains the same (left_cols in column units, active_cols in column units).
   const targetDx = - (left_cols + active_cols / 2.0) * config.x_pitch;
 
   // Y-axis: Find the physical Y-offset of the primary ROV block

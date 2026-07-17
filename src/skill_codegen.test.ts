@@ -281,11 +281,14 @@ describe('generateSkillCode – segment X offsets', () => {
    *   active:6 cols → x_offset = 2*2.0 = 4.0000
    *   seg_r:2 cols  → x_offset = (2+6)*2.0 = 16.0000
    */
-  it('accumulates X offsets correctly across segments', () => {
+  it('accumulates X offsets correctly across segments (R180-corrected origins)', () => {
     const code = generateSkillCode(segmentedConfig);
-    expect(code).toContain('dx = 0.0000');
-    expect(code).toContain('dx = 4.0000');
-    expect(code).toContain('dx = 16.0000');
+    // seg_l: currSegX=0, cols=2, x_pitch=2.0 → dx = 0.0000 + (2 * 2)
+    // active: currSegX=4, cols=6, x_pitch=2.0 → dx = 4.0000 + (6 * 2)
+    // seg_r: currSegX=16, cols=2, x_pitch=2.0 → dx = 16.0000 + (2 * 2)
+    expect(code).toContain('dx = 0.0000 + (2 * 2)');
+    expect(code).toContain('dx = 4.0000 + (6 * 2)');
+    expect(code).toContain('dx = 16.0000 + (2 * 2)');
   });
 
   it('generates distinct mosaic names for each segment', () => {
