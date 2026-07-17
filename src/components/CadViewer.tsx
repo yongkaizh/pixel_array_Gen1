@@ -4,21 +4,21 @@ import { Grid, HelpCircle, Eye, EyeOff, ZoomIn, ZoomOut, Maximize, Move, ArrowUp
 import { getRowCategory } from '../utils';
 
 const PALETTE = [
-  { fill: 'rgba(16, 185, 129, 0.15)', stroke: '#059669', text: '#047857' }, // Emerald
-  { fill: 'rgba(59, 130, 246, 0.15)', stroke: '#2563eb', text: '#1d4ed8' }, // Blue
-  { fill: 'rgba(245, 158, 11, 0.15)', stroke: '#d97706', text: '#b45309' }, // Amber
-  { fill: 'rgba(236, 72, 153, 0.15)', stroke: '#db2777', text: '#be185d' }, // Pink
-  { fill: 'rgba(168, 85, 247, 0.15)', stroke: '#9333ea', text: '#7e22ce' }, // Purple
-  { fill: 'rgba(20, 184, 166, 0.15)', stroke: '#0d9488', text: '#0f766e' }, // Teal
-  { fill: 'rgba(249, 115, 22, 0.15)', stroke: '#ea580c', text: '#c2410c' }, // Orange
-  { fill: 'rgba(6, 182, 212, 0.15)', stroke: '#0891b2', text: '#0e7490' }, // Cyan
-  { fill: 'rgba(99, 102, 241, 0.15)', stroke: '#4f46e5', text: '#4338ca' }, // Indigo
-  { fill: 'rgba(239, 68, 68, 0.15)', stroke: '#dc2626', text: '#b91c1c' }, // Red
-  { fill: 'rgba(132, 204, 22, 0.15)', stroke: '#65a30d', text: '#4d7c0f' }, // Lime
-  { fill: 'rgba(234, 179, 8, 0.15)', stroke: '#ca8a04', text: '#a16207' }, // Yellow
-  { fill: 'rgba(244, 63, 94, 0.15)', stroke: '#e11d48', text: '#be123c' }, // Rose
-  { fill: 'rgba(14, 165, 233, 0.15)', stroke: '#0284c7', text: '#0369a1' }, // Sky
-  { fill: 'rgba(148, 163, 184, 0.15)', stroke: '#475569', text: '#334155' }  // Slate (fallback/dummy)
+  { fill: 'rgba(16, 185, 129, 0.45)', stroke: '#059669', text: '#047857' }, // Emerald
+  { fill: 'rgba(59, 130, 246, 0.45)', stroke: '#2563eb', text: '#1d4ed8' }, // Blue
+  { fill: 'rgba(245, 158, 11, 0.45)', stroke: '#d97706', text: '#b45309' }, // Amber
+  { fill: 'rgba(236, 72, 153, 0.45)', stroke: '#db2777', text: '#be185d' }, // Pink
+  { fill: 'rgba(168, 85, 247, 0.45)', stroke: '#9333ea', text: '#7e22ce' }, // Purple
+  { fill: 'rgba(20, 184, 166, 0.45)', stroke: '#0d9488', text: '#0f766e' }, // Teal
+  { fill: 'rgba(249, 115, 22, 0.45)', stroke: '#ea580c', text: '#c2410c' }, // Orange
+  { fill: 'rgba(6, 182, 212, 0.45)', stroke: '#0891b2', text: '#0e7490' }, // Cyan
+  { fill: 'rgba(99, 102, 241, 0.45)', stroke: '#4f46e5', text: '#4338ca' }, // Indigo
+  { fill: 'rgba(239, 68, 68, 0.45)', stroke: '#dc2626', text: '#b91c1c' }, // Red
+  { fill: 'rgba(132, 204, 22, 0.45)', stroke: '#65a30d', text: '#4d7c0f' }, // Lime
+  { fill: 'rgba(234, 179, 8, 0.45)', stroke: '#ca8a04', text: '#a16207' }, // Yellow
+  { fill: 'rgba(244, 63, 94, 0.45)', stroke: '#e11d48', text: '#be123c' }, // Rose
+  { fill: 'rgba(14, 165, 233, 0.45)', stroke: '#0284c7', text: '#0369a1' }, // Sky
+  { fill: 'rgba(148, 163, 184, 0.45)', stroke: '#475569', text: '#334155' }  // Slate (fallback/dummy)
 ];
 
 // Generate a color map for all unique purposes
@@ -1104,7 +1104,7 @@ export const CadViewer = React.memo(function CadViewer({ config }: CadViewerProp
                         y={y}
                         width={w}
                         height={h}
-                        fill={isHovered ? colorInfo.fill.replace('0.15', '0.30') : colorInfo.fill}
+                        fill={isHovered ? colorInfo.fill.replace('0.45', '0.70') : colorInfo.fill}
                         stroke={isHovered ? '#ffffff' : colorInfo.stroke}
                         strokeWidth={isHovered ? 2 : Math.min(1.5, Math.max(0.2, h / 3))}
                         className="transition-all duration-100"
@@ -1138,7 +1138,7 @@ export const CadViewer = React.memo(function CadViewer({ config }: CadViewerProp
                               }}
                               onMouseEnter={() => setHoveredSegIdx(sIdx)}
                               onMouseLeave={() => setHoveredSegIdx(null)}
-                              fill={isSegHovered || (isHovered && hoveredSegIdx === null) ? segColor.fill.replace('0.15', '0.30') : segColor.fill}
+                              fill={isSegHovered || (isHovered && hoveredSegIdx === null) ? segColor.fill.replace('0.45', '0.70') : segColor.fill}
                               stroke={isSegHovered || (isHovered && hoveredSegIdx === null) ? '#ffffff' : segColor.stroke}
                               strokeWidth={isSegHovered || (isHovered && hoveredSegIdx === null) ? 2 : Math.min(1.5, Math.max(0.2, h / 3))}
                               className="transition-all duration-100"
