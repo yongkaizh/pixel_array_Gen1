@@ -320,12 +320,8 @@ export function generateSkillCode(config: LayoutConfig): string {
       code.push('  )');
       code.push('');
       code.push('  when(inst');
-      code.push('    bBox = inst~>bBox');
-      code.push('    ll = car(bBox)');
-      code.push('    x_ll = car(ll)');
-      code.push('    y_ll = cadr(ll)');
-      code.push('    dx = 0.0 - x_ll');
-      code.push('    dy = currentY - y_ll');
+      code.push('    dx = 0.0');
+      code.push('    dy = currentY');
       code.push('    inst~>xy = list(dx dy)');
       code.push('  )');
       code.push('');
@@ -419,12 +415,8 @@ export function generateSkillCode(config: LayoutConfig): string {
         code.push('  )');
         code.push('');
         code.push('  when(inst');
-        code.push('    bBox = inst~>bBox');
-        code.push('    ll = car(bBox)');
-        code.push('    x_ll = car(ll)');
-        code.push('    y_ll = cadr(ll)');
-        code.push(`    dx = ${currSegX.toFixed(4)} - x_ll`);
-        code.push('    dy = currentY - y_ll');
+        code.push(`    dx = ${currSegX.toFixed(4)}`);
+        code.push('    dy = currentY');
         code.push('    inst~>xy = list(dx dy)');
         code.push('  )');
         code.push('');
@@ -1007,12 +999,8 @@ def main():
   )
 
   when(inst
-     bBox = inst~>bBox
-     ll = car(bBox)
-     x_ll = car(ll)
-     y_ll = cadr(ll)
-     dx = 0.0 - x_ll
-     dy = currentY - y_ll
+     dx = 0.0
+     dy = currentY
      inst~>xy = list(dx dy)
   )
 

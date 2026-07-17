@@ -283,9 +283,9 @@ describe('generateSkillCode – segment X offsets', () => {
    */
   it('accumulates X offsets correctly across segments', () => {
     const code = generateSkillCode(segmentedConfig);
-    expect(code).toContain('dx = 0.0000 - x_ll');
-    expect(code).toContain('dx = 4.0000 - x_ll');
-    expect(code).toContain('dx = 16.0000 - x_ll');
+    expect(code).toContain('dx = 0.0000');
+    expect(code).toContain('dx = 4.0000');
+    expect(code).toContain('dx = 16.0000');
   });
 
   it('generates distinct mosaic names for each segment', () => {
