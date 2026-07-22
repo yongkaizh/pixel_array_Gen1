@@ -43,11 +43,11 @@ export function getDefaultLayoutConfig(): LayoutConfig {
 
 export const PRESET_CONFIGS: { id: string; name: string; description: string; config: () => LayoutConfig }[] = [
   {
-    id: 'ox02n1bl',
-    name: 'OX02N1BL_PIXTOP (1936 Cols, 2.2μm Pitch)',
+    id: 'sensor_1936',
+    name: 'Sensor Array Model 1936 (1936 Cols, 2.2μm Pitch)',
     description: 'Target sensor model with 1936 columns, 2.2μm pitch, BLC blocks, clamps, and BDTID centering.',
     config: () => ({
-      top_lib: 'OX02N1BL_PIXTOP',
+      top_lib: 'SENSOR_1936_LIB',
       top_cell: 'array_pixel',
       x_pitch: 2.2,
       y_pitch: 2.2,
