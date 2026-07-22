@@ -8,6 +8,8 @@ export function getDefaultLayoutConfig(): LayoutConfig {
     y_pitch: 2.5,
     total_cols: 2048,
     rov_purpose: 'core',
+    center_layer: 'BDTID',
+    center_purpose: 'drawing',
     rows: [
       { purpose: 'bottom', rows: 2, name: 'Bottom_Region' },
       { purpose: 'dummy', rows: 2, name: 'Dummy_Buffer_1' },
