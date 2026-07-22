@@ -28,7 +28,9 @@ export interface LayoutConfig {
   total_cols: number;
   
   rov_purpose: string;
-    rows: RowConfig[];
+  center_layer: string;
+  center_purpose: string;
+  rows: RowConfig[];
   cell_map: Record<string, CellInfo>;
 }
 

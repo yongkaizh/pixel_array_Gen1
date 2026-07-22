@@ -29,6 +29,7 @@ export function exportToExcel(config: LayoutConfig): ArrayBuffer {
     ['cellname', config.top_cell, '<-- Target cell view name', '', '', '', ''],
     ['x pitch', config.x_pitch, '<-- x direction pixel unit pitch', '', '', '', ''],
     ['y pitch', config.y_pitch, '<-- y direction pixel unit pitch', '', '', '', ''],
+    ['center layer', (config.center_layer || 'BDTID') + ' ' + (config.center_purpose || 'drawing'), '<-- Layer used to center the active ROV array', '', '', '', ''],
     ['', '', '', '', '', '', ''],
     ['--- ARRAY WIDTH ---', '', '', '', '', '', ''],
     ['col_num', '', '<-- Total number of columns', '', '', '', ''],

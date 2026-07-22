@@ -131,10 +131,25 @@ def main():
         print(f"Error parsing metadata parameters: {e}")
         sys.exit(1)
 
+    try:
+        center_layer_raw = get_parameter(tmpl, "center layer")
+        if not center_layer_raw:
+            center_layer_raw = get_parameter(tmpl, "centering layer")
+    except Exception:
+        center_layer_raw = ""
+    
+    if not center_layer_raw:
+        center_layer_raw = "BDTID drawing"
+    
+    center_parts = center_layer_raw.split()
+    center_layer = center_parts[0] if len(center_parts) > 0 else "BDTID"
+    center_purpose = center_parts[1] if len(center_parts) > 1 else "drawing"
+
     print("Library :", top_lib)
     print("Cell    :", top_cell)
     print("X Pitch :", x_pitch)
     print("Y Pitch :", y_pitch)
+    print("Center  :", f"{center_layer} {center_purpose}")
 
     # =========================================================
     # Parse col_num table
@@ -633,12 +648,50 @@ def main():
     skill.append(f"""
  printf("\\nFinding Global Array Center...\\n")
  if(maxActiveInst then
-   bBox = maxActiveInst~>bBox
-   cx = (caar(bBox) + caadr(bBox)) / 2.0
-   cy = (cadar(bBox) + cadadr(bBox)) / 2.0
-   dx = 0.0 - cx
-   dy = 0.0 - cy
-   printf("Max Active Array measured center: cx=%L cy=%L\\n" cx cy)
+   c_layer = "{center_layer}"
+   c_purp = "{center_purpose}"
+   master = dbOpenCellViewByType(maxActiveInst~>libName maxActiveInst~>cellName "layout" "maskLayout" "r")
+   layerShapes = setof(x master~>shapes (x~>layerName == c_layer && x~>purpose == c_purp))
+   if(layerShapes then
+     llx = 1e6 lly = 1e6 urx = -1e6 ury = -1e6
+     foreach(shape layerShapes
+       llx = min(llx caar(shape~>bBox))
+       lly = min(lly cadar(shape~>bBox))
+       urx = max(urx caadr(shape~>bBox))
+       ury = max(ury cadadr(shape~>bBox))
+     )
+     d_width = urx - llx
+     h_height = ury - lly
+     P_ll = list(llx lly)
+     
+     ; Transform lower-left of the shape to the first instance of the mosaic (x0, y0)
+     P_first_ll = dbTransformPoint(P_ll list(car(maxActiveInst~>xy) cadr(maxActiveInst~>xy)) maxActiveInst~>orient)
+     x0 = car(P_first_ll)
+     y0 = cadr(P_first_ll)
+     
+     ; Array parameters
+     u_dx = maxActiveInst~>uX
+     u_dy = maxActiveInst~>uY
+     u_cols = maxActiveInst~>columns
+     u_rows = maxActiveInst~>rows
+     
+     ; Formula: Center_X = x0 + (d + (n - 1) * pitch_x) / 2.0
+     ; Formula: Center_Y = y0 + (h + (m - 1) * pitch_y) / 2.0
+     cx = x0 + (d_width + (u_cols - 1) * u_dx) / 2.0
+     cy = y0 + (h_height + (u_rows - 1) * u_dy) / 2.0
+     dx = 0.0 - cx
+     dy = 0.0 - cy
+     printf("Max Active Array layer %s %s center: cx=%L cy=%L\\n" c_layer c_purp cx cy)
+     dbClose(master)
+   else
+     printf("WARNING: Could not find layer %s %s in master %s. Falling back to bounding box center.\\n" c_layer c_purp maxActiveInst~>cellName)
+     bBox = maxActiveInst~>bBox
+     cx = (caar(bBox) + caadr(bBox)) / 2.0
+     cy = (cadar(bBox) + cadadr(bBox)) / 2.0
+     dx = 0.0 - cx
+     dy = 0.0 - cy
+     dbClose(master)
+   )
  else
    dx = - ({total_cols} / 2.0) * {x_pitch}
    dy = {target_dy:.4f}

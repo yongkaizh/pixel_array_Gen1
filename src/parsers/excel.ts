@@ -244,6 +244,19 @@ export function parseExcelFile(fileBuffer: ArrayBuffer): LayoutConfig {
     throw new Error(`INVALID 'y pitch' VALUE: "${y_pitch_raw}". This must be a positive non-zero decimal value representing vertical cell pitch.`);
   }
 
+  // Parse optional center layer (fallback to BDTID drawing)
+  const centerLayerPos = findKeyword('center layer') || findKeyword('centering layer');
+  let center_layer_raw = "BDTID drawing";
+  if (centerLayerPos) {
+    const cl_val = grid[centerLayerPos[0]][centerLayerPos[1] + 1];
+    if (cl_val && cl_val.trim() !== '') {
+      center_layer_raw = cl_val.trim();
+    }
+  }
+  const center_parts = center_layer_raw.split(/\s+/);
+  const center_layer = center_parts[0] || "BDTID";
+  const center_purpose = center_parts.length > 1 ? center_parts[1] : "drawing";
+
   // Find col_num
   const colPos = findKeyword('col_num');
   if (!colPos) {
@@ -430,7 +443,9 @@ export function parseExcelFile(fileBuffer: ArrayBuffer): LayoutConfig {
     x_pitch,
     y_pitch,
     total_cols,
-        rov_purpose,
+    rov_purpose,
+    center_layer,
+    center_purpose,
     rows,
     cell_map
   };
