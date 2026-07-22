@@ -305,7 +305,7 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
             <div className="text-amber-400 font-bold uppercase mb-2">// 1. SPREADSHEET ROW DEFINITION</div><p className="text-slate-300 text-sm mb-2">In sheet <code className="text-white font-bold">format_template</code>, define row blocks. Reference your custom purpose keys for segments:
             </p>
             <div className="bg-[#2d2d2d] border border-[#444] p-2 space-y-1 rounded-lg text-sm">
-              <div><code className="text-sky-600 font-bold">rov</code> ➔ 5 rows ➔ <code className="text-emerald-600 font-bold">dummy</code>:20, <code className="text-sky-600 font-bold">active</code>:100, <code className="text-emerald-600 font-bold">dummy</code>:20</div>
+              <div><code className="text-sky-600 font-bold">Col B (Purpose)</code>: active ➔ <code className="text-emerald-600 font-bold">Col D (Left)</code>: dummy:20, idle:10 ➔ <code className="text-emerald-600 font-bold">Col E (Right)</code>: dummy:20</div>
             </div>
           </div>
 
