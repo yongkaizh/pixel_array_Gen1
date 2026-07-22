@@ -82,7 +82,7 @@ export const SkillCodeViewer = React.memo(function SkillCodeViewer({ config }: S
         </div>
 
         {/* Script code with manual SKILL-like highlight */}
-        <div className="overflow-x-auto max-h-[500px] overflow-y-auto bg-black/5 select-text">
+        <div className="overflow-x-auto max-h-[500px] overflow-y-auto bg-slate-950 select-text">
           <div className="p-5 font-mono text-sm leading-relaxed text-slate-300 min-w-max">
             {highlightedCode}
           </div>

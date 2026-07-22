@@ -77,9 +77,23 @@ export default function App() {
                   Layout Engine
                 </span>
               </div>
-              <p className="text-sm text-glass-muted font-mono uppercase tracking-wide">
+              <p className="text-xs text-glass-muted font-mono uppercase tracking-wide">
                 Integrated Silicon Layout Script &amp; Automation Compiler
               </p>
+              <div className="flex flex-wrap items-center gap-2 mt-1.5 font-mono text-[11px]">
+                <span className="bg-slate-200/60 text-slate-700 px-2 py-0.5 rounded border border-slate-300 font-bold">
+                  ROWS: {activeConfig.rows.reduce((sum, r) => sum + r.rows, 0)}
+                </span>
+                <span className="bg-slate-200/60 text-slate-700 px-2 py-0.5 rounded border border-slate-300 font-bold">
+                  COLS: {activeConfig.total_cols}
+                </span>
+                <span className="bg-sky-100 text-sky-800 px-2 py-0.5 rounded border border-sky-300 font-bold">
+                  PITCH: {activeConfig.x_pitch} &times; {activeConfig.y_pitch} μm
+                </span>
+                <span className="bg-purple-100 text-purple-800 px-2 py-0.5 rounded border border-purple-300 font-bold">
+                  CENTER: {activeConfig.center_layer || 'BDTID'} {activeConfig.center_purpose || 'drawing'}
+                </span>
+              </div>
             </div>
           </div>
 

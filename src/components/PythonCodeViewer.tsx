@@ -73,7 +73,7 @@ export const PythonCodeViewer = React.memo(function PythonCodeViewer() {
         </div>
 
         {/* Highlighted Editor Body */}
-        <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+        <div className="overflow-x-auto max-h-[400px] overflow-y-auto bg-slate-950">
           <pre className="p-5 font-mono text-sm leading-relaxed text-slate-300">
             <code>
               {highlightPythonCode(correctedCode)}
@@ -95,8 +95,8 @@ function highlightPythonCode(code: string) {
     // Check if full line is a comment
     if (line.trim().startsWith('#')) {
       return (
-        <div key={idx} className="table-row">
-          <span className="table-cell text-right pr-4 text-slate-650 select-none w-10 text-sm border-r border-slate-900/80 pr-2 mr-3">{idx + 1}</span>
+        <div key={idx} className="table-row hover:bg-slate-900/50 transition-colors">
+          <span className="table-cell text-right text-slate-500 select-none w-10 text-xs border-r border-slate-800 pr-2 mr-3 opacity-60">{idx + 1}</span>
           <span className="text-slate-400 italic pl-3">{line}</span>
         </div>
       );
@@ -133,8 +133,8 @@ function highlightPythonCode(code: string) {
     });
 
     return (
-      <div key={idx} className="table-row hover:bg-slate-100">
-        <span className="table-cell text-right pr-4 text-slate-400 select-none w-10 text-sm border-r border-slate-900/80 pr-2 mr-3">{idx + 1}</span>
+      <div key={idx} className="table-row hover:bg-slate-900/50 transition-colors">
+        <span className="table-cell text-right text-slate-500 select-none w-10 text-xs border-r border-slate-800 pr-2 mr-3 opacity-60">{idx + 1}</span>
         <span className="pl-3">
           {styledCode}
           {trailingComment && <span className="text-slate-400 italic">{trailingComment}</span>}
