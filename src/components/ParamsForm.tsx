@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { LayoutConfig, RowConfig, CellInfo, RowSegment } from '../types';
 import { Plus, Trash, Settings, RefreshCw, Layers, CheckCircle, Edit, Info, AlertCircle, Play, ArrowUp, ArrowDown } from 'lucide-react';
 import { parseSegmentsString, getLeftRightStringsFromSegments } from '../utils';
+import { PRESET_CONFIGS } from '../config/defaults';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface ParamsFormProps {
@@ -254,7 +255,7 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
 
   return (
     <div className="bg-glass-panel rounded-lg border border-glass-border p-6 flex flex-col gap-5 text-glass-text">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h3 className="font-sans font-black uppercase italic tracking-tight text-base mb-1">
             Layout Parameter Editor
@@ -262,6 +263,28 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
           <p className="text-xs text-glass-text/80">
             Edit parameters, stack rows, and configure layout rotations interactively.
           </p>
+        </div>
+
+        {/* Preset Selector Dropdown */}
+        <div className="flex items-center gap-2 bg-glass-bg p-1.5 border border-glass-border rounded-lg shrink-0">
+          <span className="text-xs font-mono font-bold uppercase text-indigo-600 px-1">Preset:</span>
+          <select
+            onChange={(e) => {
+              const preset = PRESET_CONFIGS.find(p => p.id === e.target.value);
+              if (preset) {
+                onConfigChange(preset.config());
+              }
+            }}
+            defaultValue=""
+            className="text-xs font-mono bg-white text-slate-800 border border-slate-300 rounded px-2 py-1 font-semibold focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+          >
+            <option value="" disabled>-- Quick Load Preset --</option>
+            {PRESET_CONFIGS.map(p => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
@@ -877,6 +900,38 @@ export function RowItemEditor({ row, idx, cellMap, totalCols, onUpdate, onDelete
             className={`bg-glass-panel border ${!isLeftValid ? 'border-rose-500 focus:ring-rose-500' : 'border-glass-border focus:ring-neon-cyan'} rounded-lg px-2.5 py-1 text-sm font-mono text-glass-text focus:outline-none transition`}
             title="Specify columns on the left. Format: purpose:cols or count (e.g. dummy:20 or simply 20)"
           />
+          <div className="flex flex-wrap items-center gap-1 mt-1 text-[10px] font-mono">
+            <button
+              type="button"
+              onClick={() => handleLeftChange(leftInput ? `${leftInput}, dummy:20` : 'dummy:20')}
+              className="px-1.5 py-0.5 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded font-bold transition cursor-pointer"
+            >
+              + dummy:20
+            </button>
+            <button
+              type="button"
+              onClick={() => handleLeftChange(leftInput ? `${leftInput}, idle:10` : 'idle:10')}
+              className="px-1.5 py-0.5 bg-purple-100 hover:bg-purple-200 text-purple-800 rounded font-bold transition cursor-pointer"
+            >
+              + idle:10
+            </button>
+            <button
+              type="button"
+              onClick={() => handleLeftChange(leftInput ? `${leftInput}, idle:100` : 'idle:100')}
+              className="px-1.5 py-0.5 bg-indigo-100 hover:bg-indigo-200 text-indigo-800 rounded font-bold transition cursor-pointer"
+            >
+              + idle:100
+            </button>
+            {leftInput && (
+              <button
+                type="button"
+                onClick={() => handleLeftChange('')}
+                className="px-1.5 py-0.5 bg-rose-100 hover:bg-rose-200 text-rose-700 rounded font-bold transition cursor-pointer"
+              >
+                Clear
+              </button>
+            )}
+          </div>
         </div>
         <div className="flex flex-col gap-1">
           <span className="text-sm text-glass-text/80 font-black uppercase font-mono tracking-wider flex justify-between">
@@ -891,6 +946,38 @@ export function RowItemEditor({ row, idx, cellMap, totalCols, onUpdate, onDelete
             className={`bg-glass-panel border ${!isRightValid ? 'border-rose-500 focus:ring-rose-500' : 'border-glass-border focus:ring-neon-cyan'} rounded-lg px-2.5 py-1 text-sm font-mono text-glass-text focus:outline-none transition`}
             title="Specify columns on the right. Format: purpose:cols or count (e.g. dummy:20 or simply 20)"
           />
+          <div className="flex flex-wrap items-center gap-1 mt-1 text-[10px] font-mono">
+            <button
+              type="button"
+              onClick={() => handleRightChange(rightInput ? `${rightInput}, dummy:20` : 'dummy:20')}
+              className="px-1.5 py-0.5 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded font-bold transition cursor-pointer"
+            >
+              + dummy:20
+            </button>
+            <button
+              type="button"
+              onClick={() => handleRightChange(rightInput ? `${rightInput}, idle:10` : 'idle:10')}
+              className="px-1.5 py-0.5 bg-purple-100 hover:bg-purple-200 text-purple-800 rounded font-bold transition cursor-pointer"
+            >
+              + idle:10
+            </button>
+            <button
+              type="button"
+              onClick={() => handleRightChange(rightInput ? `${rightInput}, dummy:200` : 'dummy:200')}
+              className="px-1.5 py-0.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded font-bold transition cursor-pointer"
+            >
+              + dummy:200
+            </button>
+            {rightInput && (
+              <button
+                type="button"
+                onClick={() => handleRightChange('')}
+                className="px-1.5 py-0.5 bg-rose-100 hover:bg-rose-200 text-rose-700 rounded font-bold transition cursor-pointer"
+              >
+                Clear
+              </button>
+            )}
+          </div>
         </div>
       </div>
       

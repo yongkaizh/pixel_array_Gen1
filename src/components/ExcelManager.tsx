@@ -119,13 +119,23 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
 
   return (
     <div className="bg-glass-panel rounded-lg border border-glass-border p-6 flex flex-col gap-6 text-glass-text">
-      <div className="space-y-1.5">
-        <h3 className="font-sans font-black uppercase italic tracking-tight text-base">
-          Excel Spreadsheet Integration
-        </h3>
-        <p className="text-xs text-glass-text/80 leading-relaxed">
-          Start by uploading an .xlsx layout file. The workbook feeds the same layout data that is later used to generate the final SKILL script, so the required structure stays important.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="space-y-1.5">
+          <h3 className="font-sans font-black uppercase italic tracking-tight text-base">
+            Excel Spreadsheet Integration
+          </h3>
+          <p className="text-xs text-glass-text/80 leading-relaxed">
+            Upload an .xlsx layout file or export your current active layout back to Excel.
+          </p>
+        </div>
+        <button
+          onClick={handleExportExcel}
+          className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-mono font-bold uppercase transition shadow-md hover:shadow-lg shrink-0 cursor-pointer"
+        >
+          <FileDown className="w-4 h-4" />
+          Export Layout to Excel (.xlsx)
+        </button>
+      </div>
         <div className="flex flex-wrap items-center gap-2 text-xs font-mono uppercase tracking-wider text-glass-text/80">
           <span className="bg-glass-bg px-2 py-1 border border-glass-border/20">1. Upload</span>
           <span>→</span>
@@ -133,7 +143,6 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
           <span>→</span>
           <span className="bg-glass-bg px-2 py-1 border border-glass-border/20">3. Apply</span>
         </div>
-      </div>
 
       <div className="border border-glass-border/20 bg-glass-panel p-4 space-y-2.5">
         <p className="text-xs font-mono font-black uppercase tracking-[0.2em] text-glass-text/90">
