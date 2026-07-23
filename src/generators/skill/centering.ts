@@ -106,22 +106,31 @@ export function generateCentering(builder: SkillBuilder, config: LayoutConfig): 
         ury = cadadr(local_bBox)
 
         ; ---------------------------------------------------------------
-        ; Calculate Mosaic Target Layer bBox using L, R, B, T margins
+        ; Calculate Mosaic Target Layer bBox using "Rotate First" logic
         ; ---------------------------------------------------------------
         orient = maxActiveInst~>orient
         unless(orient orient = "R0")
         
-        uBBox = master~>bBox
-        u_llx = caar(uBBox)
-        u_lly = cadar(uBBox)
-        u_urx = caadr(uBBox)
-        u_ury = cadadr(uBBox)
+        ; Do rotation first
+        trans = list(list(0.0 0.0) orient 1.0)
+        rot_uBBox = dbTransformBBox(master~>bBox trans)
+        rot_local_bBox = dbTransformBBox(local_bBox trans)
         
-        ; Margins from cell boundary to layer boundary in the master cell
-        L_margin = llx - u_llx
-        R_margin = u_urx - urx
-        B_margin = lly - u_lly
-        T_margin = u_ury - ury
+        u_llx = caar(rot_uBBox)
+        u_lly = cadar(rot_uBBox)
+        u_urx = caadr(rot_uBBox)
+        u_ury = cadadr(rot_uBBox)
+        
+        llx_rot = caar(rot_local_bBox)
+        lly_rot = cadar(rot_local_bBox)
+        urx_rot = caadr(rot_local_bBox)
+        ury_rot = cadadr(rot_local_bBox)
+        
+        ; Margins from rotated cell boundary to rotated layer boundary
+        L_margin = llx_rot - u_llx
+        R_margin = u_urx - urx_rot
+        B_margin = lly_rot - u_lly
+        T_margin = u_ury - ury_rot
         
         mBBox = maxActiveInst~>bBox
         m_llx = caar(mBBox)
@@ -129,66 +138,14 @@ export function generateCentering(builder: SkillBuilder, config: LayoutConfig): 
         m_urx = caadr(mBBox)
         m_ury = cadadr(mBBox)
         
-        ; Apply margins to the mosaic physical bounding box based on orientation
-        case( orient
-          ( "R0"
-            layer_left   = m_llx + L_margin
-            layer_right  = m_urx - R_margin
-            layer_bottom = m_lly + B_margin
-            layer_top    = m_ury - T_margin
-          )
-          ( "R90"
-            layer_left   = m_llx + B_margin
-            layer_right  = m_urx - T_margin
-            layer_bottom = m_lly + R_margin
-            layer_top    = m_ury - L_margin
-          )
-          ( "R180"
-            layer_left   = m_llx + R_margin
-            layer_right  = m_urx - L_margin
-            layer_bottom = m_lly + T_margin
-            layer_top    = m_ury - B_margin
-          )
-          ( "R270"
-            layer_left   = m_llx + T_margin
-            layer_right  = m_urx - B_margin
-            layer_bottom = m_lly + L_margin
-            layer_top    = m_ury - R_margin
-          )
-          ( "MY"
-            layer_left   = m_llx + R_margin
-            layer_right  = m_urx - L_margin
-            layer_bottom = m_lly + B_margin
-            layer_top    = m_ury - T_margin
-          )
-          ( "MX"
-            layer_left   = m_llx + L_margin
-            layer_right  = m_urx - R_margin
-            layer_bottom = m_lly + T_margin
-            layer_top    = m_ury - B_margin
-          )
-          ( "MYR90"
-            layer_left   = m_llx + B_margin
-            layer_right  = m_urx - T_margin
-            layer_bottom = m_lly + L_margin
-            layer_top    = m_ury - R_margin
-          )
-          ( "MXR90"
-            layer_left   = m_llx + T_margin
-            layer_right  = m_urx - B_margin
-            layer_bottom = m_lly + R_margin
-            layer_top    = m_ury - L_margin
-          )
-          ( t
-            layer_left   = m_llx + L_margin
-            layer_right  = m_urx - R_margin
-            layer_bottom = m_lly + B_margin
-            layer_top    = m_ury - T_margin
-          )
-        )
+        ; Apply margins directly since rotation is already accounted for
+        layer_left   = m_llx + L_margin
+        layer_right  = m_urx - R_margin
+        layer_bottom = m_lly + B_margin
+        layer_top    = m_ury - T_margin
         
         layer_bBox = list(list(layer_left layer_bottom) list(layer_right layer_top))
-        printf("  Mosaic Array target layer bBox (Margin calc): %L\\n" layer_bBox)
+        printf("  Mosaic Array target layer bBox (Rotated Margin calc): %L\\n" layer_bBox)
         
         ; Calculate final center
         cx = (layer_left + layer_right) / 2.0
