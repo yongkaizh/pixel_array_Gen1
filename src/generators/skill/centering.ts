@@ -106,67 +106,53 @@ export function generateCentering(builder: SkillBuilder, config: LayoutConfig): 
         ury = cadadr(local_bBox)
 
         ; ---------------------------------------------------------------
-        ; Calculate Mosaic Target Layer bBox using "Rotate First" logic
+        ; Calculate Mosaic Target Layer bBox EXACTLY using instance transforms
+        ; This bypasses any master~>bBox inaccuracies (e.g. text labels)
         ; ---------------------------------------------------------------
         orient = maxActiveInst~>orient
         unless(orient orient = "R0")
         
-        ; Do rotation first
-        trans = list(list(0.0 0.0) orient 1.0)
-        rot_uBBox_raw = dbTransformBBox(master~>bBox trans)
-        rot_local_bBox_raw = dbTransformBBox(local_bBox trans)
+        m_cols = maxActiveInst~>columns
+        unless(m_cols m_cols = 1)
+        m_rows = maxActiveInst~>rows
+        unless(m_rows m_rows = 1)
         
-        ; Normalize rotated master bBox to ensure strict ll and ur
-        u_llx = min(caar(rot_uBBox_raw) caadr(rot_uBBox_raw))
-        u_urx = max(caar(rot_uBBox_raw) caadr(rot_uBBox_raw))
-        u_lly = min(cadar(rot_uBBox_raw) cadadr(rot_uBBox_raw))
-        u_ury = max(cadar(rot_uBBox_raw) cadadr(rot_uBBox_raw))
+        uX = maxActiveInst~>uX
+        unless(uX uX = 0.0)
+        uY = maxActiveInst~>uY
+        unless(uY uY = 0.0)
         
-        ; Normalize rotated local layer bBox
-        llx_rot = min(caar(rot_local_bBox_raw) caadr(rot_local_bBox_raw))
-        urx_rot = max(caar(rot_local_bBox_raw) caadr(rot_local_bBox_raw))
-        lly_rot = min(cadar(rot_local_bBox_raw) cadadr(rot_local_bBox_raw))
-        ury_rot = max(cadar(rot_local_bBox_raw) cadadr(rot_local_bBox_raw))
+        xy_0 = maxActiveInst~>xy
+        xy_last = list(car(xy_0) + (m_cols - 1) * uX cadr(xy_0) + (m_rows - 1) * uY)
         
-        rot_uBBox = list(list(u_llx u_lly) list(u_urx u_ury))
-        rot_local_bBox = list(list(llx_rot lly_rot) list(urx_rot ury_rot))
+        bBox_0 = dbTransformBBox(local_bBox list(xy_0 orient 1.0))
+        bBox_last = dbTransformBBox(local_bBox list(xy_last orient 1.0))
         
-        printf("  Master bBox (rotated and normalized): %L\\n" rot_uBBox)
-        printf("  Local Layer bBox (rotated and normalized): %L\\n" rot_local_bBox)
-        
-        ; Visual margins (if layer exceeds cell boundary, margin is correctly negative)
-        L_margin = llx_rot - u_llx
-        R_margin = u_urx - urx_rot
-        B_margin = lly_rot - u_lly
-        T_margin = u_ury - ury_rot
-        
-        printf("  Margins (L R B T): %L %L %L %L\\n" L_margin R_margin B_margin T_margin)
-        
-        mBBox = maxActiveInst~>bBox
-        m_llx = caar(mBBox)
-        m_lly = cadar(mBBox)
-        m_urx = caadr(mBBox)
-        m_ury = cadadr(mBBox)
-        
-        ; Apply margins directly (rotation already handled by normalized bounding boxes)
-        layer_left   = m_llx + L_margin
-        layer_right  = m_urx - R_margin
-        layer_bottom = m_lly + B_margin
-        layer_top    = m_ury - T_margin
+        ; The global target layer bounds are the extremes of the first and last instance layer bounds!
+        layer_left   = min(caar(bBox_0) caadr(bBox_0) caar(bBox_last) caadr(bBox_last))
+        layer_right  = max(caar(bBox_0) caadr(bBox_0) caar(bBox_last) caadr(bBox_last))
+        layer_bottom = min(cadar(bBox_0) cadadr(bBox_0) cadar(bBox_last) cadadr(bBox_last))
+        layer_top    = max(cadar(bBox_0) cadadr(bBox_0) cadar(bBox_last) cadadr(bBox_last))
         
         layer_bBox = list(list(layer_left layer_bottom) list(layer_right layer_top))
-        printf("  Mosaic Array target layer bBox (Rotated Margin calc): %L\\n" layer_bBox)
+        printf("  Mosaic Array EXACT target layer bBox: %L\\n" layer_bBox)
         
-        ; Calculate final center
-        cx = (layer_left + layer_right) / 2.0
-        cy = (layer_bottom + layer_top) / 2.0
+        ; ---------------------------------------------------------------
+        ; Align the left-bottom of the layer to the ideal centered left-bottom
+        ; (Implementing user's specific alignment logic)
+        ; ---------------------------------------------------------------
+        layer_width  = layer_right - layer_left
+        layer_height = layer_top - layer_bottom
         
-        dx = 0.0 - cx
-        dy = 0.0 - cy
+        ideal_llx = 0.0 - (layer_width / 2.0)
+        ideal_lly = 0.0 - (layer_height / 2.0)
         
-        printf("  Mosaic bounds: [%L, %L] - [%L, %L] Orient: %s\\n" m_llx m_lly m_urx m_ury orient)
-        printf("  Layer center in array: cx=%L cy=%L\\n" cx cy)
-        printf("  Shift: dx=%L dy=%L\\n" dx dy)
+        dx = ideal_llx - layer_left
+        dy = ideal_lly - layer_bottom
+        
+        printf("  Layer actual left-bottom: %L, %L\\n" layer_left layer_bottom)
+        printf("  Layer ideal left-bottom for centering: %L, %L\\n" ideal_llx ideal_lly)
+        printf("  Shift required: dx=%L dy=%L\\n" dx dy)
         dbClose(master)
 
       else
