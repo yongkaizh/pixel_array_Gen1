@@ -704,30 +704,62 @@ def main():
      ury = cadadr(local_bBox)
 
      ; ---------------------------------------------------------------
-     ; 1. Find the exact bounding box of the target layer in the bottom-left unit cell
+     ; 1. Calculate the robust physical bounding box of the mosaic's target layer
+     ; We do this by evaluating the absolute placement of the 4 corner instances
      ; ---------------------------------------------------------------
      orient = maxActiveInst~>orient
      unless(orient orient = "R0")
      
-     ; dbTransformBBox applies the (0,0) instance's placement and rotation
-     bl_bBox = dbTransformBBox(local_bBox list(maxActiveInst~>xy orient 1.0))
-     layer_left   = caar(bl_bBox)
-     layer_bottom = cadar(bl_bBox)
-     
-     ; ---------------------------------------------------------------
-     ; 2. Calculate the top-right corner using the mosaic's rows, cols, and pitch
-     ; ---------------------------------------------------------------
      m_cols = maxActiveInst~>columns
      unless(m_cols m_cols = 1)
      m_rows = maxActiveInst~>rows
      unless(m_rows m_rows = 1)
      
-     layer_right  = caadr(bl_bBox) + (m_cols - 1) * {x_pitch}
-     layer_top    = cadadr(bl_bBox) + (m_rows - 1) * {y_pitch}
+     uX = maxActiveInst~>uX
+     unless(uX uX = {x_pitch})
+     uY = maxActiveInst~>uY
+     unless(uY uY = {y_pitch})
+     
+     min_lx = 1e10
+     min_ly = 1e10
+     max_rx = -1e10
+     max_ry = -1e10
+     
+     ; The 4 corner instance grid indices
+     corners = list(
+       list(0 0)
+       list(m_cols - 1 0)
+       list(0 m_rows - 1)
+       list(m_cols - 1 m_rows - 1)
+     )
+     
+     foreach(corner corners
+       col = car(corner)
+       row = cadr(corner)
+       
+       ; Calculate local placement offset of this instance in the mosaic
+       local_pt = list(col * uX row * uY)
+       
+       ; Transform local placement to absolute global placement using the mosaic's origin and orientation
+       global_pt = dbTransformPoint(local_pt list(maxActiveInst~>xy orient 1.0))
+       
+       ; Transform the master cell's target layer bBox to this instance's absolute placement
+       inst_bBox = dbTransformBBox(local_bBox list(global_pt orient 1.0))
+       
+       if(caar(inst_bBox) < min_lx then min_lx = caar(inst_bBox))
+       if(cadar(inst_bBox) < min_ly then min_ly = cadar(inst_bBox))
+       if(caadr(inst_bBox) > max_rx then max_rx = caadr(inst_bBox))
+       if(cadadr(inst_bBox) > max_ry then max_ry = cadadr(inst_bBox))
+     )
+     
+     layer_left   = min_lx
+     layer_bottom = min_ly
+     layer_right  = max_rx
+     layer_top    = max_ry
      
      ; Explicitly construct the calculated target layer bounding box
      layer_bBox = list(list(layer_left layer_bottom) list(layer_right layer_top))
-     printf("  Mosaic Array target layer bBox (from unit cell + pitch extrapolation): %L\\n" layer_bBox)
+     printf("  Mosaic Array target layer bBox (from robust 4-corner calculation): %L\\n" layer_bBox)
      
      ; Calculate final center
      cx = (layer_left + layer_right) / 2.0
