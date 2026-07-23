@@ -793,14 +793,17 @@ def main():
        )
      )
      
-     ; Calculate final center
+     ; Explicitly construct the calculated target layer bounding box
+     layer_bBox = list(list(layer_left layer_bottom) list(layer_right layer_top))
+     printf("  Mosaic Array target layer bBox (after applying B/T/R/L insets and rotation): %L\\n" layer_bBox)
+     
+     ; Calculate final center from the explicit layer_bBox
      cx = (layer_left + layer_right) / 2.0
      cy = (layer_bottom + layer_top) / 2.0
      
      dx = 0.0 - cx
      dy = 0.0 - cy
      
-     printf("  Mosaic bounds: [%L, %L] - [%L, %L] Orient: %s\\n" m_llx m_lly m_urx m_ury orient)
      printf("  Layer center in array: cx=%L cy=%L\\n" cx cy)
      printf("  Shift: dx=%L dy=%L\\n" dx dy)
      dbClose(master)
