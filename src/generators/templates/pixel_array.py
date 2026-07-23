@@ -649,62 +649,85 @@ def main():
  printf("\\nFinding Global Array Center...\\n")
  if(maxActiveInst then
    c_layer = "{center_layer}"
-   c_purp = "{center_purpose}"
-   master = dbOpenCellViewByType(maxActiveInst~>libName maxActiveInst~>cellName "layout" "maskLayout" "r")
-   layerShapes = setof(x master~>shapes (x~>layerName == c_layer && x~>purpose == c_purp))
+   c_purp  = "{center_purpose}"
+
+   ; Open the master cell of the active (ROV) mosaic
+   master = dbOpenCellViewByType(
+     maxActiveInst~>libName
+     maxActiveInst~>cellName
+     "layout" "maskLayout" "r"
+   )
+
+   layerShapes = setof(sh master~>shapes
+     (sh~>layerName == c_layer && sh~>purpose == c_purp)
+   )
+
    if(layerShapes then
-     llx = 1e6 lly = 1e6 urx = -1e6 ury = -1e6
-     foreach(shape layerShapes
-       llx = min(llx caar(shape~>bBox))
-       lly = min(lly cadar(shape~>bBox))
-       urx = max(urx caadr(shape~>bBox))
-       ury = max(ury cadadr(shape~>bBox))
+     ; Collect bounding box of all matching shapes in LOCAL (master cell) space
+     llx = 1e6  lly = 1e6  urx = -1e6  ury = -1e6
+     foreach(sh layerShapes
+       llx = min(llx caar(sh~>bBox))
+       lly = min(lly cadar(sh~>bBox))
+       urx = max(urx caadr(sh~>bBox))
+       ury = max(ury cadadr(sh~>bBox))
      )
-      ; Shape center in master (local) space
-      xc_master = (llx + urx) / 2.0
-      yc_master = (lly + ury) / 2.0
-      
-      ; Mosaic array step vectors (in parent/top-cell space) and dimensions
-      u_dx = maxActiveInst~>uX
-      u_dy = maxActiveInst~>uY
-      u_cols = maxActiveInst~>columns
-      u_rows = maxActiveInst~>rows
-      
-      ; Transform shape center from local space using the FIRST instance origin (xy, orient)
-      ; This gives the shape center in parent space for tile [0,0]
-      ix0 = car(maxActiveInst~>xy)
-      iy0 = cadr(maxActiveInst~>xy)
-      C_first = dbTransformPoint(list(xc_master yc_master) list(ix0 iy0) maxActiveInst~>orient)
-      
-      ; The LAST instance [cols-1, rows-1] has its parent-space origin offset by the step vectors
-      ; uX and uY are already in parent space, so just add them to the first origin
-      ix_last = ix0 + (u_cols - 1) * u_dx
-      iy_last = iy0 + (u_rows - 1) * u_dy
-      C_last = dbTransformPoint(list(xc_master yc_master) list(ix_last iy_last) maxActiveInst~>orient)
-      
-      ; True geometric center = midpoint of first and last tile shape centers
-      ; This is invariant to orientation (works for R0, R90, R180, MX, MY, etc.)
-      cx = (car(C_first) + car(C_last)) / 2.0
-      cy = (cadr(C_first) + cadr(C_last)) / 2.0
-      dx = 0.0 - cx
-      dy = 0.0 - cy
-      printf("Center layer [%s %s] found. cx=%L cy=%L  ->  shift dx=%L dy=%L\\n" c_layer c_purp cx cy dx dy)
-      dbClose(master)
+
+     ; Shape center in local (master cell) coordinate space
+     xc_local = (llx + urx) / 2.0
+     yc_local = (lly + ury) / 2.0
+     printf("  Layer '%s %s' local center: xc=%L yc=%L\\n" c_layer c_purp xc_local yc_local)
+
+     ; ---------------------------------------------------------------
+     ; CORRECT centering formula for R180 mosaics
+     ;
+     ; For an R180 tile with origin (ox,oy), local point (lx,ly)
+     ; maps to parent space as (ox-lx, oy-ly).
+     ;
+     ; The mosaic physical bBox = [m_llx,m_lly]-[m_urx,m_ury].
+     ;
+     ;   Left-most  shape center X  = m_llx + (cell_W - xc_local)
+     ;   Right-most shape center X  = m_urx - xc_local
+     ;   Layer center X = average  = (m_llx + m_urx + cell_W - 2*xc_local) / 2
+     ;
+     ; This is INVARIANT to whether Cadence stores uX positive or negative,
+     ; because it uses the actual physical bBox of the mosaic.
+     ; ---------------------------------------------------------------
+
+     mBBox = maxActiveInst~>bBox
+     m_llx = caar(mBBox)
+     m_lly = cadar(mBBox)
+     m_urx = caadr(mBBox)
+     m_ury = cadadr(mBBox)
+
+     cell_W = {x_pitch}
+     cell_H = {y_pitch}
+
+     cx = (m_llx + m_urx + cell_W - 2.0 * xc_local) / 2.0
+     cy = (m_lly + m_ury + cell_H - 2.0 * yc_local) / 2.0
+     dx = 0.0 - cx
+     dy = 0.0 - cy
+     printf("  Mosaic bBox: [%L,%L]-[%L,%L]\\n" m_llx m_lly m_urx m_ury)
+     printf("  Layer center in array: cx=%L cy=%L\\n" cx cy)
+     printf("  Shift: dx=%L dy=%L\\n" dx dy)
+     dbClose(master)
+
    else
-     printf("WARNING: Could not find layer %s %s in master %s. Falling back to bounding box center.\\n" c_layer c_purp maxActiveInst~>cellName)
-     bBox = maxActiveInst~>bBox
-     cx = (caar(bBox) + caadr(bBox)) / 2.0
-     cy = (cadar(bBox) + cadadr(bBox)) / 2.0
+     ; Layer not found — fall back to bBox center of the mosaic
+     printf("WARNING: Layer '%s %s' not found in '%s'. Using mosaic bBox center.\\n" c_layer c_purp maxActiveInst~>cellName)
+     mBBox = maxActiveInst~>bBox
+     cx = (caar(mBBox) + caadr(mBBox)) / 2.0
+     cy = (cadar(mBBox) + cadadr(mBBox)) / 2.0
      dx = 0.0 - cx
      dy = 0.0 - cy
      dbClose(master)
    )
  else
+   ; No active mosaic found — use pre-computed mathematical fallback
    dx = - ({total_cols} / 2.0) * {x_pitch}
    dy = {target_dy:.4f}
-   printf("Fallback mathematical center: cx=%L cy=%L\\n" 0.0 - dx 0.0 - dy)
+   printf("No active mosaic. Fallback center: cx=%L cy=%L\\n" 0.0 - dx 0.0 - dy)
  )
- printf("Move dx=%L dy=%L\\n" dx dy)
+ printf("Shifting all instances by dx=%L dy=%L\\n" dx dy)
 
  foreach(
    item
