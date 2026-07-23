@@ -60,19 +60,53 @@ export function generateCentering(builder: SkillBuilder, config: LayoutConfig): 
         "layout" "maskLayout" "r"
       )
 
-      layerShapes = setof(sh master~>shapes
-        (sh~>layerName == c_layer && sh~>purpose == c_purp)
+      ; ---------------------------------------------------------------
+      ; HIERARCHICAL LAYER BBOX EXTRACTION
+      ; 
+      ; We must find the target layer's bounding box even if it is embedded
+      ; deep inside child instances (e.g. photodiode subcells) within the master cell.
+      ; ---------------------------------------------------------------
+      unless( isCallable('PA_getHierLayerBBox)
+        procedure( PA_getHierLayerBBox(cv lName pName)
+          let((llx lly urx ury childBox shBox)
+            llx = 1e6 lly = 1e6 urx = -1e6 ury = -1e6
+            foreach(sh cv~>shapes
+              if(sh~>layerName == lName && sh~>purpose == pName then
+                shBox = sh~>bBox
+                llx = min(llx caar(shBox))
+                lly = min(lly cadar(shBox))
+                urx = max(urx caadr(shBox))
+                ury = max(ury cadadr(shBox))
+              )
+            )
+            foreach(inst cv~>instances
+              if(inst~>purpose != "dummy" then
+                childBox = PA_getHierLayerBBox(inst~>master lName pName)
+                if(childBox then
+                  childBox = dbTransformBBox(childBox inst~>transform)
+                  llx = min(llx caar(childBox))
+                  lly = min(lly cadar(childBox))
+                  urx = max(urx caadr(childBox))
+                  ury = max(ury cadadr(childBox))
+                )
+              )
+            )
+            if(llx < 1e5 then
+              list(list(llx lly) list(urx ury))
+            else
+              nil
+            )
+          )
+        )
       )
 
-      if(layerShapes then
-        ; Collect the bounding box of all matching shapes in local (master cell) space
-        llx = 1e6  lly = 1e6  urx = -1e6  ury = -1e6
-        foreach(sh layerShapes
-          llx = min(llx caar(sh~>bBox))
-          lly = min(lly cadar(sh~>bBox))
-          urx = max(urx caadr(sh~>bBox))
-          ury = max(ury cadadr(sh~>bBox))
-        )
+      local_bBox = PA_getHierLayerBBox(master c_layer c_purp)
+
+      if(local_bBox then
+        llx = caar(local_bBox)
+        lly = cadar(local_bBox)
+        urx = caadr(local_bBox)
+        ury = cadadr(local_bBox)
 
         ; Find the master cell physical bounding box
         cbBBox = master~>bBox
