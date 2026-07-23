@@ -30,6 +30,19 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
 
   const [confirmDeletePurposeKey, setConfirmDeletePurposeKey] = useState<string | null>(null);
 
+  // Local edit state for center layer inputs to prevent mid-edit value snap-back
+  const [centerLayerInput, setCenterLayerInput] = useState<string>(config.center_layer ?? 'BDTID');
+  const [centerPurposeInput, setCenterPurposeInput] = useState<string>(config.center_purpose ?? 'drawing');
+
+  // Sync local state when external config changes (e.g. preset load or Excel upload)
+  React.useEffect(() => {
+    setCenterLayerInput(config.center_layer ?? 'BDTID');
+  }, [config.center_layer]);
+
+  React.useEffect(() => {
+    setCenterPurposeInput(config.center_purpose ?? 'drawing');
+  }, [config.center_purpose]);
+
   const updateGlobal = (key: keyof LayoutConfig, value: any) => {
     onConfigChange({
       ...config,
@@ -389,13 +402,15 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
               ))}
             </select>
           </div>
-
           <div className="space-y-1.5">
             <label className="text-xs font-mono font-black text-glass-text/80 uppercase tracking-widest">Center Layer Name</label>
             <input
               type="text"
-              value={config.center_layer ?? 'BDTID'}
-              onChange={(e) => updateGlobal('center_layer', e.target.value)}
+              value={centerLayerInput}
+              onChange={(e) => {
+                setCenterLayerInput(e.target.value);
+                updateGlobal('center_layer', e.target.value);
+              }}
               placeholder="e.g. BDTID"
               className="w-full glass-input rounded-lg px-3.5 py-2 text-xs font-mono focus:ring-1 focus:ring-neon-cyan focus:border-neon-cyan transition-all"
             />
@@ -405,8 +420,11 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
             <label className="text-xs font-mono font-black text-glass-text/80 uppercase tracking-widest">Center Layer Purpose</label>
             <input
               type="text"
-              value={config.center_purpose ?? 'drawing'}
-              onChange={(e) => updateGlobal('center_purpose', e.target.value)}
+              value={centerPurposeInput}
+              onChange={(e) => {
+                setCenterPurposeInput(e.target.value);
+                updateGlobal('center_purpose', e.target.value);
+              }}
               placeholder="e.g. drawing"
               className="w-full glass-input rounded-lg px-3.5 py-2 text-xs font-mono focus:ring-1 focus:ring-neon-cyan focus:border-neon-cyan transition-all"
             />

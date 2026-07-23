@@ -660,33 +660,36 @@ def main():
        urx = max(urx caadr(shape~>bBox))
        ury = max(ury cadadr(shape~>bBox))
      )
-     ; Find bounding box of the shape in the master cell
-     xc_master = (llx + urx) / 2.0
-     yc_master = (lly + ury) / 2.0
-     
-     ; Array parameters
-     u_dx = maxActiveInst~>uX
-     u_dy = maxActiveInst~>uY
-     u_cols = maxActiveInst~>columns
-     u_rows = maxActiveInst~>rows
-     
-     ; Shape center of the first instance (col 0, row 0) mapped to parent
-     C_first = dbTransformPoint(list(xc_master yc_master) list(car(maxActiveInst~>xy) cadr(maxActiveInst~>xy)) maxActiveInst~>orient)
-     
-     ; Shape center of the last instance (col n-1, row m-1) in local mosaic space
-     x_last_local = xc_master + (u_cols - 1) * u_dx
-     y_last_local = yc_master + (u_rows - 1) * u_dy
-     
-     ; Shape center of the last instance mapped to parent
-     C_last = dbTransformPoint(list(x_last_local y_last_local) list(car(maxActiveInst~>xy) cadr(maxActiveInst~>xy)) maxActiveInst~>orient)
-     
-     ; True geometric center of the layer in the array is the midpoint
-     cx = (car(C_first) + car(C_last)) / 2.0
-     cy = (cadr(C_first) + cadr(C_last)) / 2.0
-     dx = 0.0 - cx
-     dy = 0.0 - cy
-     printf("Max Active Array layer %s %s center: cx=%L cy=%L\\n" c_layer c_purp cx cy)
-     dbClose(master)
+      ; Shape center in master (local) space
+      xc_master = (llx + urx) / 2.0
+      yc_master = (lly + ury) / 2.0
+      
+      ; Mosaic array step vectors (in parent/top-cell space) and dimensions
+      u_dx = maxActiveInst~>uX
+      u_dy = maxActiveInst~>uY
+      u_cols = maxActiveInst~>columns
+      u_rows = maxActiveInst~>rows
+      
+      ; Transform shape center from local space using the FIRST instance origin (xy, orient)
+      ; This gives the shape center in parent space for tile [0,0]
+      ix0 = car(maxActiveInst~>xy)
+      iy0 = cadr(maxActiveInst~>xy)
+      C_first = dbTransformPoint(list(xc_master yc_master) list(ix0 iy0) maxActiveInst~>orient)
+      
+      ; The LAST instance [cols-1, rows-1] has its parent-space origin offset by the step vectors
+      ; uX and uY are already in parent space, so just add them to the first origin
+      ix_last = ix0 + (u_cols - 1) * u_dx
+      iy_last = iy0 + (u_rows - 1) * u_dy
+      C_last = dbTransformPoint(list(xc_master yc_master) list(ix_last iy_last) maxActiveInst~>orient)
+      
+      ; True geometric center = midpoint of first and last tile shape centers
+      ; This is invariant to orientation (works for R0, R90, R180, MX, MY, etc.)
+      cx = (car(C_first) + car(C_last)) / 2.0
+      cy = (cadr(C_first) + cadr(C_last)) / 2.0
+      dx = 0.0 - cx
+      dy = 0.0 - cy
+      printf("Center layer [%s %s] found. cx=%L cy=%L  ->  shift dx=%L dy=%L\\n" c_layer c_purp cx cy dx dy)
+      dbClose(master)
    else
      printf("WARNING: Could not find layer %s %s in master %s. Falling back to bounding box center.\\n" c_layer c_purp maxActiveInst~>cellName)
      bBox = maxActiveInst~>bBox
