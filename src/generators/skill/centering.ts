@@ -127,9 +127,50 @@ export function generateCentering(builder: SkillBuilder, config: LayoutConfig): 
         transform_0 = list(list(gx gy) orient 1.0)
         bBox_0 = dbTransformBBox(local_bBox transform_0)
         
+        ; Calculate step vectors for the (cols-1, rows-1) mosaic cell, respecting grid rotation!
+        col_step = (cols - 1) * uX
+        row_step = (rows - 1) * uY
+        
+        case(orient
+          ("R0"
+            gx_end = gx + col_step
+            gy_end = gy + row_step
+          )
+          ("R90"
+            gx_end = gx - row_step
+            gy_end = gy + col_step
+          )
+          ("R180"
+            gx_end = gx - col_step
+            gy_end = gy - row_step
+          )
+          ("R270"
+            gx_end = gx + row_step
+            gy_end = gy - col_step
+          )
+          ("MY"
+            gx_end = gx - col_step
+            gy_end = gy + row_step
+          )
+          ("MX"
+            gx_end = gx + col_step
+            gy_end = gy - row_step
+          )
+          ("MYR90"
+            gx_end = gx - row_step
+            gy_end = gy - col_step
+          )
+          ("MXR90"
+            gx_end = gx + row_step
+            gy_end = gy + col_step
+          )
+          (t
+            gx_end = gx + col_step
+            gy_end = gy + row_step
+          )
+        )
+        
         ; Project the exact layer bBox to the last cell (cols-1, rows-1)
-        gx_end = gx + (cols - 1) * uX
-        gy_end = gy + (rows - 1) * uY
         transform_end = list(list(gx_end gy_end) orient 1.0)
         bBox_end = dbTransformBBox(local_bBox transform_end)
         
