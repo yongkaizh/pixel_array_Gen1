@@ -105,7 +105,7 @@ export function generateCentering(builder: SkillBuilder, config: LayoutConfig): 
         urx = caadr(local_bBox)
         ury = cadadr(local_bBox)
 
-        ; Find the master cell physical bounding box (prefer prBoundary if present)
+        ; Find the master cell physical origin (prefer prBoundary lower-left if present)
         cbBBox = nil
         if(master~>prBoundary then
           cbBBox = master~>prBoundary~>bBox
@@ -114,17 +114,19 @@ export function generateCentering(builder: SkillBuilder, config: LayoutConfig): 
         )
         c_llx = caar(cbBBox)
         c_lly = cadar(cbBBox)
-        c_urx = caadr(cbBBox)
-        c_ury = cadadr(cbBBox)
         
-        ; Calculate the 4 insets of the target layer relative to the master cell bounds
+        ; Derive true reference bounding box from exact grid pitch (x_pitch / y_pitch)
+        c_urx = c_llx + ${x_pitch}
+        c_ury = c_lly + ${y_pitch}
+        
+        ; Calculate the 4 insets of the target layer relative to the pitch reference box
         inset_left   = llx - c_llx
         inset_bottom = lly - c_lly
         inset_right  = c_urx - urx
         inset_top    = c_ury - ury
         
-        printf("  Master Cell bBox: [%L, %L] - [%L, %L]\\n" c_llx c_lly c_urx c_ury)
-        printf("  Layer Insets: L=%L B=%L R=%L T=%L\\n" inset_left inset_bottom inset_right inset_top)
+        printf("  Master Cell Origin: [%L, %L] Pitch Ref Box: [%L, %L] - [%L, %L]\\n" c_llx c_lly c_llx c_lly c_urx c_ury)
+        printf("  Pitch Insets: L=%L B=%L R=%L T=%L\\n" inset_left inset_bottom inset_right inset_top)
 
         ; ---------------------------------------------------------------
         ; ORIENTATION-AWARE MOSAIC INSET ALGORITHM
