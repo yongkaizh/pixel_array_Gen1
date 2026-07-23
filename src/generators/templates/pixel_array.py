@@ -704,12 +704,10 @@ def main():
      ury = cadadr(local_bBox)
 
      ; ---------------------------------------------------------------
-     ; PRECISE BBOX PROJECTION ALGORITHM
+     ; NATIVE ARRAY LAYER BBOX TRANSFORM ALGORITHM
      ;
-     ; We completely bypass maxActiveInst~>bBox because Cadence's
-     ; mosaic bounding boxes are often bloated by grid snapping or
-     ; invisible cell properties. Instead, we mathematically project the 
-     ; exact layer bounds across the array pitch to get perfect bounds.
+     ; Construct unrotated array layer bBox at grid origin (0,0),
+     ; then transform it using Cadence's native dbTransformBBox.
      ; ---------------------------------------------------------------
      gx = car(maxActiveInst~>xy)
      gy = cadr(maxActiveInst~>xy)
@@ -720,66 +718,23 @@ def main():
      
      orient = maxActiveInst~>orient
      unless(orient orient = "R0")
+
+     ; Calculate unrotated total array layer bounds at grid origin
+     grid_llx = min(llx llx + (cols - 1) * uX)
+     grid_urx = max(urx urx + (cols - 1) * uX)
+     grid_lly = min(lly lly + (rows - 1) * uY)
+     grid_ury = max(ury ury + (rows - 1) * uY)
      
-     ; Project the exact layer bBox to the first cell (0,0)
-     transform_0 = list(list(gx gy) orient 1.0)
-     bBox_0 = dbTransformBBox(local_bBox transform_0)
+     grid_layer_bBox = list(list(grid_llx grid_lly) list(grid_urx grid_ury))
+
+     ; Transform the entire array layer bBox to top cellview coordinates
+     layer_bBox = dbTransformBBox(grid_layer_bBox list(list(gx gy) orient 1.0))
      
-     ; Calculate step vectors for the (cols-1, rows-1) mosaic cell, respecting grid rotation!
-     col_step = (cols - 1) * uX
-     row_step = (rows - 1) * uY
+     layer_left   = caar(layer_bBox)
+     layer_bottom = cadar(layer_bBox)
+     layer_right  = caadr(layer_bBox)
+     layer_top    = cadadr(layer_bBox)
      
-     case(orient
-       ("R0"
-         gx_end = gx + col_step
-         gy_end = gy + row_step
-       )
-       ("R90"
-         gx_end = gx - row_step
-         gy_end = gy + col_step
-       )
-       ("R180"
-         gx_end = gx - col_step
-         gy_end = gy - row_step
-       )
-       ("R270"
-         gx_end = gx + row_step
-         gy_end = gy - col_step
-       )
-       ("MY"
-         gx_end = gx - col_step
-         gy_end = gy + row_step
-       )
-       ("MX"
-         gx_end = gx + col_step
-         gy_end = gy - row_step
-       )
-       ("MYR90"
-         gx_end = gx - row_step
-         gy_end = gy - col_step
-       )
-       ("MXR90"
-         gx_end = gx + row_step
-         gy_end = gy + col_step
-       )
-       (t
-         gx_end = gx + col_step
-         gy_end = gy + row_step
-       )
-     )
-     
-     ; Project the exact layer bBox to the last cell (cols-1, rows-1)
-     transform_end = list(list(gx_end gy_end) orient 1.0)
-     bBox_end = dbTransformBBox(local_bBox transform_end)
-     
-     ; The absolute precise bounds of the target layer across the array
-     layer_left   = min(caar(bBox_0) caar(bBox_end))
-     layer_bottom = min(cadar(bBox_0) cadar(bBox_end))
-     layer_right  = max(caadr(bBox_0) caadr(bBox_end))
-     layer_top    = max(cadadr(bBox_0) cadadr(bBox_end))
-     
-     ; Explicitly construct the calculated target layer bounding box
-     layer_bBox = list(list(layer_left layer_bottom) list(layer_right layer_top))
      printf("  Mosaic Array precise target layer bBox: %L\\n" layer_bBox)
      
      ; Calculate final center from the explicit layer_bBox
