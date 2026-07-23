@@ -86,23 +86,31 @@ export function generateCentering(builder: SkillBuilder, config: LayoutConfig): 
         ; maps to parent space as (ox-lx, oy-ly).
         ;
         ; Physical bBox of the mosaic = [m_llx,m_lly]-[m_urx,m_ury].
+        ; Physical bBox of the master cell = [c_llx,c_lly]-[c_urx,c_ury].
         ;
-        ;   Left-most  shape center X  = m_llx + (pitch_X - xc_local)
-        ;   Right-most shape center X  = m_urx - xc_local
-        ;   Layer center X = average  = (m_llx + m_urx + pitch_X - 2*xc_local) / 2
+        ;   Left-most physical edge  m_llx = X_min - c_urx
+        ;   Right-most physical edge m_urx = X_max - c_llx
+        ;   => X_min = m_llx + c_urx
+        ;   => X_max = m_urx + c_llx
+        ;   Grid center X = (X_min + X_max) / 2 = (m_llx + m_urx + c_llx + c_urx) / 2
+        ;   Layer center X = Grid center X - xc_local
         ;
-        ; Invariant to sign of inst~>uX — works for all mosaic configurations.
+        ; Invariant to sign of inst~>uX — works for all mosaic configurations,
+        ; and does NOT assume cell bounding box equals pitch!
         ; ---------------------------------------------------------------
         mBBox   = maxActiveInst~>bBox
         m_llx   = caar(mBBox)
         m_lly   = cadar(mBBox)
         m_urx   = caadr(mBBox)
         m_ury   = cadadr(mBBox)
-        pitch_X = ${x_pitch}
-        pitch_Y = ${y_pitch}
+        
+        c_llx   = caar(master~>bBox)
+        c_lly   = cadar(master~>bBox)
+        c_urx   = caadr(master~>bBox)
+        c_ury   = cadadr(master~>bBox)
 
-        cx = (m_llx + m_urx + pitch_X - 2.0 * xc_local) / 2.0
-        cy = (m_lly + m_ury + pitch_Y - 2.0 * yc_local) / 2.0
+        cx = (m_llx + m_urx + c_llx + c_urx) / 2.0 - xc_local
+        cy = (m_lly + m_ury + c_lly + c_ury) / 2.0 - yc_local
         dx = 0.0 - cx
         dy = 0.0 - cy
         printf("  Mosaic bBox: [%L,%L]-[%L,%L]\\n" m_llx m_lly m_urx m_ury)
