@@ -659,156 +659,85 @@ def main():
    )
 
    ; ---------------------------------------------------------------
-   ; HIERARCHICAL LAYER BBOX EXTRACTION
+   ; LAYER BBOX EXTRACTION via dbShapeQuery
    ; 
-   ; We must find the target layer's bounding box even if it is embedded
-   ; deep inside child instances (e.g. photodiode subcells) within the master cell.
+   ; We use Cadence's native dbShapeQuery to rapidly find all shapes
+   ; on the target layer in the master cell up to 32 levels deep.
    ; ---------------------------------------------------------------
-   unless( isCallable('PA_getHierLayerBBox)
-     procedure( PA_getHierLayerBBox(cv lName pName)
-       let((llx lly urx ury childBox shBox)
-         llx = 1e6 lly = 1e6 urx = -1e6 ury = -1e6
-         foreach(sh cv~>shapes
-           if(sh~>layerName == lName && sh~>purpose == pName then
-             shBox = sh~>bBox
-             llx = min(llx caar(shBox))
-             lly = min(lly cadar(shBox))
-             urx = max(urx caadr(shBox))
-             ury = max(ury cadadr(shBox))
-           )
-         )
-         foreach(inst cv~>instances
-           if(inst~>purpose != "dummy" then
-             childBox = PA_getHierLayerBBox(inst~>master lName pName)
-             if(childBox then
-               childBox = dbTransformBBox(childBox inst~>transform)
-               llx = min(llx caar(childBox))
-               lly = min(lly cadar(childBox))
-               urx = max(urx caadr(childBox))
-               ury = max(ury cadadr(childBox))
-             )
-           )
-         )
-         if(llx < 1e5 then
-           list(list(llx lly) list(urx ury))
-         else
-           nil
+   shapes = dbShapeQuery(master list(c_layer c_purp) master~>bBox 0 32)
+   llx = 1e6 lly = 1e6 urx = -1e6 ury = -1e6
+   
+   foreach(path shapes
+     if(listp(path) then
+       sh = car(last(path))
+       shBox = sh~>bBox
+       ; Safely transform the shape's local bBox up the hierarchy to the master cell
+       foreach(item reverse(path)
+         if(item~>objType == "inst" then
+           shBox = dbTransformBBox(shBox item~>transform)
          )
        )
+     else
+       shBox = path~>bBox
+     )
+     
+     if(shBox then
+       llx = min(llx caar(shBox))
+       lly = min(lly cadar(shBox))
+       urx = max(urx caadr(shBox))
+       ury = max(ury cadadr(shBox))
      )
    )
-
-   local_bBox = PA_getHierLayerBBox(master c_layer c_purp)
+   
+   local_bBox = nil
+   if(llx < 1e5 then
+     local_bBox = list(list(llx lly) list(urx ury))
+   )
 
    if(local_bBox then
-     printf("  SUCCESS: Found target layer '%s %s' hierarchical bBox: %L\\n" c_layer c_purp local_bBox)
-     llx = caar(local_bBox)
-     lly = cadar(local_bBox)
-     urx = caadr(local_bBox)
-     ury = cadadr(local_bBox)
-
-     ; Find the master cell physical bounding box
-     cbBBox = master~>bBox
-     c_llx = caar(cbBBox)
-     c_lly = cadar(cbBBox)
-     c_urx = caadr(cbBBox)
-     c_ury = cadadr(cbBBox)
+     printf("  SUCCESS: Found target layer '%s %s' bBox via dbShapeQuery: %L\\n" c_layer c_purp local_bBox)
      
-     ; Calculate the 4 insets of the target layer relative to the master cell bounds
-     inset_left   = llx - c_llx
-     inset_bottom = lly - c_lly
-     inset_right  = c_urx - urx
-     inset_top    = c_ury - ury
-     
-     printf("  Master Cell bBox: [%L, %L] - [%L, %L]\\n" c_llx c_lly c_urx c_ury)
-     printf("  Layer Insets: L=%L B=%L R=%L T=%L\\n" inset_left inset_bottom inset_right inset_top)
-
      ; ---------------------------------------------------------------
-     ; ORIENTATION-AWARE MOSAIC INSET ALGORITHM
+     ; NATIVE CELLVIEW BBOX TRANSFER ALGORITHM
      ;
-     ; To perfectly find the target layer bounding box across the entire mosaic,
-     ; we take the physical bounding box of the entire mosaic instance and 
-     ; mathematically inset it by the exact offsets calculated from the master cell.
-     ; 
-     ; We use a case switch on the mosaic orientation to accurately map the master
-     ; cell's Left/Right/Bottom/Top insets to the mosaic's physical edges!
+     ; We calculate the center by transferring the layer's local bBox
+     ; directly into the current (top-level) cellview using Cadence's
+     ; native geometric transformation engine (dbTransformBBox).
+     ;
+     ; This perfectly ignores skewed physical mosaic bounding boxes.
      ; ---------------------------------------------------------------
-     mBBox = maxActiveInst~>bBox
-     m_llx = caar(mBBox)
-     m_lly = cadar(mBBox)
-     m_urx = caadr(mBBox)
-     m_ury = cadadr(mBBox)
-     
+     gx = car(maxActiveInst~>xy)
+     gy = cadr(maxActiveInst~>xy)
+     cols = maxActiveInst~>columns
+     rows = maxActiveInst~>rows
+     uX = maxActiveInst~>uX
+     uY = maxActiveInst~>uY
      orient = maxActiveInst~>orient
      unless(orient orient = "R0")
      
-     ; Map insets to the mosaic bounds based on orientation
-     case(orient
-       ("R0"
-         layer_left   = m_llx + inset_left
-         layer_right  = m_urx - inset_right
-         layer_bottom = m_lly + inset_bottom
-         layer_top    = m_ury - inset_top
-       )
-       ("R90"
-         layer_left   = m_llx + inset_top
-         layer_right  = m_urx - inset_bottom
-         layer_bottom = m_lly + inset_left
-         layer_top    = m_ury - inset_right
-       )
-       ("R180"
-         layer_left   = m_llx + inset_right
-         layer_right  = m_urx - inset_left
-         layer_bottom = m_lly + inset_top
-         layer_top    = m_ury - inset_bottom
-       )
-       ("R270"
-         layer_left   = m_llx + inset_bottom
-         layer_right  = m_urx - inset_top
-         layer_bottom = m_lly + inset_right
-         layer_top    = m_ury - inset_left
-       )
-       ("MY"
-         layer_left   = m_llx + inset_right
-         layer_right  = m_urx - inset_left
-         layer_bottom = m_lly + inset_bottom
-         layer_top    = m_ury - inset_top
-       )
-       ("MX"
-         layer_left   = m_llx + inset_left
-         layer_right  = m_urx - inset_right
-         layer_bottom = m_lly + inset_top
-         layer_top    = m_ury - inset_bottom
-       )
-       ("MYR90"
-         layer_left   = m_llx + inset_top
-         layer_right  = m_urx - inset_bottom
-         layer_bottom = m_lly + inset_right
-         layer_top    = m_ury - inset_left
-       )
-       ("MXR90"
-         layer_left   = m_llx + inset_bottom
-         layer_right  = m_urx - inset_top
-         layer_bottom = m_lly + inset_left
-         layer_top    = m_ury - inset_right
-       )
-       (t
-         printf("WARNING: Unknown orientation %s, assuming R0\\n" orient)
-         layer_left   = m_llx + inset_left
-         layer_right  = m_urx - inset_right
-         layer_bottom = m_lly + inset_bottom
-         layer_top    = m_ury - inset_top
-       )
-     )
+     ; Transform layer bBox for the (0,0) mosaic cell
+     transform_0 = list(list(gx gy) orient 1.0)
+     bBox_0 = dbTransformBBox(local_bBox transform_0)
      
-     ; Calculate final center
-     cx = (layer_left + layer_right) / 2.0
-     cy = (layer_bottom + layer_top) / 2.0
+     ; Transform layer bBox for the (cols-1, rows-1) mosaic cell
+     gx_end = gx + (cols - 1) * uX
+     gy_end = gy + (rows - 1) * uY
+     transform_end = list(list(gx_end gy_end) orient 1.0)
+     bBox_end = dbTransformBBox(local_bBox transform_end)
+     
+     ; Determine the absolute total bounds of the layer in the top cell
+     global_llx = min(caar(bBox_0) caar(bBox_end))
+     global_lly = min(cadar(bBox_0) cadar(bBox_end))
+     global_urx = max(caadr(bBox_0) caadr(bBox_end))
+     global_ury = max(cadadr(bBox_0) cadadr(bBox_end))
+     
+     cx = (global_llx + global_urx) / 2.0
+     cy = (global_lly + global_ury) / 2.0
      
      dx = 0.0 - cx
      dy = 0.0 - cy
      
-     printf("  Mosaic bounds: [%L, %L] - [%L, %L] Orient: %s\\n" m_llx m_lly m_urx m_ury orient)
+     printf("  Mosaic Array target layer transferred bounds: [%L, %L] - [%L, %L]\\n" global_llx global_lly global_urx global_ury)
      printf("  Layer center in array: cx=%L cy=%L\\n" cx cy)
      printf("  Shift: dx=%L dy=%L\\n" dx dy)
      dbClose(master)
