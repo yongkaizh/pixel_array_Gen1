@@ -105,81 +105,104 @@ export function generateCentering(builder: SkillBuilder, config: LayoutConfig): 
         urx = caadr(local_bBox)
         ury = cadadr(local_bBox)
 
+        ; Find the master cell physical bounding box (prefer prBoundary if present)
+        cbBBox = nil
+        if(master~>prBoundary then
+          cbBBox = master~>prBoundary~>bBox
+        else
+          cbBBox = master~>bBox
+        )
+        c_llx = caar(cbBBox)
+        c_lly = cadar(cbBBox)
+        c_urx = caadr(cbBBox)
+        c_ury = cadadr(cbBBox)
+        
+        ; Calculate the 4 insets of the target layer relative to the master cell bounds
+        inset_left   = llx - c_llx
+        inset_bottom = lly - c_lly
+        inset_right  = c_urx - urx
+        inset_top    = c_ury - ury
+        
+        printf("  Master Cell bBox: [%L, %L] - [%L, %L]\\n" c_llx c_lly c_urx c_ury)
+        printf("  Layer Insets: L=%L B=%L R=%L T=%L\\n" inset_left inset_bottom inset_right inset_top)
+
         ; ---------------------------------------------------------------
-        ; PURE GRID TRANSFORM ALGORITHM (INDEPENDENT OF MOSAIC BBOX)
+        ; ORIENTATION-AWARE MOSAIC INSET ALGORITHM
         ;
-        ; Find target layer bBox in cell (0,0) (bBox_0) and cell (cols-1, rows-1) (bBox_end)
-        ; using grid pitch, cols, rows, and orient, then compute the big center layer bBox.
+        ; We take the physical bounding box of the mosaic instance and mathematically
+        ; inset it by the exact offsets calculated from the master cell.
         ; ---------------------------------------------------------------
-        gx = car(maxActiveInst~>xy)
-        gy = cadr(maxActiveInst~>xy)
-        cols = maxActiveInst~>columns
-        rows = maxActiveInst~>rows
-        uX = maxActiveInst~>uX
-        uY = maxActiveInst~>uY
+        mBBox = maxActiveInst~>bBox
+        m_llx = caar(mBBox)
+        m_lly = cadar(mBBox)
+        m_urx = caadr(mBBox)
+        m_ury = cadadr(mBBox)
         
         orient = maxActiveInst~>orient
         unless(orient orient = "R0")
         
-        ; Transform layer bBox for cell (0,0)
-        transform_0 = list(list(gx gy) orient 1.0)
-        bBox_0 = dbTransformBBox(local_bBox transform_0)
-        
-        ; Calculate opposite corner cell (cols-1, rows-1) position, respecting grid orientation
-        col_step = (cols - 1) * uX
-        row_step = (rows - 1) * uY
-        
+        ; Map insets to the mosaic bounds based on orientation
         case(orient
           ("R0"
-            gx_end = gx + col_step
-            gy_end = gy + row_step
+            layer_left   = m_llx + inset_left
+            layer_right  = m_urx - inset_right
+            layer_bottom = m_lly + inset_bottom
+            layer_top    = m_ury - inset_top
           )
           ("R90"
-            gx_end = gx - row_step
-            gy_end = gy + col_step
+            layer_left   = m_llx + inset_top
+            layer_right  = m_urx - inset_bottom
+            layer_bottom = m_lly + inset_left
+            layer_top    = m_ury - inset_right
           )
           ("R180"
-            gx_end = gx - col_step
-            gy_end = gy - row_step
+            layer_left   = m_llx + inset_right
+            layer_right  = m_urx - inset_left
+            layer_bottom = m_lly + inset_top
+            layer_top    = m_ury - inset_bottom
           )
           ("R270"
-            gx_end = gx + row_step
-            gy_end = gy - col_step
+            layer_left   = m_llx + inset_bottom
+            layer_right  = m_urx - inset_top
+            layer_bottom = m_lly + inset_right
+            layer_top    = m_ury - inset_left
           )
           ("MY"
-            gx_end = gx - col_step
-            gy_end = gy + row_step
+            layer_left   = m_llx + inset_right
+            layer_right  = m_urx - inset_left
+            layer_bottom = m_lly + inset_bottom
+            layer_top    = m_ury - inset_top
           )
           ("MX"
-            gx_end = gx + col_step
-            gy_end = gy - row_step
+            layer_left   = m_llx + inset_left
+            layer_right  = m_urx - inset_right
+            layer_bottom = m_lly + inset_top
+            layer_top    = m_ury - inset_bottom
           )
           ("MYR90"
-            gx_end = gx - row_step
-            gy_end = gy - col_step
+            layer_left   = m_llx + inset_top
+            layer_right  = m_urx - inset_bottom
+            layer_bottom = m_lly + inset_right
+            layer_top    = m_ury - inset_left
           )
           ("MXR90"
-            gx_end = gx + row_step
-            gy_end = gy + col_step
+            layer_left   = m_llx + inset_bottom
+            layer_right  = m_urx - inset_top
+            layer_bottom = m_lly + inset_left
+            layer_top    = m_ury - inset_right
           )
           (t
-            gx_end = gx + col_step
-            gy_end = gy + row_step
+            printf("WARNING: Unknown orientation %s, assuming R0\\n" orient)
+            layer_left   = m_llx + inset_left
+            layer_right  = m_urx - inset_right
+            layer_bottom = m_lly + inset_bottom
+            layer_top    = m_ury - inset_top
           )
         )
         
-        ; Transform layer bBox for cell (cols-1, rows-1)
-        transform_end = list(list(gx_end gy_end) orient 1.0)
-        bBox_end = dbTransformBBox(local_bBox transform_end)
-        
-        ; Compute exact big center layer bBox across entire active array
-        layer_left   = min(caar(bBox_0) caar(bBox_end))
-        layer_bottom = min(cadar(bBox_0) cadar(bBox_end))
-        layer_right  = max(caadr(bBox_0) caadr(bBox_end))
-        layer_top    = max(cadadr(bBox_0) cadadr(bBox_end))
-        
+        ; Explicitly construct the calculated target layer bounding box
         layer_bBox = list(list(layer_left layer_bottom) list(layer_right layer_top))
-        printf("  Big Array center layer bBox: %L\\n" layer_bBox)
+        printf("  Mosaic Array target layer bBox (after applying B/T/R/L insets and rotation): %L\\n" layer_bBox)
         
         ; Calculate final center
         cx = (layer_left + layer_right) / 2.0
@@ -188,7 +211,8 @@ export function generateCentering(builder: SkillBuilder, config: LayoutConfig): 
         dx = 0.0 - cx
         dy = 0.0 - cy
         
-        printf("  Big layer center in array: cx=%L cy=%L\\n" cx cy)
+        printf("  Mosaic bounds: [%L, %L] - [%L, %L] Orient: %s\\n" m_llx m_lly m_urx m_ury orient)
+        printf("  Layer center in array: cx=%L cy=%L\\n" cx cy)
         printf("  Shift: dx=%L dy=%L\\n" dx dy)
         dbClose(master)
 
@@ -211,7 +235,7 @@ export function generateCentering(builder: SkillBuilder, config: LayoutConfig): 
       printf("Fallback mathematical center: cx=%L cy=%L\\n" 0.0 - dx 0.0 - dy)
     )
 
-    printf("Initial shift: dx=%L dy=%L\\n" dx dy)
+    printf("Shifting all instances by dx=%L dy=%L\\n" dx dy)
 
     foreach(item allInsts
       inst = car(item)
@@ -219,77 +243,15 @@ export function generateCentering(builder: SkillBuilder, config: LayoutConfig): 
     )
 
     ; ---------------------------------------------------------------
-    ; SECONDARY VERIFICATION & FINE-TUNING CONVERGENCE LOOP
-    ; Re-reads active mosaic xy after shift and applies fine-tune
-    ; adjustment if target layer center is not perfectly at (0, 0).
-    ; ---------------------------------------------------------------
-    if(boundp('local_bBox) && local_bBox then
-      max_iter = 5
-      iter = 0
-      converged = nil
-      
-      while(iter < max_iter && !converged
-        iter = iter + 1
-        v_gx = car(maxActiveInst~>xy)
-        v_gy = cadr(maxActiveInst~>xy)
-        
-        v_transform_0 = list(list(v_gx v_gy) orient 1.0)
-        v_bBox_0 = dbTransformBBox(local_bBox v_transform_0)
-        
-        case(orient
-          ("R0"    v_gx_end = v_gx + col_step v_gy_end = v_gy + row_step)
-          ("R90"   v_gx_end = v_gx - row_step v_gy_end = v_gy + col_step)
-          ("R180"  v_gx_end = v_gx - col_step v_gy_end = v_gy - row_step)
-          ("R270"  v_gx_end = v_gx + row_step v_gy_end = v_gy - col_step)
-          ("MY"    v_gx_end = v_gx - col_step v_gy_end = v_gy + row_step)
-          ("MX"    v_gx_end = v_gx + col_step v_gy_end = v_gy - row_step)
-          ("MYR90" v_gx_end = v_gx - row_step v_gy_end = v_gy - col_step)
-          ("MXR90" v_gx_end = v_gx + row_step v_gy_end = v_gy + col_step)
-          (t       v_gx_end = v_gx + col_step v_gy_end = v_gy + row_step)
-        )
-        
-        v_transform_end = list(list(v_gx_end v_gy_end) orient 1.0)
-        v_bBox_end = dbTransformBBox(local_bBox v_transform_end)
-        
-        l_left   = min(caar(v_bBox_0) caar(v_bBox_end))
-        l_bottom = min(cadar(v_bBox_0) cadar(v_bBox_end))
-        l_right  = max(caadr(v_bBox_0) caadr(v_bBox_end))
-        l_top    = max(cadadr(v_bBox_0) cadadr(v_bBox_end))
-        
-        curr_cx = (l_left + l_right) / 2.0
-        curr_cy = (l_bottom + l_top) / 2.0
-        
-        printf("  Verification Iteration %d: Current layer center at cx=%L cy=%L\\n" iter curr_cx curr_cy)
-        
-        if(abs(curr_cx) < 1e-4 && abs(curr_cy) < 1e-4 then
-          converged = t
-          printf("  SUCCESS: Target layer center is verified at (0.0, 0.0)!\\n")
-          layer_left = l_left
-          layer_bottom = l_bottom
-          layer_right = l_right
-          layer_top = l_top
-        else
-          fine_dx = 0.0 - curr_cx
-          fine_dy = 0.0 - curr_cy
-          printf("  Fine-tuning array position by dx=%L dy=%L...\\n" fine_dx fine_dy)
-          foreach(item allInsts
-            inst = car(item)
-            inst~>xy = list(car(inst~>xy) + fine_dx cadr(inst~>xy) + fine_dy)
-          )
-          layer_left = l_left + fine_dx
-          layer_bottom = l_bottom + fine_dy
-          layer_right = l_right + fine_dx
-          layer_top = l_top + fine_dy
-        )
-      )
-    )
-
-    ; ---------------------------------------------------------------
     ; VERIFICATION RECTANGLE
     ; ---------------------------------------------------------------
     if(boundp('layer_left) && layer_left then
-      dbCreateRect(cv list("M1" "pin") list(list(layer_left layer_bottom) list(layer_right layer_top)))
-      printf("  Drew verification rectangle on 'M1' 'pin' covering all target layers in the array: [%L, %L] - [%L, %L]\\n" layer_left layer_bottom layer_right layer_top)
+      v_llx = layer_left + dx
+      v_lly = layer_bottom + dy
+      v_urx = layer_right + dx
+      v_ury = layer_top + dy
+      dbCreateRect(cv list("M1" "pin") list(list(v_llx v_lly) list(v_urx v_ury)))
+      printf("  Drew verification rectangle on 'M1' 'pin' covering all target layers in the array: [%L, %L] - [%L, %L]\\n" v_llx v_lly v_urx v_ury)
     )
 
     ; --- Rotations applied during creation ---
