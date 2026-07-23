@@ -842,78 +842,41 @@ def main():
 
   ; ---------------------------------------------------------------
   ; SECONDARY VERIFICATION & FINE-TUNING CONVERGENCE LOOP
-  ; Re-reads active mosaic bBox after shift and applies fine-tune
+  ; Re-reads active mosaic xy after shift and applies fine-tune
   ; adjustment if target layer center is not perfectly at (0, 0).
   ; ---------------------------------------------------------------
-  if(boundp('inset_left) && inset_left then
+  if(boundp('local_bBox) && local_bBox then
     max_iter = 3
     iter = 0
     converged = nil
     
     while(iter < max_iter && !converged
       iter = iter + 1
-      mBBox = maxActiveInst~>bBox
-      m_llx = caar(mBBox)
-      m_lly = cadar(mBBox)
-      m_urx = caadr(mBBox)
-      m_ury = cadadr(mBBox)
+      v_gx = car(maxActiveInst~>xy)
+      v_gy = cadr(maxActiveInst~>xy)
+      
+      v_transform_0 = list(list(v_gx v_gy) orient 1.0)
+      v_bBox_0 = dbTransformBBox(local_bBox v_transform_0)
       
       case(orient
-        ("R0"
-          l_left   = m_llx + inset_left
-          l_right  = m_urx - inset_right
-          l_bottom = m_lly + inset_bottom
-          l_top    = m_ury - inset_top
-        )
-        ("R90"
-          l_left   = m_llx + inset_top
-          l_right  = m_urx - inset_bottom
-          l_bottom = m_lly + inset_left
-          l_top    = m_ury - inset_right
-        )
-        ("R180"
-          l_left   = m_llx + inset_right
-          l_right  = m_urx - inset_left
-          l_bottom = m_lly + inset_top
-          l_top    = m_ury - inset_bottom
-        )
-        ("R270"
-          l_left   = m_llx + inset_bottom
-          l_right  = m_urx - inset_top
-          l_bottom = m_lly + inset_right
-          l_top    = m_ury - inset_left
-        )
-        ("MY"
-          l_left   = m_llx + inset_right
-          l_right  = m_urx - inset_left
-          l_bottom = m_lly + inset_bottom
-          l_top    = m_ury - inset_top
-        )
-        ("MX"
-          l_left   = m_llx + inset_left
-          l_right  = m_urx - inset_right
-          l_bottom = m_lly + inset_top
-          l_top    = m_ury - inset_bottom
-        )
-        ("MYR90"
-          l_left   = m_llx + inset_top
-          l_right  = m_urx - inset_bottom
-          l_bottom = m_lly + inset_right
-          l_top    = m_ury - inset_left
-        )
-        ("MXR90"
-          l_left   = m_llx + inset_bottom
-          l_right  = m_urx - inset_top
-          l_bottom = m_lly + inset_left
-          l_top    = m_ury - inset_right
-        )
-        (t
-          l_left   = m_llx + inset_left
-          l_right  = m_urx - inset_right
-          l_bottom = m_lly + inset_bottom
-          l_top    = m_ury - inset_top
-        )
+        ("R0"    v_gx_end = v_gx + col_step v_gy_end = v_gy + row_step)
+        ("R90"   v_gx_end = v_gx - row_step v_gy_end = v_gy + col_step)
+        ("R180"  v_gx_end = v_gx - col_step v_gy_end = v_gy - row_step)
+        ("R270"  v_gx_end = v_gx + row_step v_gy_end = v_gy - col_step)
+        ("MY"    v_gx_end = v_gx - col_step v_gy_end = v_gy + row_step)
+        ("MX"    v_gx_end = v_gx + col_step v_gy_end = v_gy - row_step)
+        ("MYR90" v_gx_end = v_gx - row_step v_gy_end = v_gy - col_step)
+        ("MXR90" v_gx_end = v_gx + row_step v_gy_end = v_gy + col_step)
+        (t       v_gx_end = v_gx + col_step v_gy_end = v_gy + row_step)
       )
+      
+      v_transform_end = list(list(v_gx_end v_gy_end) orient 1.0)
+      v_bBox_end = dbTransformBBox(local_bBox v_transform_end)
+      
+      l_left   = min(caar(v_bBox_0) caar(v_bBox_end))
+      l_bottom = min(cadar(v_bBox_0) cadar(v_bBox_end))
+      l_right  = max(caadr(v_bBox_0) caadr(v_bBox_end))
+      l_top    = max(cadadr(v_bBox_0) cadadr(v_bBox_end))
       
       curr_cx = (l_left + l_right) / 2.0
       curr_cy = (l_bottom + l_top) / 2.0
