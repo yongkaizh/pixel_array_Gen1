@@ -846,7 +846,7 @@ def main():
   ; adjustment if target layer center is not perfectly at (0, 0).
   ; ---------------------------------------------------------------
   if(boundp('local_bBox) && local_bBox then
-    max_iter = 3
+    max_iter = 5
     iter = 0
     converged = nil
     
