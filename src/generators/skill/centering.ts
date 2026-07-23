@@ -68,6 +68,8 @@ export function generateCentering(builder: SkillBuilder, config: LayoutConfig): 
       ; ---------------------------------------------------------------
       shapes = dbShapeQuery(master list(c_layer c_purp) master~>bBox 0 32)
       llx = 1e6 lly = 1e6 urx = -1e6 ury = -1e6
+      maxArea = -1.0
+      bestBox = nil
       
       foreach(path shapes
         if(listp(path) then
@@ -86,17 +88,31 @@ export function generateCentering(builder: SkillBuilder, config: LayoutConfig): 
         
         ; Filter by polygon/rect/path to avoid weird layer artifacts, as requested
         if(shBox && (sh~>objType == "polygon" || sh~>objType == "rect" || sh~>objType == "path") then
-          llx = min(llx caar(shBox))
-          lly = min(lly cadar(shBox))
-          urx = max(urx caadr(shBox))
-          ury = max(ury cadadr(shBox))
+          s_llx = caar(shBox)
+          s_lly = cadar(shBox)
+          s_urx = caadr(shBox)
+          s_ury = cadadr(shBox)
+
+          llx = min(llx s_llx)
+          lly = min(lly s_lly)
+          urx = max(urx s_urx)
+          ury = max(ury s_ury)
+
+          ; Track largest shape to prevent dummy shapes or guard ring lines from skewing center
+          area = (s_urx - s_llx) * (s_ury - s_lly)
+          if(area > maxArea then
+            maxArea = area
+            bestBox = shBox
+          )
         )
       )
       
       local_bBox = nil
-      if(llx < 1e5 then
+      if(bestBox then
+        local_bBox = bestBox
+      else if(llx < 1e5 then
         local_bBox = list(list(llx lly) list(urx ury))
-      )
+      ))
 
       if(local_bBox then
         printf("  SUCCESS: Found target layer '%s %s' bBox via dbShapeQuery: %L\\n" c_layer c_purp local_bBox)
