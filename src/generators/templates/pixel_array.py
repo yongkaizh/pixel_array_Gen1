@@ -711,27 +711,32 @@ def main():
      
      ; Do rotation first
      trans = list(list(0.0 0.0) orient 1.0)
-     rot_uBBox = dbTransformBBox(master~>bBox trans)
-     rot_local_bBox = dbTransformBBox(local_bBox trans)
+     rot_uBBox_raw = dbTransformBBox(master~>bBox trans)
+     rot_local_bBox_raw = dbTransformBBox(local_bBox trans)
      
-     u_llx = caar(rot_uBBox)
-     u_lly = cadar(rot_uBBox)
-     u_urx = caadr(rot_uBBox)
-     u_ury = cadadr(rot_uBBox)
+     ; Normalize rotated master bBox to ensure strict ll and ur
+     u_llx = min(caar(rot_uBBox_raw) caadr(rot_uBBox_raw))
+     u_urx = max(caar(rot_uBBox_raw) caadr(rot_uBBox_raw))
+     u_lly = min(cadar(rot_uBBox_raw) cadadr(rot_uBBox_raw))
+     u_ury = max(cadar(rot_uBBox_raw) cadadr(rot_uBBox_raw))
      
-     llx_rot = caar(rot_local_bBox)
-     lly_rot = cadar(rot_local_bBox)
-     urx_rot = caadr(rot_local_bBox)
-     ury_rot = cadadr(rot_local_bBox)
+     ; Normalize rotated local layer bBox
+     llx_rot = min(caar(rot_local_bBox_raw) caadr(rot_local_bBox_raw))
+     urx_rot = max(caar(rot_local_bBox_raw) caadr(rot_local_bBox_raw))
+     lly_rot = min(cadar(rot_local_bBox_raw) cadadr(rot_local_bBox_raw))
+     ury_rot = max(cadar(rot_local_bBox_raw) cadadr(rot_local_bBox_raw))
      
-     printf("  Master bBox (rotated): %L\\n" rot_uBBox)
-     printf("  Local Layer bBox (rotated): %L\\n" rot_local_bBox)
+     rot_uBBox = list(list(u_llx u_lly) list(u_urx u_ury))
+     rot_local_bBox = list(list(llx_rot lly_rot) list(urx_rot ury_rot))
      
-     ; Margins from rotated cell boundary to rotated layer boundary (using abs to handle unnormalized bBoxes)
-     L_margin = abs(llx_rot - u_llx)
-     R_margin = abs(u_urx - urx_rot)
-     B_margin = abs(lly_rot - u_lly)
-     T_margin = abs(u_ury - ury_rot)
+     printf("  Master bBox (rotated and normalized): %L\\n" rot_uBBox)
+     printf("  Local Layer bBox (rotated and normalized): %L\\n" rot_local_bBox)
+     
+     ; Visual margins (if layer exceeds cell boundary, margin is correctly negative)
+     L_margin = llx_rot - u_llx
+     R_margin = u_urx - urx_rot
+     B_margin = lly_rot - u_lly
+     T_margin = u_ury - ury_rot
      
      printf("  Margins (L R B T): %L %L %L %L\\n" L_margin R_margin B_margin T_margin)
      
@@ -741,7 +746,7 @@ def main():
      m_urx = caadr(mBBox)
      m_ury = cadadr(mBBox)
      
-     ; Apply margins directly since rotation is already accounted for
+     ; Apply margins directly (rotation already handled by normalized bounding boxes)
      layer_left   = m_llx + L_margin
      layer_right  = m_urx - R_margin
      layer_bottom = m_lly + B_margin
