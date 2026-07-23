@@ -704,56 +704,48 @@ def main():
      ury = cadadr(local_bBox)
 
      ; ---------------------------------------------------------------
-     ; Calculate Mosaic Target Layer bBox using "Rotate First" logic
+     ; Calculate Mosaic Target Layer bBox EXACTLY using instance transforms
+     ; This bypasses any master~>bBox inaccuracies (e.g. text labels or PR boundaries)
      ; ---------------------------------------------------------------
      ; Hardcoding "R180" because Cadence maxActiveInst~>orient can incorrectly report "R0"
      orient = "R180"
      
-     ; Do rotation first
-     trans = list(list(0.0 0.0) orient 1.0)
-     rot_uBBox_raw = dbTransformBBox(master~>bBox trans)
-     rot_local_bBox_raw = dbTransformBBox(local_bBox trans)
+     m_cols = maxActiveInst~>columns
+     m_rows = maxActiveInst~>rows
+     uX = maxActiveInst~>uX
+     unless(uX uX = 0.0)
+     uY = maxActiveInst~>uY
+     unless(uY uY = 0.0)
      
-     ; Normalize rotated master bBox to ensure strict ll and ur
-     u_llx = min(caar(rot_uBBox_raw) caadr(rot_uBBox_raw))
-     u_urx = max(caar(rot_uBBox_raw) caadr(rot_uBBox_raw))
-     u_lly = min(cadar(rot_uBBox_raw) cadadr(rot_uBBox_raw))
-     u_ury = max(cadar(rot_uBBox_raw) cadadr(rot_uBBox_raw))
+     ; Calculate the 4 corner points of the local unrotated grid
+     pt_00 = list(0.0 0.0)
+     pt_c0 = list((m_cols - 1) * uX 0.0)
+     pt_0r = list(0.0 (m_rows - 1) * uY)
+     pt_cr = list((m_cols - 1) * uX (m_rows - 1) * uY)
      
-     ; Normalize rotated local layer bBox
-     llx_rot = min(caar(rot_local_bBox_raw) caadr(rot_local_bBox_raw))
-     urx_rot = max(caar(rot_local_bBox_raw) caadr(rot_local_bBox_raw))
-     lly_rot = min(cadar(rot_local_bBox_raw) cadadr(rot_local_bBox_raw))
-     ury_rot = max(cadar(rot_local_bBox_raw) cadadr(rot_local_bBox_raw))
+     xy_0 = maxActiveInst~>xy
      
-     rot_uBBox = list(list(u_llx u_lly) list(u_urx u_ury))
-     rot_local_bBox = list(list(llx_rot lly_rot) list(urx_rot ury_rot))
+     ; Transform them to absolute top-cell coordinates using the mosaic's transform
+     xy_00 = dbTransformPoint(pt_00 list(xy_0 orient 1.0))
+     xy_c0 = dbTransformPoint(pt_c0 list(xy_0 orient 1.0))
+     xy_0r = dbTransformPoint(pt_0r list(xy_0 orient 1.0))
+     xy_cr = dbTransformPoint(pt_cr list(xy_0 orient 1.0))
      
-     printf("  Master bBox (rotated and normalized): %L\\n" rot_uBBox)
-     printf("  Local Layer bBox (rotated and normalized): %L\\n" rot_local_bBox)
+     ; Transform the target layer bounding box to each of the 4 extreme instances
+     bB_00 = dbTransformBBox(local_bBox list(xy_00 orient 1.0))
+     bB_c0 = dbTransformBBox(local_bBox list(xy_c0 orient 1.0))
+     bB_0r = dbTransformBBox(local_bBox list(xy_0r orient 1.0))
+     bB_cr = dbTransformBBox(local_bBox list(xy_cr orient 1.0))
      
-     ; Visual margins (if layer exceeds cell boundary, margin is correctly negative)
-     L_margin = llx_rot - u_llx
-     R_margin = u_urx - urx_rot
-     B_margin = lly_rot - u_lly
-     T_margin = u_ury - ury_rot
+     ; The global target layer bounds are the absolute minimum and maximum across all 4 corners!
+     layer_left   = min(caar(bB_00) caar(bB_c0) caar(bB_0r) caar(bB_cr) caadr(bB_00) caadr(bB_c0) caadr(bB_0r) caadr(bB_cr))
+     layer_right  = max(caar(bB_00) caar(bB_c0) caar(bB_0r) caar(bB_cr) caadr(bB_00) caadr(bB_c0) caadr(bB_0r) caadr(bB_cr))
+     layer_bottom = min(cadar(bB_00) cadar(bB_c0) cadar(bB_0r) cadar(bB_cr) cadadr(bB_00) cadadr(bB_c0) cadadr(bB_0r) cadadr(bB_cr))
+     layer_top    = max(cadar(bB_00) cadar(bB_c0) cadar(bB_0r) cadar(bB_cr) cadadr(bB_00) cadadr(bB_c0) cadadr(bB_0r) cadadr(bB_cr))
      
-     printf("  Margins (L R B T): %L %L %L %L\\n" L_margin R_margin B_margin T_margin)
-     
-     mBBox = maxActiveInst~>bBox
-     m_llx = caar(mBBox)
-     m_lly = cadar(mBBox)
-     m_urx = caadr(mBBox)
-     m_ury = cadadr(mBBox)
-     
-     ; Apply margins directly (rotation already handled by normalized bounding boxes)
-     layer_left   = m_llx + L_margin
-     layer_right  = m_urx - R_margin
-     layer_bottom = m_lly + B_margin
-     layer_top    = m_ury - T_margin
+     printf("  Mosaic Array EXACT target layer bBox: [%L, %L] - [%L, %L]\\n" layer_left layer_bottom layer_right layer_top)
      
      layer_bBox = list(list(layer_left layer_bottom) list(layer_right layer_top))
-     printf("  Mosaic Array target layer bBox (Rotated Margin calc): %L\\n" layer_bBox)
      
      ; Calculate final center
      cx = (layer_left + layer_right) / 2.0
