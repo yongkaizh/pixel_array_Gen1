@@ -132,6 +132,8 @@ export function generateCentering(builder: SkillBuilder, config: LayoutConfig): 
         B_margin = lly_rot - u_lly
         T_margin = u_ury - ury_rot
         
+        printf("  Margins (L R B T): %L %L %L %L\\n" L_margin R_margin B_margin T_margin)
+        
         mBBox = maxActiveInst~>bBox
         m_llx = caar(mBBox)
         m_lly = cadar(mBBox)
