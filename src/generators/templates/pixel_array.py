@@ -704,86 +704,98 @@ def main():
      ury = cadadr(local_bBox)
 
      ; ---------------------------------------------------------------
-     ; 1. Calculate the robust physical bounding box of the mosaic's target layer
-     ; We do this by evaluating the absolute placement of the 4 corner instances
+     ; Calculate Mosaic Target Layer bBox using L, R, B, T margins
      ; ---------------------------------------------------------------
      orient = maxActiveInst~>orient
      unless(orient orient = "R0")
      
-     m_cols = maxActiveInst~>columns
-     unless(m_cols m_cols = 1)
-     m_rows = maxActiveInst~>rows
-     unless(m_rows m_rows = 1)
+     uBBox = master~>bBox
+     u_llx = caar(uBBox)
+     u_lly = cadar(uBBox)
+     u_urx = caadr(uBBox)
+     u_ury = cadadr(uBBox)
      
-     uX = maxActiveInst~>uX
-     unless(uX uX = {x_pitch})
-     uY = maxActiveInst~>uY
-     unless(uY uY = {y_pitch})
+     ; Margins from cell boundary to layer boundary in the master cell
+     L_margin = llx - u_llx
+     R_margin = u_urx - urx
+     B_margin = lly - u_lly
+     T_margin = u_ury - ury
      
-     min_lx = 1e10
-     min_ly = 1e10
-     max_rx = -1e10
-     max_ry = -1e10
+     mBBox = maxActiveInst~>bBox
+     m_llx = caar(mBBox)
+     m_lly = cadar(mBBox)
+     m_urx = caadr(mBBox)
+     m_ury = cadadr(mBBox)
      
-     ; The 4 corner instance grid indices
-     corners = list(
-       list(0 0)
-       list(m_cols - 1 0)
-       list(0 m_rows - 1)
-       list(m_cols - 1 m_rows - 1)
+     ; Apply margins to the mosaic physical bounding box based on orientation
+     case( orient
+       ( "R0"
+         layer_left   = m_llx + L_margin
+         layer_right  = m_urx - R_margin
+         layer_bottom = m_lly + B_margin
+         layer_top    = m_ury - T_margin
+       )
+       ( "R90"
+         layer_left   = m_llx + B_margin
+         layer_right  = m_urx - T_margin
+         layer_bottom = m_lly + R_margin
+         layer_top    = m_ury - L_margin
+       )
+       ( "R180"
+         layer_left   = m_llx + R_margin
+         layer_right  = m_urx - L_margin
+         layer_bottom = m_lly + T_margin
+         layer_top    = m_ury - B_margin
+       )
+       ( "R270"
+         layer_left   = m_llx + T_margin
+         layer_right  = m_urx - B_margin
+         layer_bottom = m_lly + L_margin
+         layer_top    = m_ury - R_margin
+       )
+       ( "MY"
+         layer_left   = m_llx + R_margin
+         layer_right  = m_urx - L_margin
+         layer_bottom = m_lly + B_margin
+         layer_top    = m_ury - T_margin
+       )
+       ( "MX"
+         layer_left   = m_llx + L_margin
+         layer_right  = m_urx - R_margin
+         layer_bottom = m_lly + T_margin
+         layer_top    = m_ury - B_margin
+       )
+       ( "MYR90"
+         layer_left   = m_llx + B_margin
+         layer_right  = m_urx - T_margin
+         layer_bottom = m_lly + L_margin
+         layer_top    = m_ury - R_margin
+       )
+       ( "MXR90"
+         layer_left   = m_llx + T_margin
+         layer_right  = m_urx - B_margin
+         layer_bottom = m_lly + R_margin
+         layer_top    = m_ury - L_margin
+       )
+       ( t
+         layer_left   = m_llx + L_margin
+         layer_right  = m_urx - R_margin
+         layer_bottom = m_lly + B_margin
+         layer_top    = m_ury - T_margin
+       )
      )
      
-     foreach(corner corners
-       col = car(corner)
-       row = cadr(corner)
-       
-       ; Calculate local placement offset of this instance in the mosaic
-       local_pt = list(col * uX row * uY)
-       
-       ; Transform local placement to absolute global placement using the mosaic's origin and orientation
-       global_pt = dbTransformPoint(local_pt list(maxActiveInst~>xy orient 1.0))
-       
-       ; Transform the master cell's target layer bBox to this instance's absolute placement
-       inst_bBox = dbTransformBBox(local_bBox list(global_pt orient 1.0))
-       
-       if(caar(inst_bBox) < min_lx then min_lx = caar(inst_bBox))
-       if(cadar(inst_bBox) < min_ly then min_ly = cadar(inst_bBox))
-       if(caadr(inst_bBox) > max_rx then max_rx = caadr(inst_bBox))
-       if(cadadr(inst_bBox) > max_ry then max_ry = cadadr(inst_bBox))
-     )
-     
-     layer_left   = min_lx
-     layer_bottom = min_ly
-     layer_right  = max_rx
-     layer_top    = max_ry
-     
-     ; Explicitly construct the calculated target layer bounding box
      layer_bBox = list(list(layer_left layer_bottom) list(layer_right layer_top))
-     printf("  Mosaic Array target layer bBox (from robust 4-corner calculation): %L\\n" layer_bBox)
-     
-     ; ---------------------------------------------------------------
-     ; Calculate center layer bBox of the mosaic via subtraction
-     ; ---------------------------------------------------------------
-     mosaic_layer_w = layer_right - layer_left
-     mosaic_layer_h = layer_top - layer_bottom
-     
-     unit_layer_w = urx - llx
-     unit_layer_h = ury - lly
-     
-     center_layer_left = layer_left + (mosaic_layer_w - unit_layer_w) / 2.0
-     center_layer_bottom = layer_bottom + (mosaic_layer_h - unit_layer_h) / 2.0
-     center_layer_right = center_layer_left + unit_layer_w
-     center_layer_top = center_layer_bottom + unit_layer_h
-     
-     printf("  Center Layer bBox of the mosaic: [%L, %L] - [%L, %L]\\n" center_layer_left center_layer_bottom center_layer_right center_layer_top)
+     printf("  Mosaic Array target layer bBox (Margin calc): %L\\n" layer_bBox)
      
      ; Calculate final center
-     cx = (center_layer_left + center_layer_right) / 2.0
-     cy = (center_layer_bottom + center_layer_top) / 2.0
+     cx = (layer_left + layer_right) / 2.0
+     cy = (layer_bottom + layer_top) / 2.0
      
      dx = 0.0 - cx
      dy = 0.0 - cy
      
+     printf("  Mosaic bounds: [%L, %L] - [%L, %L] Orient: %s\\n" m_llx m_lly m_urx m_ury orient)
      printf("  Layer center in array: cx=%L cy=%L\\n" cx cy)
      printf("  Shift: dx=%L dy=%L\\n" dx dy)
      dbClose(master)
