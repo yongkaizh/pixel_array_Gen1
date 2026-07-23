@@ -236,6 +236,18 @@ export function generateCentering(builder: SkillBuilder, config: LayoutConfig): 
       inst~>xy = list(car(inst~>xy) + dx cadr(inst~>xy) + dy)
     )
 
+    ; ---------------------------------------------------------------
+    ; VERIFICATION RECTANGLE
+    ; ---------------------------------------------------------------
+    if(boundp('layer_left) && layer_left then
+      v_llx = layer_left + dx
+      v_lly = layer_bottom + dy
+      v_urx = layer_right + dx
+      v_ury = layer_top + dy
+      dbCreateRect(cv list("M1" "pin") list(list(v_llx v_lly) list(v_urx v_ury)))
+      printf("  Drew verification rectangle on 'M1' 'pin' covering array layer bounds: [%L, %L] - [%L, %L]\\n" v_llx v_lly v_urx v_ury)
+    )
+
     ; --- Rotations applied during creation ---
 
     dbSave(cv)
