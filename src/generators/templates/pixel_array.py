@@ -720,6 +720,17 @@ def main():
      uY = maxActiveInst~>uY
      unless(uY uY = 0.0)
      
+     ; --- Diagnostic Printf for the user's reference ---
+     trans_diag = list(list(0.0 0.0) orient 1.0)
+     rot_local_raw = dbTransformBBox(local_bBox trans_diag)
+     llx_rot = min(caar(rot_local_raw) caadr(rot_local_raw))
+     urx_rot = max(caar(rot_local_raw) caadr(rot_local_raw))
+     lly_rot = min(cadar(rot_local_raw) cadadr(rot_local_raw))
+     ury_rot = max(cadar(rot_local_raw) cadadr(rot_local_raw))
+     rot_local_diag = list(list(llx_rot lly_rot) list(urx_rot ury_rot))
+     printf("  Local Layer bBox (rotated to %s and normalized): %L\\n" orient rot_local_diag)
+     ; ---------------------------------------------------
+     
      ; Calculate the 4 corner points of the local unrotated grid
      pt_00 = list(0.0 0.0)
      pt_c0 = list((m_cols - 1) * uX 0.0)
