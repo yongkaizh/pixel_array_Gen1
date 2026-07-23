@@ -80,40 +80,40 @@ export function generateCentering(builder: SkillBuilder, config: LayoutConfig): 
         printf("  Layer '%s %s' local center: xc=%L yc=%L\\n" c_layer c_purp xc_local yc_local)
 
         ; ---------------------------------------------------------------
-        ; CORRECT centering formula for R180 mosaics
+        ; EXACT GRID CENTERING ALGORITHM (Robust against asymmetric cell bounding boxes)
         ;
-        ; For an R180 tile with origin (ox,oy), local point (lx,ly)
-        ; maps to parent space as (ox-lx, oy-ly).
+        ; We calculate the center using the exact mathematical grid step
+        ; vectors (uX, uY) of the mosaic instance, ignoring physical bounding boxes.
         ;
-        ; Physical bBox of the mosaic = [m_llx,m_lly]-[m_urx,m_ury].
-        ; Physical bBox of the master cell = [c_llx,c_lly]-[c_urx,c_ury].
-        ;
-        ;   Left-most physical edge  m_llx = X_min - c_urx
-        ;   Right-most physical edge m_urx = X_max - c_llx
-        ;   => X_min = m_llx + c_urx
-        ;   => X_max = m_urx + c_llx
-        ;   Grid center X = (X_min + X_max) / 2 = (m_llx + m_urx + c_llx + c_urx) / 2
-        ;   Layer center X = Grid center X - xc_local
-        ;
-        ; Invariant to sign of inst~>uX — works for all mosaic configurations,
-        ; and does NOT assume cell bounding box equals pitch!
+        ; 1. Find the local layer center (xc_local, yc_local).
+        ; 2. Find the layer center of the (0,0) grid cell (at inst~>xy).
+        ; 3. Find the layer center of the (cols-1, rows-1) grid cell.
+        ; 4. Average them to find the true mathematical layer center of the array.
         ; ---------------------------------------------------------------
-        mBBox   = maxActiveInst~>bBox
-        m_llx   = caar(mBBox)
-        m_lly   = cadar(mBBox)
-        m_urx   = caadr(mBBox)
-        m_ury   = cadadr(mBBox)
+        gx = car(maxActiveInst~>xy)
+        gy = cadr(maxActiveInst~>xy)
+        cols = maxActiveInst~>columns
+        rows = maxActiveInst~>rows
         
-        c_llx   = caar(master~>bBox)
-        c_lly   = cadar(master~>bBox)
-        c_urx   = caadr(master~>bBox)
-        c_ury   = cadadr(master~>bBox)
-
-        cx = (m_llx + m_urx + c_llx + c_urx) / 2.0 - xc_local
-        cy = (m_lly + m_ury + c_lly + c_ury) / 2.0 - yc_local
+        ; Cadence mosaics store the grid step vectors
+        uX = maxActiveInst~>uX
+        uY = maxActiveInst~>uY
+        
+        ; Because of R180 rotation, local coordinates map to (-xc_local, -yc_local)
+        ; relative to the grid point.
+        p0_x = gx - xc_local
+        p0_y = gy - yc_local
+        
+        p1_x = gx + (cols - 1) * uX - xc_local
+        p1_y = gy + (rows - 1) * uY - yc_local
+        
+        cx = (p0_x + p1_x) / 2.0
+        cy = (p0_y + p1_y) / 2.0
+        
         dx = 0.0 - cx
         dy = 0.0 - cy
-        printf("  Mosaic bBox: [%L,%L]-[%L,%L]\\n" m_llx m_lly m_urx m_ury)
+        
+        printf("  Mosaic Grid: Origin=(%L, %L) Cols=%L Rows=%L uX=%L uY=%L\\n" gx gy cols rows uX uY)
         printf("  Layer center in array: cx=%L cy=%L\\n" cx cy)
         printf("  Shift: dx=%L dy=%L\\n" dx dy)
         dbClose(master)
