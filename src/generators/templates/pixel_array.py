@@ -703,106 +703,31 @@ def main():
      urx = caadr(local_bBox)
      ury = cadadr(local_bBox)
 
-     ; Find the master cell physical origin (prefer prBoundary lower-left if present)
-     cbBBox = nil
-     if(master~>prBoundary then
-       cbBBox = master~>prBoundary~>bBox
-     else
-       cbBBox = master~>bBox
-     )
-     c_llx = caar(cbBBox)
-     c_lly = cadar(cbBBox)
-     
-     ; Derive true reference bounding box from exact grid pitch (x_pitch / y_pitch)
-     c_urx = c_llx + {x_pitch}
-     c_ury = c_lly + {y_pitch}
-     
-     ; Calculate the 4 insets of the target layer relative to the pitch reference box
-     inset_left   = llx - c_llx
-     inset_bottom = lly - c_lly
-     inset_right  = c_urx - urx
-     inset_top    = c_ury - ury
-     
-     printf("  Master Cell Origin: [%L, %L] Pitch Ref Box: [%L, %L] - [%L, %L]\\n" c_llx c_lly c_llx c_lly c_urx c_ury)
-     printf("  Pitch Insets: L=%L B=%L R=%L T=%L\\n" inset_left inset_bottom inset_right inset_top)
-
      ; ---------------------------------------------------------------
-     ; ORIENTATION-AWARE MOSAIC INSET ALGORITHM
-     ;
-     ; We take the physical bounding box of the mosaic instance and mathematically
-     ; inset it by the exact offsets calculated from the master cell.
+     ; 1. Find the exact bounding box of the target layer in the bottom-left unit cell
      ; ---------------------------------------------------------------
-     mBBox = maxActiveInst~>bBox
-     m_llx = caar(mBBox)
-     m_lly = cadar(mBBox)
-     m_urx = caadr(mBBox)
-     m_ury = cadadr(mBBox)
-     
      orient = maxActiveInst~>orient
      unless(orient orient = "R0")
      
-     ; Map insets to the mosaic bounds based on orientation
-     case(orient
-       ("R0"
-         layer_left   = m_llx + inset_left
-         layer_right  = m_urx - inset_right
-         layer_bottom = m_lly + inset_bottom
-         layer_top    = m_ury - inset_top
-       )
-       ("R90"
-         layer_left   = m_llx + inset_top
-         layer_right  = m_urx - inset_bottom
-         layer_bottom = m_lly + inset_left
-         layer_top    = m_ury - inset_right
-       )
-       ("R180"
-         layer_left   = m_llx + inset_right
-         layer_right  = m_urx - inset_left
-         layer_bottom = m_lly + inset_top
-         layer_top    = m_ury - inset_bottom
-       )
-       ("R270"
-         layer_left   = m_llx + inset_bottom
-         layer_right  = m_urx - inset_top
-         layer_bottom = m_lly + inset_right
-         layer_top    = m_ury - inset_left
-       )
-       ("MY"
-         layer_left   = m_llx + inset_right
-         layer_right  = m_urx - inset_left
-         layer_bottom = m_lly + inset_bottom
-         layer_top    = m_ury - inset_top
-       )
-       ("MX"
-         layer_left   = m_llx + inset_left
-         layer_right  = m_urx - inset_right
-         layer_bottom = m_lly + inset_top
-         layer_top    = m_ury - inset_bottom
-       )
-       ("MYR90"
-         layer_left   = m_llx + inset_top
-         layer_right  = m_urx - inset_bottom
-         layer_bottom = m_lly + inset_right
-         layer_top    = m_ury - inset_left
-       )
-       ("MXR90"
-         layer_left   = m_llx + inset_bottom
-         layer_right  = m_urx - inset_top
-         layer_bottom = m_lly + inset_left
-         layer_top    = m_ury - inset_right
-       )
-       (t
-         printf("WARNING: Unknown orientation %s, assuming R0\\n" orient)
-         layer_left   = m_llx + inset_left
-         layer_right  = m_urx - inset_right
-         layer_bottom = m_lly + inset_bottom
-         layer_top    = m_ury - inset_top
-       )
-     )
+     ; dbTransformBBox applies the (0,0) instance's placement and rotation
+     bl_bBox = dbTransformBBox(local_bBox list(maxActiveInst~>xy orient 1.0))
+     layer_left   = caar(bl_bBox)
+     layer_bottom = cadar(bl_bBox)
+     
+     ; ---------------------------------------------------------------
+     ; 2. Calculate the top-right corner using the mosaic's rows, cols, and pitch
+     ; ---------------------------------------------------------------
+     m_cols = maxActiveInst~>columns
+     unless(m_cols m_cols = 1)
+     m_rows = maxActiveInst~>rows
+     unless(m_rows m_rows = 1)
+     
+     layer_right  = caadr(bl_bBox) + (m_cols - 1) * {x_pitch}
+     layer_top    = cadadr(bl_bBox) + (m_rows - 1) * {y_pitch}
      
      ; Explicitly construct the calculated target layer bounding box
      layer_bBox = list(list(layer_left layer_bottom) list(layer_right layer_top))
-     printf("  Mosaic Array target layer bBox (after applying B/T/R/L insets and rotation): %L\\n" layer_bBox)
+     printf("  Mosaic Array target layer bBox (from unit cell + pitch extrapolation): %L\\n" layer_bBox)
      
      ; Calculate final center
      cx = (layer_left + layer_right) / 2.0
