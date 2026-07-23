@@ -830,27 +830,126 @@ def main():
    dy = {target_dy:.4f}
    printf("No active mosaic. Fallback center: cx=%L cy=%L\\n" 0.0 - dx 0.0 - dy)
  )
- printf("Shifting all instances by dx=%L dy=%L\\n" dx dy)
+ printf("Initial shift: dx=%L dy=%L\\n" dx dy)
 
- foreach(
-   item
-   allInsts
+  foreach(
+    item
+    allInsts
 
-   inst = car(item)
-   inst~>xy = list(car(inst~>xy) + dx cadr(inst~>xy) + dy)
- )
+    inst = car(item)
+    inst~>xy = list(car(inst~>xy) + dx cadr(inst~>xy) + dy)
+  )
 
- ; ---------------------------------------------------------------
- ; VERIFICATION RECTANGLE
- ; ---------------------------------------------------------------
- if(boundp('layer_left) && layer_left then
-   v_llx = layer_left + dx
-   v_lly = layer_bottom + dy
-   v_urx = layer_right + dx
-   v_ury = layer_top + dy
-   dbCreateRect(cv list("M1" "pin") list(list(v_llx v_lly) list(v_urx v_ury)))
-   printf("  Drew verification rectangle on 'M1' 'pin' covering all target layers in the array: [%L, %L] - [%L, %L]\\n" v_llx v_lly v_urx v_ury)
- )
+  ; ---------------------------------------------------------------
+  ; SECONDARY VERIFICATION & FINE-TUNING CONVERGENCE LOOP
+  ; Re-reads active mosaic bBox after shift and applies fine-tune
+  ; adjustment if target layer center is not perfectly at (0, 0).
+  ; ---------------------------------------------------------------
+  if(boundp('inset_left) && inset_left then
+    max_iter = 3
+    iter = 0
+    converged = nil
+    
+    while(iter < max_iter && !converged
+      iter = iter + 1
+      mBBox = maxActiveInst~>bBox
+      m_llx = caar(mBBox)
+      m_lly = cadar(mBBox)
+      m_urx = caadr(mBBox)
+      m_ury = cadadr(mBBox)
+      
+      case(orient
+        ("R0"
+          l_left   = m_llx + inset_left
+          l_right  = m_urx - inset_right
+          l_bottom = m_lly + inset_bottom
+          l_top    = m_ury - inset_top
+        )
+        ("R90"
+          l_left   = m_llx + inset_top
+          l_right  = m_urx - inset_bottom
+          l_bottom = m_lly + inset_left
+          l_top    = m_ury - inset_right
+        )
+        ("R180"
+          l_left   = m_llx + inset_right
+          l_right  = m_urx - inset_left
+          l_bottom = m_lly + inset_top
+          l_top    = m_ury - inset_bottom
+        )
+        ("R270"
+          l_left   = m_llx + inset_bottom
+          l_right  = m_urx - inset_top
+          l_bottom = m_lly + inset_right
+          l_top    = m_ury - inset_left
+        )
+        ("MY"
+          l_left   = m_llx + inset_right
+          l_right  = m_urx - inset_left
+          l_bottom = m_lly + inset_bottom
+          l_top    = m_ury - inset_top
+        )
+        ("MX"
+          l_left   = m_llx + inset_left
+          l_right  = m_urx - inset_right
+          l_bottom = m_lly + inset_top
+          l_top    = m_ury - inset_bottom
+        )
+        ("MYR90"
+          l_left   = m_llx + inset_top
+          l_right  = m_urx - inset_bottom
+          l_bottom = m_lly + inset_right
+          l_top    = m_ury - inset_left
+        )
+        ("MXR90"
+          l_left   = m_llx + inset_bottom
+          l_right  = m_urx - inset_top
+          l_bottom = m_lly + inset_left
+          l_top    = m_ury - inset_right
+        )
+        (t
+          l_left   = m_llx + inset_left
+          l_right  = m_urx - inset_right
+          l_bottom = m_lly + inset_bottom
+          l_top    = m_ury - inset_top
+        )
+      )
+      
+      curr_cx = (l_left + l_right) / 2.0
+      curr_cy = (l_bottom + l_top) / 2.0
+      
+      printf("  Verification Iteration %d: Current layer center at cx=%L cy=%L\\n" iter curr_cx curr_cy)
+      
+      if(abs(curr_cx) < 1e-4 && abs(curr_cy) < 1e-4 then
+        converged = t
+        printf("  SUCCESS: Target layer center is verified at (0.0, 0.0)!\\n")
+        layer_left = l_left
+        layer_bottom = l_bottom
+        layer_right = l_right
+        layer_top = l_top
+      else
+        fine_dx = 0.0 - curr_cx
+        fine_dy = 0.0 - curr_cy
+        printf("  Fine-tuning array position by dx=%L dy=%L...\\n" fine_dx fine_dy)
+        foreach(item allInsts
+          inst = car(item)
+          inst~>xy = list(car(inst~>xy) + fine_dx cadr(inst~>xy) + fine_dy)
+        )
+        layer_left = l_left + fine_dx
+        layer_bottom = l_bottom + fine_dy
+        layer_right = l_right + fine_dx
+        layer_top = l_top + fine_dy
+      )
+    )
+  )
+
+  ; ---------------------------------------------------------------
+  ; VERIFICATION RECTANGLE
+  ; ---------------------------------------------------------------
+  if(boundp('layer_left) && layer_left then
+    dbCreateRect(cv list("M1" "pin") list(list(layer_left layer_bottom) list(layer_right layer_top)))
+    printf("  Drew verification rectangle on 'M1' 'pin' covering all target layers in the array: [%L, %L] - [%L, %L]\\n" layer_left layer_bottom layer_right layer_top)
+  )
  
  ; --- Rotations applied during creation ---
 
