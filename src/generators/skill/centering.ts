@@ -108,8 +108,8 @@ export function generateCentering(builder: SkillBuilder, config: LayoutConfig): 
         ; ---------------------------------------------------------------
         ; Calculate Mosaic Target Layer bBox using "Rotate First" logic
         ; ---------------------------------------------------------------
-        orient = maxActiveInst~>orient
-        unless(orient orient = "R0")
+        ; Hardcoding "R180" because Cadence maxActiveInst~>orient can incorrectly report "R0"
+        orient = "R180"
         
         ; Do rotation first
         trans = list(list(0.0 0.0) orient 1.0)
