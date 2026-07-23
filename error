@@ -1,0 +1,29 @@
+Cellview array_pixel layout already exists. Opening...
+Creating top (purpose: top) rows=1 y=0.0
+Creating dummy (purpose: dummy) rows=1 y=2.2
+Creating c1 (purpose: c1) rows=1294 y=4.4
+ACTIVE SEGMENT MOSAIC FOUND
+Creating dummy (purpose: dummy) rows=1 y=2851.2
+Creating dummy (purpose: dummy) rows=1 y=2853.4
+Creating ECL Sig clamps (purpose: ecl) rows=2 y=2855.6
+Creating ECL Bsun clamps (purpose: bsun) rows=2 y=2860.0
+Creating Idle clamps (purpose: idle) rows=2 y=2864.4
+Creating Color bar R row (purpose: cbar) rows=1 y=2868.8
+Creating Color bar B row (purpose: cbar) rows=1 y=2871.0
+Creating Dummy pixel row (purpose: dummy) rows=1 y=2873.2
+Creating BLC zero (purpose: c2) rows=16 y=2875.4
+Creating BLC (purpose: c1) rows=35 y=2910.6
+Creating dummy (purpose: dummy) rows=1 y=2987.6
+Creating bottom (purpose: bottom) rows=1 y=2989.8
+
+Finding Global Array Center...
+  SUCCESS: Found target layer 'DBDTI drawing' bBox via dbShapeQuery: ((-1.35 -1.15) (1.15 1.35))
+  Master bBox (rotated and normalized): ((-11.07 -12.465) (10.87 9.475))
+  Local Layer bBox (rotated and normalized): ((-1.35 -1.15) (1.15 1.35))
+  Margins (L R B T): 9.72 9.72 11.315 8.125
+  Mosaic Array target layer bBox (Rotated Margin calc): ((221.05 8.44) (4260.55 2855.54))
+  Mosaic bounds: [211.33, -2.875] - [4270.27, 2863.665] Orient: R0
+  Layer center in array: cx=2240.8 cy=1431.99
+  Shift: dx=-2240.8 dy=-1431.99
+Shifting all instances by dx=-2240.8 dy=-1431.99
+  Drew verification rectangle on 'M1' 'pin' covering all target layers in the array: [-2019.75, -1423.55] - [2019.75, 1423.55]
