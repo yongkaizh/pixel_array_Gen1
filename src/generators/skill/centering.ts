@@ -74,41 +74,48 @@ export function generateCentering(builder: SkillBuilder, config: LayoutConfig): 
           ury = max(ury cadadr(sh~>bBox))
         )
 
-        ; Shape center in local (master cell) coordinate space
-        xc_local = (llx + urx) / 2.0
-        yc_local = (lly + ury) / 2.0
-        printf("  Layer '%s %s' local center: xc=%L yc=%L\\n" c_layer c_purp xc_local yc_local)
+        ; Shape bounding box in local (master cell) coordinate space
+        local_bBox = list(list(llx lly) list(urx ury))
+        printf("  Layer '%s %s' local bBox: %L\\n" c_layer c_purp local_bBox)
 
         ; ---------------------------------------------------------------
-        ; EXACT GRID CENTERING ALGORITHM (Robust against asymmetric cell bounding boxes)
+        ; NATIVE CELLVIEW BBOX TRANSFER ALGORITHM
         ;
-        ; We calculate the center using the exact mathematical grid step
-        ; vectors (uX, uY) of the mosaic instance, ignoring physical bounding boxes.
+        ; We calculate the center by transferring the layer's local bBox
+        ; directly into the current (top-level) cellview using Cadence's
+        ; native geometric transformation engine (dbTransformBBox).
         ;
-        ; 1. Find the local layer center (xc_local, yc_local).
-        ; 2. Find the layer center of the (0,0) grid cell (at inst~>xy).
-        ; 3. Find the layer center of the (cols-1, rows-1) grid cell.
-        ; 4. Average them to find the true mathematical layer center of the array.
+        ; This perfectly handles R180 offset behaviors idiomaticaly and 
+        ; ignores any stray shapes outside the target layer.
         ; ---------------------------------------------------------------
         gx = car(maxActiveInst~>xy)
         gy = cadr(maxActiveInst~>xy)
         cols = maxActiveInst~>columns
         rows = maxActiveInst~>rows
         
-        ; Cadence mosaics store the grid step vectors
         uX = maxActiveInst~>uX
         uY = maxActiveInst~>uY
+        orient = maxActiveInst~>orient
+        unless(orient orient = "R180")
         
-        ; Because of R180 rotation, local coordinates map to (-xc_local, -yc_local)
-        ; relative to the grid point.
-        p0_x = gx - xc_local
-        p0_y = gy - yc_local
+        ; Transform layer bBox for the (0,0) mosaic cell
+        transform_0 = list(list(gx gy) orient 1.0)
+        bBox_0 = dbTransformBBox(local_bBox transform_0)
         
-        p1_x = gx + (cols - 1) * uX - xc_local
-        p1_y = gy + (rows - 1) * uY - yc_local
+        ; Transform layer bBox for the (cols-1, rows-1) mosaic cell
+        gx_end = gx + (cols - 1) * uX
+        gy_end = gy + (rows - 1) * uY
+        transform_end = list(list(gx_end gy_end) orient 1.0)
+        bBox_end = dbTransformBBox(local_bBox transform_end)
         
-        cx = (p0_x + p1_x) / 2.0
-        cy = (p0_y + p1_y) / 2.0
+        ; Determine the absolute total bounds of the layer in the top cell
+        global_llx = min(caar(bBox_0) caar(bBox_end))
+        global_lly = min(cadar(bBox_0) cadar(bBox_end))
+        global_urx = max(caadr(bBox_0) caadr(bBox_end))
+        global_ury = max(cadadr(bBox_0) cadadr(bBox_end))
+        
+        cx = (global_llx + global_urx) / 2.0
+        cy = (global_lly + global_ury) / 2.0
         
         dx = 0.0 - cx
         dy = 0.0 - cy
