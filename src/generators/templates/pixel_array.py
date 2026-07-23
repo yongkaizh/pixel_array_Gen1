@@ -660,14 +660,9 @@ def main():
        urx = max(urx caadr(shape~>bBox))
        ury = max(ury cadadr(shape~>bBox))
      )
-     d_width = urx - llx
-     h_height = ury - lly
-     P_ll = list(llx lly)
-     
-     ; Transform lower-left of the shape to the first instance of the mosaic (x0, y0)
-     P_first_ll = dbTransformPoint(P_ll list(car(maxActiveInst~>xy) cadr(maxActiveInst~>xy)) maxActiveInst~>orient)
-     x0 = car(P_first_ll)
-     y0 = cadr(P_first_ll)
+     ; Find bounding box of the shape in the master cell
+     xc_master = (llx + urx) / 2.0
+     yc_master = (lly + ury) / 2.0
      
      ; Array parameters
      u_dx = maxActiveInst~>uX
@@ -675,10 +670,19 @@ def main():
      u_cols = maxActiveInst~>columns
      u_rows = maxActiveInst~>rows
      
-     ; Formula: Center_X = x0 + (d + (n - 1) * pitch_x) / 2.0
-     ; Formula: Center_Y = y0 + (h + (m - 1) * pitch_y) / 2.0
-     cx = x0 + (d_width + (u_cols - 1) * u_dx) / 2.0
-     cy = y0 + (h_height + (u_rows - 1) * u_dy) / 2.0
+     ; Shape center of the first instance (col 0, row 0) mapped to parent
+     C_first = dbTransformPoint(list(xc_master yc_master) list(car(maxActiveInst~>xy) cadr(maxActiveInst~>xy)) maxActiveInst~>orient)
+     
+     ; Shape center of the last instance (col n-1, row m-1) in local mosaic space
+     x_last_local = xc_master + (u_cols - 1) * u_dx
+     y_last_local = yc_master + (u_rows - 1) * u_dy
+     
+     ; Shape center of the last instance mapped to parent
+     C_last = dbTransformPoint(list(x_last_local y_last_local) list(car(maxActiveInst~>xy) cadr(maxActiveInst~>xy)) maxActiveInst~>orient)
+     
+     ; True geometric center of the layer in the array is the midpoint
+     cx = (car(C_first) + car(C_last)) / 2.0
+     cy = (cadr(C_first) + cadr(C_last)) / 2.0
      dx = 0.0 - cx
      dy = 0.0 - cy
      printf("Max Active Array layer %s %s center: cx=%L cy=%L\\n" c_layer c_purp cx cy)
