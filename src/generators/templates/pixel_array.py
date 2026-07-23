@@ -701,6 +701,7 @@ def main():
    local_bBox = PA_getHierLayerBBox(master c_layer c_purp)
 
    if(local_bBox then
+     printf("  SUCCESS: Found target layer '%s %s' hierarchical bBox: %L\\n" c_layer c_purp local_bBox)
      llx = caar(local_bBox)
      lly = cadar(local_bBox)
      urx = caadr(local_bBox)
