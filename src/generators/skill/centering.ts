@@ -126,11 +126,14 @@ export function generateCentering(builder: SkillBuilder, config: LayoutConfig): 
         urx_rot = caadr(rot_local_bBox)
         ury_rot = cadadr(rot_local_bBox)
         
-        ; Margins from rotated cell boundary to rotated layer boundary
-        L_margin = llx_rot - u_llx
-        R_margin = u_urx - urx_rot
-        B_margin = lly_rot - u_lly
-        T_margin = u_ury - ury_rot
+        printf("  Master bBox (rotated): %L\\n" rot_uBBox)
+        printf("  Local Layer bBox (rotated): %L\\n" rot_local_bBox)
+        
+        ; Margins from rotated cell boundary to rotated layer boundary (using abs to handle unnormalized bBoxes)
+        L_margin = abs(llx_rot - u_llx)
+        R_margin = abs(u_urx - urx_rot)
+        B_margin = abs(lly_rot - u_lly)
+        T_margin = abs(u_ury - ury_rot)
         
         printf("  Margins (L R B T): %L %L %L %L\\n" L_margin R_margin B_margin T_margin)
         
