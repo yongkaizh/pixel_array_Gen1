@@ -672,53 +672,108 @@ def main():
        ury = max(ury cadadr(sh~>bBox))
      )
 
-     ; Shape bounding box in local (master cell) coordinate space
-     local_bBox = list(list(llx lly) list(urx ury))
-     printf("  Layer '%s %s' local bBox: %L\\n" c_layer c_purp local_bBox)
+     ; Find the master cell physical bounding box
+     cbBBox = master~>bBox
+     c_llx = caar(cbBBox)
+     c_lly = cadar(cbBBox)
+     c_urx = caadr(cbBBox)
+     c_ury = cadadr(cbBBox)
+     
+     ; Calculate the 4 insets of the target layer relative to the master cell bounds
+     inset_left   = llx - c_llx
+     inset_bottom = lly - c_lly
+     inset_right  = c_urx - urx
+     inset_top    = c_ury - ury
+     
+     printf("  Master Cell bBox: [%L, %L] - [%L, %L]\\n" c_llx c_lly c_urx c_ury)
+     printf("  Layer Insets: L=%L B=%L R=%L T=%L\\n" inset_left inset_bottom inset_right inset_top)
 
      ; ---------------------------------------------------------------
-     ; NATIVE CELLVIEW BBOX TRANSFER ALGORITHM
+     ; ORIENTATION-AWARE MOSAIC INSET ALGORITHM
      ;
-     ; We calculate the center by transferring the layer's local bBox
-     ; directly into the current (top-level) cellview using Cadence's
-     ; native geometric transformation engine (dbTransformBBox).
-     ;
-     ; This perfectly handles R180 offset behaviors idiomaticaly and 
-     ; ignores any stray shapes outside the target layer.
+     ; To perfectly find the target layer bounding box across the entire mosaic,
+     ; we take the physical bounding box of the entire mosaic instance and 
+     ; mathematically inset it by the exact offsets calculated from the master cell.
+     ; 
+     ; We use a case switch on the mosaic orientation to accurately map the master
+     ; cell's Left/Right/Bottom/Top insets to the mosaic's physical edges!
      ; ---------------------------------------------------------------
-     gx = car(maxActiveInst~>xy)
-     gy = cadr(maxActiveInst~>xy)
-     cols = maxActiveInst~>columns
-     rows = maxActiveInst~>rows
+     mBBox = maxActiveInst~>bBox
+     m_llx = caar(mBBox)
+     m_lly = cadar(mBBox)
+     m_urx = caadr(mBBox)
+     m_ury = cadadr(mBBox)
      
-     uX = maxActiveInst~>uX
-     uY = maxActiveInst~>uY
      orient = maxActiveInst~>orient
-     unless(orient orient = "R180")
+     unless(orient orient = "R0")
      
-     ; Transform layer bBox for the (0,0) mosaic cell
-     transform_0 = list(list(gx gy) orient 1.0)
-     bBox_0 = dbTransformBBox(local_bBox transform_0)
+     ; Map insets to the mosaic bounds based on orientation
+     case(orient
+       ("R0"
+         layer_left   = m_llx + inset_left
+         layer_right  = m_urx - inset_right
+         layer_bottom = m_lly + inset_bottom
+         layer_top    = m_ury - inset_top
+       )
+       ("R90"
+         layer_left   = m_llx + inset_top
+         layer_right  = m_urx - inset_bottom
+         layer_bottom = m_lly + inset_left
+         layer_top    = m_ury - inset_right
+       )
+       ("R180"
+         layer_left   = m_llx + inset_right
+         layer_right  = m_urx - inset_left
+         layer_bottom = m_lly + inset_top
+         layer_top    = m_ury - inset_bottom
+       )
+       ("R270"
+         layer_left   = m_llx + inset_bottom
+         layer_right  = m_urx - inset_top
+         layer_bottom = m_lly + inset_right
+         layer_top    = m_ury - inset_left
+       )
+       ("MY"
+         layer_left   = m_llx + inset_right
+         layer_right  = m_urx - inset_left
+         layer_bottom = m_lly + inset_bottom
+         layer_top    = m_ury - inset_top
+       )
+       ("MX"
+         layer_left   = m_llx + inset_left
+         layer_right  = m_urx - inset_right
+         layer_bottom = m_lly + inset_top
+         layer_top    = m_ury - inset_bottom
+       )
+       ("MYR90"
+         layer_left   = m_llx + inset_top
+         layer_right  = m_urx - inset_bottom
+         layer_bottom = m_lly + inset_right
+         layer_top    = m_ury - inset_left
+       )
+       ("MXR90"
+         layer_left   = m_llx + inset_bottom
+         layer_right  = m_urx - inset_top
+         layer_bottom = m_lly + inset_left
+         layer_top    = m_ury - inset_right
+       )
+       (t
+         printf("WARNING: Unknown orientation %s, assuming R0\\n" orient)
+         layer_left   = m_llx + inset_left
+         layer_right  = m_urx - inset_right
+         layer_bottom = m_lly + inset_bottom
+         layer_top    = m_ury - inset_top
+       )
+     )
      
-     ; Transform layer bBox for the (cols-1, rows-1) mosaic cell
-     gx_end = gx + (cols - 1) * uX
-     gy_end = gy + (rows - 1) * uY
-     transform_end = list(list(gx_end gy_end) orient 1.0)
-     bBox_end = dbTransformBBox(local_bBox transform_end)
-     
-     ; Determine the absolute total bounds of the layer in the top cell
-     global_llx = min(caar(bBox_0) caar(bBox_end))
-     global_lly = min(cadar(bBox_0) cadar(bBox_end))
-     global_urx = max(caadr(bBox_0) caadr(bBox_end))
-     global_ury = max(cadadr(bBox_0) cadadr(bBox_end))
-     
-     cx = (global_llx + global_urx) / 2.0
-     cy = (global_lly + global_ury) / 2.0
+     ; Calculate final center
+     cx = (layer_left + layer_right) / 2.0
+     cy = (layer_bottom + layer_top) / 2.0
      
      dx = 0.0 - cx
      dy = 0.0 - cy
      
-     printf("  Mosaic Grid: Origin=(%L, %L) Cols=%L Rows=%L uX=%L uY=%L\\n" gx gy cols rows uX uY)
+     printf("  Mosaic bounds: [%L, %L] - [%L, %L] Orient: %s\\n" m_llx m_lly m_urx m_ury orient)
      printf("  Layer center in array: cx=%L cy=%L\\n" cx cy)
      printf("  Shift: dx=%L dy=%L\\n" dx dy)
      dbClose(master)
