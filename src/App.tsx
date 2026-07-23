@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { LayoutConfig } from './types';
-import { getDefaultLayoutConfig } from './utils';
+import { getDefaultLayoutConfig } from './config/defaults';
 import { CadViewer } from './components/CadViewer';
 import { ExcelManager } from './components/ExcelManager';
 import { ParamsForm } from './components/ParamsForm';

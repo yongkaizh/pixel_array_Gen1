@@ -3,7 +3,6 @@ import {
   getRowCategory, 
   parseSegmentsString, 
   getLeftRightStringsFromSegments,
-  getDefaultLayoutConfig,
   generateSkillCode,
   generatePythonCode,
   parseExcelFile,
@@ -11,6 +10,7 @@ import {
   exportToExcel
 } from './utils';
 import { LayoutConfig } from './types';
+import { getDefaultLayoutConfig } from './config/defaults';
 import * as XLSX from 'xlsx';
 
 describe('utils.ts', () => {

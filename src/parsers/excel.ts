@@ -450,5 +450,3 @@ export function parseExcelFile(fileBuffer: ArrayBuffer): LayoutConfig {
     cell_map
   };
 }
-
-// Generate array buffer for downloading array_pixel.xlsx

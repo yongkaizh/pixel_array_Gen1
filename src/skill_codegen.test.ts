@@ -13,7 +13,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { generateSkillCode, generatePythonCode, getDefaultLayoutConfig } from './utils';
+import { generateSkillCode, generatePythonCode } from './utils';
+import { getDefaultLayoutConfig } from './config/defaults';
 import type { LayoutConfig } from './types';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────

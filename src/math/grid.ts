@@ -54,6 +54,3 @@ export function getLeftRightStringsFromSegments(segments: RowSegment[] | undefin
     };
   }
 }
-
-
-// Parse uploaded Excel file to layout config
