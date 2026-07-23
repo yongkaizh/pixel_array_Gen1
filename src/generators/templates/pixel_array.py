@@ -720,17 +720,31 @@ def main():
      uY = maxActiveInst~>uY
      unless(uY uY = 0.0)
      
+     ; Calculate the 4 corner points of the local unrotated grid
+     pt_00 = list(0.0 0.0)
+     pt_c0 = list((m_cols - 1) * uX 0.0)
+     pt_0r = list(0.0 (m_rows - 1) * uY)
+     pt_cr = list((m_cols - 1) * uX (m_rows - 1) * uY)
+     
      xy_0 = maxActiveInst~>xy
-     xy_last = list(car(xy_0) + (m_cols - 1) * uX cadr(xy_0) + (m_rows - 1) * uY)
      
-     bBox_0 = dbTransformBBox(local_bBox list(xy_0 orient 1.0))
-     bBox_last = dbTransformBBox(local_bBox list(xy_last orient 1.0))
+     ; Transform them to absolute top-cell coordinates using the mosaic's transform
+     xy_00 = dbTransformPoint(pt_00 list(xy_0 orient 1.0))
+     xy_c0 = dbTransformPoint(pt_c0 list(xy_0 orient 1.0))
+     xy_0r = dbTransformPoint(pt_0r list(xy_0 orient 1.0))
+     xy_cr = dbTransformPoint(pt_cr list(xy_0 orient 1.0))
      
-     ; The global target layer bounds are the extremes of the first and last instance layer bounds!
-     layer_left   = min(caar(bBox_0) caadr(bBox_0) caar(bBox_last) caadr(bBox_last))
-     layer_right  = max(caar(bBox_0) caadr(bBox_0) caar(bBox_last) caadr(bBox_last))
-     layer_bottom = min(cadar(bBox_0) cadadr(bBox_0) cadar(bBox_last) cadadr(bBox_last))
-     layer_top    = max(cadar(bBox_0) cadadr(bBox_0) cadar(bBox_last) cadadr(bBox_last))
+     ; Transform the target layer bounding box to each of the 4 extreme instances
+     bB_00 = dbTransformBBox(local_bBox list(xy_00 orient 1.0))
+     bB_c0 = dbTransformBBox(local_bBox list(xy_c0 orient 1.0))
+     bB_0r = dbTransformBBox(local_bBox list(xy_0r orient 1.0))
+     bB_cr = dbTransformBBox(local_bBox list(xy_cr orient 1.0))
+     
+     ; The global target layer bounds are the absolute minimum and maximum across all 4 corners!
+     layer_left   = min(caar(bB_00) caar(bB_c0) caar(bB_0r) caar(bB_cr) caadr(bB_00) caadr(bB_c0) caadr(bB_0r) caadr(bB_cr))
+     layer_right  = max(caar(bB_00) caar(bB_c0) caar(bB_0r) caar(bB_cr) caadr(bB_00) caadr(bB_c0) caadr(bB_0r) caadr(bB_cr))
+     layer_bottom = min(cadar(bB_00) cadar(bB_c0) cadar(bB_0r) cadar(bB_cr) cadadr(bB_00) cadadr(bB_c0) cadadr(bB_0r) cadadr(bB_cr))
+     layer_top    = max(cadar(bB_00) cadar(bB_c0) cadar(bB_0r) cadar(bB_cr) cadadr(bB_00) cadadr(bB_c0) cadadr(bB_0r) cadadr(bB_cr))
      
      layer_bBox = list(list(layer_left layer_bottom) list(layer_right layer_top))
      printf("  Mosaic Array EXACT target layer bBox: %L\\n" layer_bBox)
