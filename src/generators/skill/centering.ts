@@ -239,15 +239,13 @@ export function generateCentering(builder: SkillBuilder, config: LayoutConfig): 
     ; ---------------------------------------------------------------
     ; VERIFICATION RECTANGLE
     ; ---------------------------------------------------------------
-    if(boundp('llx) && llx then
-      v_w = urx - llx
-      v_h = ury - lly
-      v_llx = -v_w / 2.0
-      v_lly = -v_h / 2.0
-      v_urx = v_w / 2.0
-      v_ury = v_h / 2.0
+    if(boundp('layer_left) && layer_left then
+      v_llx = layer_left + dx
+      v_lly = layer_bottom + dy
+      v_urx = layer_right + dx
+      v_ury = layer_top + dy
       dbCreateRect(cv list("M1" "pin") list(list(v_llx v_lly) list(v_urx v_ury)))
-      printf("  Drew verification rectangle on 'M1' 'pin' matching single target layer size: [%L, %L] - [%L, %L]\\n" v_llx v_lly v_urx v_ury)
+      printf("  Drew verification rectangle on 'M1' 'pin' covering all target layers in the array: [%L, %L] - [%L, %L]\\n" v_llx v_lly v_urx v_ury)
     )
 
     ; --- Rotations applied during creation ---
