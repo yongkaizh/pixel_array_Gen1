@@ -761,14 +761,29 @@ def main():
      layer_bBox = list(list(layer_left layer_bottom) list(layer_right layer_top))
      printf("  Mosaic Array target layer bBox (from robust 4-corner calculation): %L\\n" layer_bBox)
      
+     ; ---------------------------------------------------------------
+     ; Calculate center layer bBox of the mosaic via subtraction
+     ; ---------------------------------------------------------------
+     mosaic_layer_w = layer_right - layer_left
+     mosaic_layer_h = layer_top - layer_bottom
+     
+     unit_layer_w = urx - llx
+     unit_layer_h = ury - lly
+     
+     center_layer_left = layer_left + (mosaic_layer_w - unit_layer_w) / 2.0
+     center_layer_bottom = layer_bottom + (mosaic_layer_h - unit_layer_h) / 2.0
+     center_layer_right = center_layer_left + unit_layer_w
+     center_layer_top = center_layer_bottom + unit_layer_h
+     
+     printf("  Center Layer bBox of the mosaic: [%L, %L] - [%L, %L]\\n" center_layer_left center_layer_bottom center_layer_right center_layer_top)
+     
      ; Calculate final center
-     cx = (layer_left + layer_right) / 2.0
-     cy = (layer_bottom + layer_top) / 2.0
+     cx = (center_layer_left + center_layer_right) / 2.0
+     cy = (center_layer_bottom + center_layer_top) / 2.0
      
      dx = 0.0 - cx
      dy = 0.0 - cy
      
-     printf("  Mosaic bounds: [%L, %L] - [%L, %L] Orient: %s\\n" m_llx m_lly m_urx m_ury orient)
      printf("  Layer center in array: cx=%L cy=%L\\n" cx cy)
      printf("  Shift: dx=%L dy=%L\\n" dx dy)
      dbClose(master)
