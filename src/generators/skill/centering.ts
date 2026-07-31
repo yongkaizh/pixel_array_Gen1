@@ -191,13 +191,44 @@ export function generateCentering(builder: SkillBuilder, config: LayoutConfig): 
     ; ---------------------------------------------------------------
     ; VERIFICATION RECTANGLE
     ; ---------------------------------------------------------------
-    if(boundp('layer_left) && layer_left then
-      v_llx = layer_left + dx
-      v_lly = layer_bottom + dy
-      v_urx = layer_right + dx
-      v_ury = layer_top + dy
-      dbCreateRect(cv list("M1" "pin") list(list(v_llx v_lly) list(v_urx v_ury)))
-      printf("  Drew verification rectangle on 'M1' 'pin' covering all target layers in the array: [%L, %L] - [%L, %L]\\n" v_llx v_lly v_urx v_ury)
+    if(boundp('local_bBox) && local_bBox && maxActiveInst then
+      targetCellName = maxActiveInst~>cellName
+      foreach(item allInsts
+        inst = car(item)
+        if(inst~>cellName == targetCellName then
+          m_cols = inst~>columns
+          m_rows = inst~>rows
+          uX = inst~>uX
+          unless(uX uX = 0.0)
+          uY = inst~>uY
+          unless(uY uY = 0.0)
+          
+          pt_00 = list(0.0 0.0)
+          pt_c0 = list((m_cols - 1) * uX 0.0)
+          pt_0r = list(0.0 (m_rows - 1) * uY)
+          pt_cr = list((m_cols - 1) * uX (m_rows - 1) * uY)
+          
+          xy_0 = inst~>xy
+          
+          xy_00 = dbTransformPoint(pt_00 list(xy_0 "R180" 1.0))
+          xy_c0 = dbTransformPoint(pt_c0 list(xy_0 "R180" 1.0))
+          xy_0r = dbTransformPoint(pt_0r list(xy_0 "R180" 1.0))
+          xy_cr = dbTransformPoint(pt_cr list(xy_0 "R180" 1.0))
+          
+          bB_00 = dbTransformBBox(local_bBox list(xy_00 "R180" 1.0))
+          bB_c0 = dbTransformBBox(local_bBox list(xy_c0 "R180" 1.0))
+          bB_0r = dbTransformBBox(local_bBox list(xy_0r "R180" 1.0))
+          bB_cr = dbTransformBBox(local_bBox list(xy_cr "R180" 1.0))
+          
+          v_llx = min(caar(bB_00) caar(bB_c0) caar(bB_0r) caar(bB_cr) caadr(bB_00) caadr(bB_c0) caadr(bB_0r) caadr(bB_cr))
+          v_urx = max(caar(bB_00) caar(bB_c0) caar(bB_0r) caar(bB_cr) caadr(bB_00) caadr(bB_c0) caadr(bB_0r) caadr(bB_cr))
+          v_lly = min(cadar(bB_00) cadar(bB_c0) cadar(bB_0r) cadar(bB_cr) cadadr(bB_00) cadadr(bB_c0) cadadr(bB_0r) cadadr(bB_cr))
+          v_ury = max(cadar(bB_00) cadar(bB_c0) cadar(bB_0r) cadar(bB_cr) cadadr(bB_00) cadadr(bB_c0) cadadr(bB_0r) cadadr(bB_cr))
+          
+          dbCreateRect(cv list("M1" "pin") list(list(v_llx v_lly) list(v_urx v_ury)))
+          printf("  Drew verification rectangle on 'M1' 'pin' for matching array '%s': [%L, %L] - [%L, %L]\\n" inst~>name v_llx v_lly v_urx v_ury)
+        )
+      )
     )
 
     ; --- Rotations applied during creation ---
