@@ -754,7 +754,8 @@ def main():
      dx = 0.0 - cx
      dy = 0.0 - cy
      
-     printf("  Mosaic bounds: [%L, %L] - [%L, %L] Orient: %s\\n" m_llx m_lly m_urx m_ury orient)
+     mBBox = maxActiveInst~>bBox
+     printf("  Mosaic bounds: [%L, %L] - [%L, %L] Orient: %s\\n" caar(mBBox) cadar(mBBox) caadr(mBBox) cadadr(mBBox) orient)
      printf("  Layer center in array: cx=%L cy=%L\\n" cx cy)
      printf("  Shift: dx=%L dy=%L\\n" dx dy)
      dbClose(master)
