@@ -1,37 +1,11 @@
+import { validateLayoutConfig } from '../math/validation';
+import { positiveNumber } from '../math/numbers';
 import * as XLSX from 'xlsx';
+import { normalizeRotation } from '../math/orientation';
 import { LayoutConfig, RowConfig, CellInfo, RowSegment } from '../types';
 
-export function parseSegmentsString(txt: string | number, defaultPurpose: string = 'dummy'): RowSegment[] {
-  if (typeof txt === 'number') txt = String(txt);
-  if (!txt || txt.trim() === '') return [];
-  // Supports formats like:
-  // "20" (defaults to "dummy:20")
-  // "dummy:20"
-  // "dummy:20, c2:10"
-  const parts = txt.split(',');
-  const segments: RowSegment[] = [];
-  parts.forEach(part => {
-    const clean = part.trim();
-    if (!clean) return;
-
-    if (/^\d+$/.test(clean)) {
-      const cols = parseInt(clean, 10);
-      if (cols > 0) {
-        segments.push({ purpose: defaultPurpose, cols });
-      }
-    } else {
-      const match = clean.match(/^([a-zA-Z0-9_]+)\s*:\s*(\d+)$/);
-      if (match) {
-        const purp = match[1].trim().toLowerCase();
-        const cols = parseInt(match[2], 10);
-        if (cols > 0) {
-          segments.push({ purpose: purp, cols });
-        }
-      }
-    }
-  });
-  return segments;
-}
+export { parseSegmentsString } from '../math/segments';
+import { parseSegmentsString } from '../math/segments';
 
 
 export function parseExcelFile(fileBuffer: ArrayBuffer): LayoutConfig {
@@ -134,10 +108,10 @@ export function parseExcelFile(fileBuffer: ArrayBuffer): LayoutConfig {
     const name = String(rawName).trim().toLowerCase();
 
     cell_map[name] = {
-      name: name,
+      name: String(row['Display Name'] || name).trim(),
       lib: String(row['library'] || row['Library'] || row['LIBRARY'] || '').trim(),
       cell: String(row['Cell'] || row['cell'] || row['CELL'] || '').trim(),
-      rot: String(row['rotation'] || row['Rotation'] || row['ROTATION'] || 'R0').trim()
+      rot: normalizeRotation(String(row['rotation'] || row['Rotation'] || row['ROTATION'] || 'R0'))
     };
   });
 
@@ -233,13 +207,13 @@ export function parseExcelFile(fileBuffer: ArrayBuffer): LayoutConfig {
   const top_cell = getParameter('cellname');
 
   const x_pitch_raw = getParameter('x pitch');
-  const x_pitch = parseFloat(x_pitch_raw);
+  const x_pitch = positiveNumber(x_pitch_raw, 'X pitch');
   if (isNaN(x_pitch) || x_pitch <= 0) {
     throw new Error(`INVALID 'x pitch' VALUE: "${x_pitch_raw}". This must be a positive non-zero decimal value representing horizontal cell pitch.`);
   }
 
   const y_pitch_raw = getParameter('y pitch');
-  const y_pitch = parseFloat(y_pitch_raw);
+  const y_pitch = positiveNumber(y_pitch_raw, 'Y pitch');
   if (isNaN(y_pitch) || y_pitch <= 0) {
     throw new Error(`INVALID 'y pitch' VALUE: "${y_pitch_raw}". This must be a positive non-zero decimal value representing vertical cell pitch.`);
   }
@@ -277,8 +251,8 @@ export function parseExcelFile(fileBuffer: ArrayBuffer): LayoutConfig {
   // Check same row first for numeric column count
   for (let c = cc + 1; c < colsCount; c++) {
     const val = grid[cr][c];
-    if (val !== '' && !isNaN(parseInt(val, 10))) {
-      total_cols = parseInt(val, 10);
+    if (val !== '' && Number.isFinite(Number(val))) {
+      total_cols = positiveNumber(val, 'Column count', true);
       foundColNum = true;
       break;
     }
@@ -288,10 +262,11 @@ export function parseExcelFile(fileBuffer: ArrayBuffer): LayoutConfig {
   if (!foundColNum) {
     for (let r = cr + 1; r < Math.min(cr + 20, rowsCount); r++) {
       const val = grid[r][cc];
+      if (val.toLowerCase() === 'row_num') break;
       if (val === '') continue;
-      const parsed = parseInt(val, 10);
-      if (!isNaN(parsed)) {
-        total_cols = parsed;
+      const parsed = Number(val);
+      if (Number.isFinite(parsed)) {
+        total_cols = positiveNumber(val, 'Column count', true);
 
         foundColNum = true;
         break;
@@ -328,7 +303,8 @@ export function parseExcelFile(fileBuffer: ArrayBuffer): LayoutConfig {
 
   const [rr, rc] = rowPos;
   const rows: RowConfig[] = [];
-  let rov_purpose = '';
+  const targetPos = findKeyword('rov purpose');
+  let rov_purpose = targetPos ? (grid[targetPos[0]][targetPos[1] + 1] || '').trim() : '';
 
   let r = rr + 1;
   while (r < rowsCount) {
@@ -340,11 +316,13 @@ export function parseExcelFile(fileBuffer: ArrayBuffer): LayoutConfig {
       purposeTxt = grid[r][rc + 1];
     }
 
-    const row_count = parseInt(rowCountTxt, 10);
-    if (isNaN(row_count)) {
-      r++;
-      continue;
+    const row_count = Number(rowCountTxt);
+    if (!Number.isFinite(row_count)) {
+      if (r === rr + 1 && rowCountTxt.startsWith('(')) { r++; continue; }
+      throw new Error(`Invalid row count: "${rowCountTxt}".`);
     }
+
+    positiveNumber(rowCountTxt, 'Row count', true);
 
     // Extract purpose and row name (e.g., "BLC (c1)" -> name: "BLC", purpose: "c1")
     let purpose = purposeTxt.trim();
@@ -390,8 +368,9 @@ export function parseExcelFile(fileBuffer: ArrayBuffer): LayoutConfig {
     rows.push(rowConf);
 
     // Check adjacent cells for ROV marker (starts from Column G which is rc + 1)
-    for (let c = rc + 1; c < Math.min(rc + 10, colsCount); c++) {
+    for (let c = rc + 2; c < Math.min(rc + 3, colsCount); c++) {
       if (grid[r][c].toUpperCase() === 'ROV') {
+        if (rov_purpose && rov_purpose.toLowerCase() !== purpose.toLowerCase()) throw new Error('ROV markers must select a single target purpose.');
         rov_purpose = purpose;
       }
     }
@@ -399,45 +378,7 @@ export function parseExcelFile(fileBuffer: ArrayBuffer): LayoutConfig {
     r++;
   }
 
-  if (!rov_purpose && rows.length > 0) {
-    // Fallback: search for row block with "rov" in purpose or take the one that contains it
-    const rovRow = rows.find(row => row.purpose.toLowerCase().includes('rov'));
-    if (rovRow) {
-      rov_purpose = rovRow.purpose;
-    } else {
-      // Default fallback
-      rov_purpose = rows[rows.length - 1].purpose;
-    }
-  }
-
-  // Validate purposes (including segments)
-  rows.forEach(row => {
-    const nameLower = row.purpose.toLowerCase();
-    if (!cell_map[nameLower]) {
-      cell_map[nameLower] = {
-        name: row.purpose,
-        lib: 'pixel_lib',
-        cell: `cell_${nameLower}`,
-        rot: 'R0'
-      };
-    }
-
-    if (row.segments) {
-      row.segments.forEach(seg => {
-        const segLower = seg.purpose.toLowerCase();
-        if (!cell_map[segLower]) {
-          cell_map[segLower] = {
-            name: seg.purpose,
-            lib: 'pixel_lib',
-            cell: `cell_${segLower}`,
-            rot: 'R0'
-          };
-        }
-      });
-    }
-  });
-
-  return {
+  const config: LayoutConfig = {
     top_lib,
     top_cell,
     x_pitch,
@@ -449,4 +390,6 @@ export function parseExcelFile(fileBuffer: ArrayBuffer): LayoutConfig {
     rows,
     cell_map
   };
+  validateLayoutConfig(config);
+  return config;
 }

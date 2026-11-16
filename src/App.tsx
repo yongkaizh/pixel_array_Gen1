@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { validateLayoutConfig } from './math/validation';
 import React, { useState } from 'react';
 import { LayoutConfig } from './types';
 import { getDefaultLayoutConfig } from './config/defaults';
@@ -27,6 +28,12 @@ export default function App() {
   const isModified = JSON.stringify(draftConfig) !== JSON.stringify(activeConfig);
 
   const handleApplyChanges = () => {
+    try {
+      validateLayoutConfig(draftConfig);
+    } catch (error) {
+      setStatus({ type: 'error', message: error instanceof Error ? error.message : String(error) });
+      return;
+    }
     setActiveConfig(draftConfig);
     setStatus({
       type: 'success',

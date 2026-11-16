@@ -1,32 +1,17 @@
 import { LayoutConfig, RowConfig, CellInfo } from "../../types";
-import { getRowCategory } from "../../math/grid";
-import { SkillBuilder } from "./SkillBuilder";
+import { centerSegmentIndices } from "../../math/layout";
+import { mosaicGeometry } from "../../math/orientation";
+import { SkillBuilder, escapeSkill } from "./SkillBuilder";
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-/** Returns the row with the most physical rows among "active" rows, or null. */
-export function findMaxActiveRow(config: LayoutConfig): RowConfig | null {
-  let maxRow: RowConfig | null = null;
-  for (const row of config.rows) {
-    if (getRowCategory(row.purpose, row.name ?? "", config.rov_purpose) === "active") {
-      if (!maxRow || row.rows > maxRow.rows) maxRow = row;
-    }
-  }
-  return maxRow;
-}
+export { findCenterRow as findMaxActiveRow } from "../../math/layout";
 
-/** Returns the CellInfo for a given purpose, creating a placeholder if missing. */
+/** Layout validation guarantees that every placed purpose has an explicit mapping. */
 function cellInfoFor(config: LayoutConfig, purpose: string): CellInfo {
-  return (
-    config.cell_map[purpose.toLowerCase()] ?? {
-      name: purpose,
-      lib: "pixel_lib",
-      cell: `cell_${purpose.toLowerCase()}`,
-      rot: "R0",
-    }
-  );
+  return config.cell_map[purpose.toLowerCase()];
 }
 
 // ---------------------------------------------------------------------------
@@ -48,8 +33,8 @@ export function generateMosaics(
     const cleanPurpose = row.purpose.toLowerCase().replace(/[^a-zA-Z0-9_]/g, "_");
 
     builder.append(`
-      ; --- Creating ${rowName} Rows ---
-      printf("Creating ${rowName} (purpose: ${row.purpose}) rows=${row.rows} y=%L\\n" currentY)
+      ; --- Creating ${rowName.replace(/[\r\n]/g, " ")} Rows ---
+      printf("Creating %s (purpose: %s) rows=%L y=%L\\n" "${escapeSkill(rowName)}" "${escapeSkill(row.purpose)}" ${row.rows} currentY)
     `);
 
     if (!row.segments || row.segments.length === 0) {
@@ -77,12 +62,13 @@ function emitSimpleMosaic(
   mosaicName: string
 ): void {
   const ci = cellInfoFor(config, row.purpose);
+  const g = mosaicGeometry(ci.rot, config.total_cols, row.rows, config.x_pitch, config.y_pitch);
 
   builder.append(`
     master =
       dbOpenCellViewByType(
-        "${ci.lib}"
-        "${ci.cell}"
+        "${escapeSkill(ci.lib)}"
+        "${escapeSkill(ci.cell)}"
         "layout"
         "maskLayout"
         "r"
@@ -91,7 +77,7 @@ function emitSimpleMosaic(
     when(
       master == nil
       error(
-        "Cannot open master ${ci.cell}\\n"
+        "Cannot open master %s\\n" "${escapeSkill(ci.cell)}"
       )
     )
 
@@ -100,11 +86,11 @@ function emitSimpleMosaic(
       master
       "${mosaicName}"
       list(0.0 0.0)
-      "R180"
-      ${row.rows}
-      ${config.total_cols}
-      ${config.y_pitch}
-      ${config.x_pitch}
+      "${g.orient}"
+      ${g.rows}
+      ${g.cols}
+      ${g.yStep}
+      ${g.xStep}
     )
     unless(inst
       inst = dbCreateMosaic(
@@ -112,38 +98,49 @@ function emitSimpleMosaic(
         master
         "${mosaicName}"
         list(0.0 0.0)
-        "R180"
-        ${row.rows}
-        ${config.total_cols}
-        ${config.y_pitch}
-        ${config.x_pitch}
+        "${g.orient}"
+        ${g.rows}
+        ${g.cols}
+        ${g.yStep}
+        ${g.xStep}
       )
     )
 
     when(
       inst == nil
       error(
-        "Failed creating ${row.purpose}\\n"
+        "Failed creating %s\\n" "${escapeSkill(row.purpose)}"
       )
     )
 
     when(inst
-      dx = ${config.total_cols} * ${config.x_pitch}
-      dy = currentY + (${row.rows} * ${config.y_pitch})
+      dx = ${g.offsetX}
+      dy = currentY + ${g.offsetY}
+      placementBox = paLayerBBox(master list("${escapeSkill(config.center_layer || 'BDTID')}" "${escapeSkill(config.center_purpose || 'drawing')}"))
+      unless(placementBox placementBox = master~>bBox)
+      unless(placementBox error("Master has no placement geometry\\n"))
+      actualBox = dbTransformBBox(placementBox list(list(0.0 0.0) "${g.orient}" 1.0))
+      nominalBox = dbTransformBBox(list(list(0.0 0.0) list(${g.xStep} ${g.yStep})) list(list(0.0 0.0) "${g.orient}" 1.0))
+      ; Pitch spaces origins; the reference cell size and local origin come from its geometry.
+      dx = dx + caar(nominalBox) - caar(actualBox)
+      dy = dy + cadar(nominalBox) - cadar(actualBox)
       inst~>xy = list(dx dy)
     )
 
     allInsts =
       cons(
-        list(inst "R180")
+        list(inst "${g.orient}" ${g.cols} ${g.rows} ${g.xStep} ${g.yStep} placementBox)
         allInsts
       )
+    dbClose(master)
   `);
 
-  if (row.purpose.toLowerCase() === config.rov_purpose.toLowerCase() && row === maxActiveRow) {
+  if (row === maxActiveRow) {
     builder.append(`
       printf("ACTIVE MOSAIC FOUND\\n")
       maxActiveInst = inst
+      maxActiveData = car(allInsts)
+      targetInsts = cons(maxActiveData targetInsts)
     `);
   }
 }
@@ -164,6 +161,7 @@ function emitSegmentedMosaic(
 
   row.segments!.forEach((seg, sIdx) => {
     const ci = cellInfoFor(config, seg.purpose);
+    const g = mosaicGeometry(ci.rot, seg.cols, row.rows, config.x_pitch, config.y_pitch);
     const cleanSeg = seg.purpose.toLowerCase().replace(/[^a-zA-Z0-9_]/g, "_");
     const segName  = `M${rowNum}_${cleanPurpose}_seg${sIdx + 1}_${cleanSeg}`;
 
@@ -171,8 +169,8 @@ function emitSegmentedMosaic(
       ; Segment ${sIdx + 1}: ${seg.purpose} (cols=${seg.cols})
       master =
         dbOpenCellViewByType(
-          "${ci.lib}"
-          "${ci.cell}"
+          "${escapeSkill(ci.lib)}"
+          "${escapeSkill(ci.cell)}"
           "layout"
           "maskLayout"
           "r"
@@ -181,7 +179,7 @@ function emitSegmentedMosaic(
       when(
         master == nil
         error(
-          "Cannot open master ${ci.cell}\\n"
+          "Cannot open master %s\\n" "${escapeSkill(ci.cell)}"
         )
       )
 
@@ -190,11 +188,11 @@ function emitSegmentedMosaic(
         master
         "${segName}"
         list(0.0 0.0)
-        "R180"
-        ${row.rows}
-        ${seg.cols}
-        ${config.y_pitch}
-        ${config.x_pitch}
+        "${g.orient}"
+        ${g.rows}
+        ${g.cols}
+        ${g.yStep}
+        ${g.xStep}
       )
       unless(inst
         inst = dbCreateMosaic(
@@ -202,41 +200,49 @@ function emitSegmentedMosaic(
           master
           "${segName}"
           list(0.0 0.0)
-          "R180"
-          ${row.rows}
-          ${seg.cols}
-          ${config.y_pitch}
-          ${config.x_pitch}
+          "${g.orient}"
+          ${g.rows}
+          ${g.cols}
+          ${g.yStep}
+          ${g.xStep}
         )
       )
 
       when(
         inst == nil
         error(
-          "Failed creating segment ${seg.purpose}\\n"
+          "Failed creating segment %s\\n" "${escapeSkill(seg.purpose)}"
         )
       )
 
       when(inst
-        dx = ${currSegX.toFixed(4)} + (${seg.cols} * ${config.x_pitch})
-        dy = currentY + (${row.rows} * ${config.y_pitch})
+        dx = ${currSegX} + ${g.offsetX}
+        dy = currentY + ${g.offsetY}
+        placementBox = paLayerBBox(master list("${escapeSkill(config.center_layer || 'BDTID')}" "${escapeSkill(config.center_purpose || 'drawing')}"))
+        unless(placementBox placementBox = master~>bBox)
+        unless(placementBox error("Master has no placement geometry\\n"))
+        actualBox = dbTransformBBox(placementBox list(list(0.0 0.0) "${g.orient}" 1.0))
+        nominalBox = dbTransformBBox(list(list(0.0 0.0) list(${g.xStep} ${g.yStep})) list(list(0.0 0.0) "${g.orient}" 1.0))
+        ; Pitch spaces origins; the reference cell size and local origin come from its geometry.
+        dx = dx + caar(nominalBox) - caar(actualBox)
+        dy = dy + cadar(nominalBox) - cadar(actualBox)
         inst~>xy = list(dx dy)
       )
 
       allInsts =
         cons(
-          list(inst "R180")
+          list(inst "${g.orient}" ${g.cols} ${g.rows} ${g.xStep} ${g.yStep} placementBox)
           allInsts
         )
+      dbClose(master)
     `);
 
-    if (
-      seg.purpose.toLowerCase() === config.rov_purpose.toLowerCase() &&
-      row === maxActiveRow
-    ) {
+    if (row === maxActiveRow && centerSegmentIndices(config, row).includes(sIdx)) {
       builder.append(`
         printf("ACTIVE SEGMENT MOSAIC FOUND\\n")
         maxActiveInst = inst
+        maxActiveData = car(allInsts)
+        targetInsts = cons(maxActiveData targetInsts)
       `);
     }
 

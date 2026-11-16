@@ -44,10 +44,19 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
   }, [config.center_purpose]);
 
   const updateGlobal = (key: keyof LayoutConfig, value: any) => {
-    onConfigChange({
-      ...config,
-      [key]: value
-    });
+    const rows = key === 'total_cols' ? config.rows.map(row => {
+      if (!row.segments?.length) return row;
+      const { leftStr, rightStr } = getLeftRightStringsFromSegments(row.segments, row.purpose, row);
+      try {
+        const left = parseSegmentsString(leftStr);
+        const right = parseSegmentsString(rightStr);
+        const mainCols = value - [...left, ...right].reduce((sum, seg) => sum + seg.cols, 0);
+        return Number.isSafeInteger(mainCols) && mainCols > 0
+          ? { ...row, segments: [...left, { purpose: row.purpose.toLowerCase(), cols: mainCols }, ...right] }
+          : row;
+      } catch { return row; }
+    }) : config.rows;
+    onConfigChange({ ...config, rows, [key]: value });
   };
 
   const handleRowChange = (index: number, keyOrObject: keyof RowConfig | Partial<RowConfig>, value?: any) => {
@@ -364,8 +373,8 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
             <input
               type="number"
               step="0.01"
-              value={config.x_pitch}
-              onChange={(e) => updateGlobal('x_pitch', parseFloat(e.target.value) || 1.0)}
+              value={Number.isNaN(config.x_pitch) ? '' : config.x_pitch}
+              onChange={(e) => updateGlobal('x_pitch', e.target.valueAsNumber)}
               className="w-full glass-input rounded-lg px-3.5 py-2 text-xs font-mono focus:ring-1 focus:ring-neon-cyan focus:border-neon-cyan transition-all"
             />
           </div>
@@ -374,8 +383,8 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
             <input
               type="number"
               step="0.01"
-              value={config.y_pitch}
-              onChange={(e) => updateGlobal('y_pitch', parseFloat(e.target.value) || 1.0)}
+              value={Number.isNaN(config.y_pitch) ? '' : config.y_pitch}
+              onChange={(e) => updateGlobal('y_pitch', e.target.valueAsNumber)}
               className="w-full glass-input rounded-lg px-3.5 py-2 text-xs font-mono focus:ring-1 focus:ring-neon-cyan focus:border-neon-cyan transition-all"
             />
           </div>
@@ -383,8 +392,8 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
             <label className="text-xs font-mono font-black text-glass-text/80 uppercase tracking-widest">Total Columns (Cols)</label>
             <input
               type="number"
-              value={config.total_cols}
-              onChange={(e) => updateGlobal('total_cols', parseInt(e.target.value, 10) || 1)}
+              value={Number.isNaN(config.total_cols) ? '' : config.total_cols}
+              onChange={(e) => updateGlobal('total_cols', e.target.valueAsNumber)}
               className="w-full glass-input rounded-lg px-3.5 py-2 text-xs font-mono focus:ring-1 focus:ring-neon-cyan focus:border-neon-cyan transition-all"
             />
           </div>
@@ -395,6 +404,7 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
               onChange={(e) => updateGlobal('rov_purpose', e.target.value)}
               className="w-full glass-input rounded-lg px-3.5 py-2 text-xs font-mono focus:ring-1 focus:ring-neon-cyan focus:border-neon-cyan transition-all"
             >
+              <option value="">Auto: largest active block or whole array</option>
               {Object.keys(config.cell_map).map((key) => (
                 <option key={key} value={key}>
                   {key.toUpperCase()}
@@ -745,14 +755,20 @@ export function RowItemEditor({ row, idx, cellMap, totalCols, onUpdate, onDelete
         }
       }
     }
+    try { parseSegmentsString(input); } catch { return { valid: false, error: 'Invalid column count' }; }
     return { valid: true, error: '' };
   };
 
-  const leftValidation = validateInputString(leftInput);
+  const paddingCols = (input: string) => {
+    try { return parseSegmentsString(input).reduce((sum, seg) => sum + seg.cols, 0); }
+    catch { return NaN; }
+  };
+  const tooWide = paddingCols(leftInput) + paddingCols(rightInput) >= totalCols;
+  const leftValidation = tooWide ? { valid: false, error: 'Padding must leave a main cell' } : validateInputString(leftInput);
   const isLeftValid = leftValidation.valid;
   const leftError = leftValidation.error;
   
-  const rightValidation = validateInputString(rightInput);
+  const rightValidation = tooWide ? { valid: false, error: 'Padding must leave a main cell' } : validateInputString(rightInput);
   const isRightValid = rightValidation.valid;
   const rightError = rightValidation.error;
 
@@ -787,6 +803,10 @@ export function RowItemEditor({ row, idx, cellMap, totalCols, onUpdate, onDelete
     
     const purp = purposeOverride || row.purpose;
     const segments: RowSegment[] = [];
+    if (leftSum + rightSum >= totalCols) {
+      onUpdate({ leftStr: leftVal, rightStr: rightVal });
+      return;
+    }
     if (leftSum > 0 || rightSum > 0) {
       leftSegs.forEach(s => segments.push(s));
       const centerCols = totalCols - leftSum - rightSum;
@@ -859,26 +879,15 @@ export function RowItemEditor({ row, idx, cellMap, totalCols, onUpdate, onDelete
               const newPurp = e.target.value;
               const v = validateInputString(leftInput);
               const rv = validateInputString(rightInput);
-              if (v.valid && rv.valid) {
+              if (v.valid && rv.valid && !tooWide) {
                 applySegments(leftInput, rightInput, newPurp);
               } else {
                 // When invalid, update purpose only
                 const updates: Partial<RowConfig> = { purpose: newPurp };
                 // Also update the center segment if it exists
                 if (row.segments) {
-                  const leftSegs = parseSegmentsString(row.leftStr || '', 'dummy');
-                  const rightSegs = parseSegmentsString(row.rightStr || '', 'dummy');
-                  const leftSum = leftSegs.reduce((sum, s) => sum + s.cols, 0);
-                  const rightSum = rightSegs.reduce((sum, s) => sum + s.cols, 0);
-                  const centerCols = totalCols - leftSum - rightSum;
-                  
-                  const segments = [];
-                  leftSegs.forEach(s => segments.push(s));
-                  if (centerCols > 0) {
-                    segments.push({ purpose: newPurp.toLowerCase(), cols: centerCols });
-                  }
-                  rightSegs.forEach(s => segments.push(s));
-                  updates.segments = segments.length > 0 ? segments : undefined;
+                  const mainIdx = row.segments.findIndex(seg => seg.purpose.toLowerCase() === row.purpose.toLowerCase());
+                  updates.segments = row.segments.map((seg, idx) => idx === mainIdx ? { ...seg, purpose: newPurp.toLowerCase() } : seg);
                 }
                 onUpdate(updates);
               }
@@ -896,8 +905,8 @@ export function RowItemEditor({ row, idx, cellMap, totalCols, onUpdate, onDelete
           <span className="text-sm text-glass-text/90 font-black uppercase font-mono tracking-wider">Row Count</span>
           <input
             type="number"
-            value={row.rows}
-            onChange={(e) => onUpdate({ rows: parseInt(e.target.value, 10) || 1 })}
+            value={Number.isNaN(row.rows) ? '' : row.rows}
+            onChange={(e) => onUpdate({ rows: e.target.valueAsNumber })}
             className="bg-glass-panel border border-glass-border rounded-lg px-2.5 py-1 text-xs font-mono text-glass-text focus:outline-none transition"
           />
         </div>

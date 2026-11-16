@@ -6,8 +6,9 @@ export function exportToExcel(config: LayoutConfig): ArrayBuffer {
   const wb = XLSX.utils.book_new();
 
   // 1. Create pix_tbl sheet data
-  const pixRows = Object.values(config.cell_map).map(cell => ({
-    'Name': cell.name,
+  const pixRows = Object.entries(config.cell_map).map(([purpose, cell]) => ({
+    'Name': purpose,
+    'Display Name': cell.name,
     'library': cell.lib,
     'Cell': cell.cell,
     'rotation': cell.rot
@@ -29,13 +30,14 @@ export function exportToExcel(config: LayoutConfig): ArrayBuffer {
     ['cellname', config.top_cell, '<-- Target cell view name', '', '', '', ''],
     ['x pitch', config.x_pitch, '<-- x direction pixel unit pitch', '', '', '', ''],
     ['y pitch', config.y_pitch, '<-- y direction pixel unit pitch', '', '', '', ''],
+    ['rov purpose', config.rov_purpose, '<-- Centering target, including padding-only purposes', '', '', '', ''],
     ['center layer', (config.center_layer || 'BDTID') + ' ' + (config.center_purpose || 'drawing'), '<-- Layer used to center the active ROV array', '', '', '', ''],
     ['', '', '', '', '', '', ''],
     ['--- ARRAY WIDTH ---', '', '', '', '', '', ''],
     ['col_num', '', '<-- Total number of columns', '', '', '', ''],
     [config.total_cols, '', '', '', '', '', ''],
     ['', '', '', '', '', '', ''],
-    ['--- ROW STACK LAYOUT (ORDERED BOTTOM TO TOP) ---', '', '', '', '', '', ''],
+    ['--- ROW STACK LAYOUT (ORDERED TOP TO BOTTOM) ---', '', '', '', '', '', ''],
     ['row_num', 'Row Block Purpose Name', 'Marker (ROV)', 'Left Columns (Padding)', 'Right Columns (Padding)', 'Notes / Address', ''],
     ['(Number of rows)', '(Which cell from pix_tbl?)', '(Type "ROV" here to mark)', '(e.g. dummy:20)', '(e.g. dummy:20)', '', '']
   ];

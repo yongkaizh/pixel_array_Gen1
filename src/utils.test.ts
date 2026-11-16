@@ -70,12 +70,8 @@ describe('utils.ts', () => {
       expect(segments).toEqual([]);
     });
 
-    it('should ignore invalid segments', () => {
-      const segments = parseSegmentsString('c1:100,invalid_segment,dummy:50', 'default');
-      expect(segments).toEqual([
-        { purpose: 'c1', cols: 100 },
-        { purpose: 'dummy', cols: 50 }
-      ]);
+    it('rejects invalid segments instead of silently changing the layout', () => {
+      expect(() => parseSegmentsString('dummy:10, invalid_segment')).toThrow('Invalid padding segment');
     });
   });
 
@@ -170,6 +166,8 @@ describe('utils.ts', () => {
         y_pitch: 2.5,
         total_cols: 10,
         rov_purpose: 'rov_marker',
+        center_layer: 'BDTID',
+        center_purpose: 'drawing',
         rows: [
           { purpose: 'c1', rows: 5, name: 'Core', address: 'Start of Core Array' },
           { purpose: 'rov_marker', rows: 1, name: 'Marker', address: 'Weird chars: #!@$%^&*()_+\nNew line' },

@@ -55,3 +55,8 @@ export class SkillBuilder {
     return this.lines.join('\n');
   }
 }
+
+/** Content of a SKILL string literal, preserving quotes, backslashes and line breaks. */
+export function escapeSkill(value: string): string {
+  return JSON.stringify(value).slice(1, -1);
+}

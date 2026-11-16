@@ -1,3 +1,4 @@
+import { nominalCenter } from '../math/layout';
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { LayoutConfig, RowConfig } from '../types';
 import { Grid, HelpCircle, Eye, EyeOff, ZoomIn, ZoomOut, Maximize, Move, ArrowUp, ArrowDown, ArrowLeft, ArrowRight, Map, Download } from 'lucide-react';
@@ -165,39 +166,10 @@ export const CadViewer = React.memo(function CadViewer({ config }: CadViewerProp
 
     const totalHeight = currentY;
 
-    // 2. Centering offsets - calculate true geometric center of active core C1/primary cell
-    // X-axis: find left-padding columns before C1/primary segment
-    let left_cols = 0;
-    let active_cols = total_cols;
-    const activeRowForX = rows.find(r => getRowCategory(r.purpose, r.name || '', rov_purpose) === 'active');
-    if (activeRowForX && activeRowForX.segments && activeRowForX.segments.length > 0) {
-      const activeSegIdx = activeRowForX.segments.findIndex(s => s.purpose.toLowerCase() === rov_purpose.toLowerCase() || getRowCategory(s.purpose, '', rov_purpose) === 'active');
-      if (activeSegIdx !== -1) {
-        for (let i = 0; i < activeSegIdx; i++) {
-          left_cols += activeRowForX.segments[i].cols;
-        }
-        active_cols = activeRowForX.segments[activeSegIdx].cols;
-      }
-    }
-    const cx = isSchematic ? width / 2 : (left_cols + active_cols / 2.0) * x_pitch;
-
-    // Y-axis: find bottom rows below active core block
-    let bottom_rows = 0;
-    let active_rows = 0;
-    let passedActive = false;
-    const reversedRowsForY = [...rows].reverse();
-    reversedRowsForY.forEach(r => {
-      const isAct = getRowCategory(r.purpose, r.name || '', rov_purpose) === 'active';
-      if (isAct) {
-        active_rows += r.rows;
-        passedActive = true;
-      } else {
-        if (!passedActive) {
-          bottom_rows += r.rows;
-        }
-      }
-    });
-    const cy = isSchematic ? totalHeight / 2 : (bottom_rows + active_rows / 2.0) * y_pitch;
+    // Use the same selected block/segments as the SKILL generator's nominal fallback.
+    const center = nominalCenter(config);
+    const cx = isSchematic ? width / 2 : center.x;
+    const cy = isSchematic ? totalHeight / 2 : center.y;
 
     // 3. Shift coordinates relative to the global center (shifted so global center is at 0, 0)
     const shiftedRowBlocks = rowBlocksRaw.map(block => {
@@ -1048,6 +1020,9 @@ export const CadViewer = React.memo(function CadViewer({ config }: CadViewerProp
           </div>
         )}
 
+        <p className="absolute bottom-2 left-3 right-3 text-xs text-glass-text/80 pointer-events-none">
+          Preview shows the pitch grid. Actual unit-cell and centering-layer bounds are measured in Virtuoso.
+        </p>
         {/* CAD Layout Render */}
         <svg
           ref={svgRef}

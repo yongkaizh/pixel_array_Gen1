@@ -1,10 +1,14 @@
+import runtime from "./runtime.il?raw";
+import { validateLayoutConfig } from "../../math/validation";
 import { LayoutConfig } from "../../types";
-import { SkillBuilder } from "./SkillBuilder";
+import { SkillBuilder, escapeSkill } from "./SkillBuilder";
 import { findMaxActiveRow, generateMosaics } from "./mosaics";
 import { generateCentering } from "./centering";
 
 export function generateSkillCode(config: LayoutConfig): string {
+  validateLayoutConfig(config);
   const builder = new SkillBuilder();
+  builder.append(runtime);
 
   // ── File header ──────────────────────────────────────────────────────────
   builder.append(`
@@ -32,6 +36,13 @@ export function generateSkillCode(config: LayoutConfig): string {
         cx
         cy
         bBox
+        maxActiveData mosaic item path sh shBox shapes verificationRect
+        placementBox actualBox nominalBox targetInsts matchesTarget target
+        c_layer c_purp local_bBox llx lly urx ury orient
+        m_cols m_rows uX uY pt_00 pt_c0 pt_0r pt_cr xy_0
+        xy_00 xy_c0 xy_0r xy_cr bB_00 bB_c0 bB_0r bB_cr
+        layer_left layer_right layer_bottom layer_top layer_bBox mBBox
+        targetCellName v_llx v_lly v_urx v_ury
       )
 
       printf("\\n===============================\\n")
@@ -40,36 +51,36 @@ export function generateSkillCode(config: LayoutConfig): string {
 
       ; Ensure target library exists
       unless(ddGetObj(
-        "${config.top_lib}"
+        "${escapeSkill(config.top_lib)}"
       )
         error(
-          "Library ${config.top_lib} does not exist!\\n"
+          "Library %s does not exist!\\n" "${escapeSkill(config.top_lib)}"
         )
       )
 
       ; Open the cell layout (create if it doesn't exist yet)
       if(ddGetObj(
-        "${config.top_lib}"
-        "${config.top_cell}"
+        "${escapeSkill(config.top_lib)}"
+        "${escapeSkill(config.top_cell)}"
         "layout"
       ) then
         printf(
-          "Cellview ${config.top_cell} layout already exists. Opening...\\n"
+          "Cellview %s layout already exists. Opening...\\n" "${escapeSkill(config.top_cell)}"
         )
         cv = dbOpenCellViewByType(
-          "${config.top_lib}"
-          "${config.top_cell}"
+          "${escapeSkill(config.top_lib)}"
+          "${escapeSkill(config.top_cell)}"
           "layout"
           "maskLayout"
           "a"
         )
       else
         printf(
-          "Cellview ${config.top_cell} layout does not exist. Creating new...\\n"
+          "Cellview %s layout does not exist. Creating new...\\n" "${escapeSkill(config.top_cell)}"
         )
         cv = dbOpenCellViewByType(
-          "${config.top_lib}"
-          "${config.top_cell}"
+          "${escapeSkill(config.top_lib)}"
+          "${escapeSkill(config.top_cell)}"
           "layout"
           "maskLayout"
           "w"
@@ -87,6 +98,11 @@ export function generateSkillCode(config: LayoutConfig): string {
           foreach(inst cv~>instances
             dbDeleteObject(inst)
           )
+          foreach(sh cv~>shapes
+            when(sh~>pixelArrayVerification
+              dbDeleteObject(sh)
+            )
+          )
           foreach(mosaic cv~>mosaics
             dbDeleteObject(mosaic)
           )
@@ -94,7 +110,10 @@ export function generateSkillCode(config: LayoutConfig): string {
 
         currentY = 0.0
         allInsts = nil
-        rovInst = nil
+        maxActiveInst = nil
+        maxActiveData = nil
+        local_bBox = nil
+        targetInsts = nil
 
   `);
 
