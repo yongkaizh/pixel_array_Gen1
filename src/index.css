@@ -101,3 +101,12 @@ body {
     outline: none;
   }
 }
+
+/* The viewport fills the page width and can be resized independently of the layout. */
+.cad-viewport {
+  height: clamp(720px, 85vh, 1100px);
+  min-height: 560px;
+  min-width: min(320px, 100%);
+  max-width: 100%;
+  resize: both;
+}

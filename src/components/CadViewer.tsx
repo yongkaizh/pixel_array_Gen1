@@ -878,9 +878,9 @@ export const CadViewer = React.memo(function CadViewer({ config }: CadViewerProp
   };
 
   return (
-    <div className="flex flex-col h-[520px] md:h-[580px] w-full bg-glass-panel rounded-lg border border-glass-border text-glass-text overflow-hidden relative">
+    <div className="cad-viewport flex flex-col w-full bg-glass-panel rounded-lg border border-glass-border text-glass-text overflow-hidden relative">
       {/* Header Bar */}
-      <div className="flex flex-col xl:flex-row xl:items-center justify-between px-6 py-4 border-b border-glass-border bg-glass-panel gap-4">
+      <div className="shrink-0 flex flex-col xl:flex-row xl:items-center justify-between px-6 py-4 border-b border-glass-border bg-glass-panel gap-4">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <div className="w-2.5 h-2.5 bg-neon-rose" />
@@ -995,7 +995,7 @@ export const CadViewer = React.memo(function CadViewer({ config }: CadViewerProp
           setLockedRowIdx(null);
           setLockedSegIdx(null);
         }}
-        className={`cad-viewer-canvas flex-1 relative overflow-hidden bg-glass-panel cursor-crosshair select-none ${isDragging ? 'cursor-grabbing' : ''}`}
+        className={`cad-viewer-canvas flex-1 min-h-0 relative overflow-hidden bg-glass-panel cursor-crosshair select-none ${isDragging ? 'cursor-grabbing' : ''}`}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
@@ -1341,8 +1341,12 @@ export const CadViewer = React.memo(function CadViewer({ config }: CadViewerProp
         )}
       </div>
 
+      <div className="shrink-0 px-6 pr-8 py-1 text-xs text-glass-text/80 bg-glass-bg border-t border-glass-border">
+        Drag the bottom-right corner to resize the canvas.
+      </div>
+
       {/* Control instructions / Legend */}
-      <div className="bg-glass-bg px-6 py-3 border-t-2 border-[#141414] text-sm font-mono text-glass-text flex flex-wrap items-center justify-between gap-3">
+      <div className="shrink-0 bg-glass-bg pl-6 pr-8 py-3 border-t-2 border-[#141414] text-sm font-mono text-glass-text flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-col gap-1 hidden sm:flex">
           <div className="flex items-center gap-1.5 text-xs">
             <Move className="w-3.5 h-3.5 shrink-0" />
