@@ -86,7 +86,7 @@ export function ExcelGuide() {
                       <th scope="row">{rowIndex + 1}</th>
                       {Array.from({ length: isSection ? 1 : step.columns }, (_, col) => {
                         const address = XLSX.utils.encode_cell({ r: rowIndex, c: col });
-                        return <td key={address} colSpan={isSection ? step.columns : undefined} className={isSection ? 'excel-guide-section' : undefined} data-cell={address} title={`${step.sheet}!${address}`}>{row[col]}</td>;
+                        return <td key={address} colSpan={isSection ? step.columns : undefined} className={isSection ? 'excel-guide-section' : undefined} data-cell={address} title={`${step.sheet}!${address}`}>{step.sheet === 'format_template' && address === 'B7' ? 'center layer' : row[col]}</td>;
                       })}
                     </tr>;
                   })}

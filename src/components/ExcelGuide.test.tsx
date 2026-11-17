@@ -35,7 +35,7 @@ describe('illustrated Excel example', () => {
     expect(screen.getByRole('img', { name: /Twelve-column mixed array/ })).toBeDefined();
   });
 
-  it('shows the exact exported headers, values, blanks, and coordinates in every step', () => {
+  it('shows exported cells with a generic center-layer label in the guide', () => {
     const workbook = XLSX.read(exportToExcel(EXCEL_GUIDE_CONFIG), { type: 'array' });
     render(<ExcelGuide />);
     const steps = [
@@ -46,13 +46,14 @@ describe('illustrated Excel example', () => {
     for (const step of steps) {
       fireEvent.click(screen.getByRole('button', { name: step.button }));
       const table = screen.getByRole('region', { name: step.region });
+      expect(table.textContent).not.toContain('BDTID drawing');
       for (let row = step.first; row <= step.last; row++) {
         for (let col = 0; col < step.columns; col++) {
           const section = String(workbook.Sheets[step.sheet][`A${row + 1}`]?.v).startsWith('---');
           if (section && col > 0) continue; // Empty cells are visually merged into the section heading.
           const address = XLSX.utils.encode_cell({ r: row, c: col });
           expect(table.querySelector(`[data-cell="${address}"]`)?.textContent)
-            .toBe(String(workbook.Sheets[step.sheet][address]?.v ?? ''));
+            .toBe(step.sheet === 'format_template' && address === 'B7' ? 'center layer' : String(workbook.Sheets[step.sheet][address]?.v ?? ''));
         }
       }
     }
