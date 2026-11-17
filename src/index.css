@@ -163,3 +163,13 @@ body {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+
+.excel-guide-table { width: 100%; border-collapse: collapse; white-space: nowrap; font-family: var(--font-mono); font-size: 0.75rem; }
+.excel-guide-table th { padding: 0.65rem 0.75rem; text-align: left; background: #f8fafc; color: #64748b; font-weight: 500; }
+.excel-guide-table td { padding: 0.85rem 0.75rem; border-top: 1px solid #e2e8f0; color: #334155; }
+
+@media (max-width: 639px) {
+  .excel-guide-figure text { font-size: 20px; }
+  .excel-guide-table th, .excel-guide-table td { font-size: 11px; padding: 0.65rem 0.3rem; }
+  .excel-guide-rows th { white-space: normal; }
+}

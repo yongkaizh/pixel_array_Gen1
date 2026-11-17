@@ -1,5 +1,6 @@
+import { ExcelGuide } from './ExcelGuide';
 import React, { useState, useRef } from 'react';
-import { Upload, FileDown, CheckCircle, AlertCircle, RefreshCw, Layers, ArrowRight, Info, Check, Play, Download } from 'lucide-react';
+import { Upload, FileDown, CheckCircle, AlertCircle, RefreshCw, Play, Download } from 'lucide-react';
 import { LayoutConfig } from '../types';
 import { parseExcelFile, exportToExcel, getExcelImportErrorDetails } from '../utils';
 
@@ -118,7 +119,7 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
   };
 
   return (
-    <div className="bg-glass-panel rounded-lg border border-glass-border p-6 flex flex-col gap-6 text-glass-text">
+    <div className="bg-glass-panel rounded-lg border border-glass-border p-4 sm:p-6 flex flex-col gap-6 text-glass-text">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="space-y-1.5">
           <h3 className="font-sans font-black uppercase italic tracking-tight text-base">
@@ -279,10 +280,10 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
       )}
 
       {/* Template Actions */}
-      <div className="flex items-center justify-between gap-4 p-4 bg-glass-bg rounded-lg border border-glass-border">
+      <div className="flex flex-wrap items-center justify-between gap-4 p-4 bg-glass-bg rounded-lg border border-glass-border">
         <div className="flex flex-col gap-0.5">
           <span className="text-xs font-bold uppercase tracking-wide">Need a starting point?</span>
-          <span className="text-xs font-mono text-glass-text/80">Export your current config to .xlsx or load the example template if you are just getting started.</span>
+          <span className="text-xs font-mono text-glass-text/80">Save your current layout as an Excel workbook.</span>
         </div>
         <button
             onClick={handleExportExcel}
@@ -293,179 +294,7 @@ export function ExcelManager({ config, onConfigChange, onApplyConfig, onSetStatu
         </button>
       </div>
 
-      {/* Visual Explanation of Mixed Cell Layout (Saves user confusion) */}
-      <div className="bg-slate-100 text-slate-800 p-6 rounded-lg border border-glass-border space-y-4">
-        <div className="flex items-center gap-2 border-b border-glass-border pb-2">
-          <Layers className="w-5 h-5 text-emerald-600" />
-          <h4 className="text-xs font-mono font-black uppercase tracking-widest text-emerald-600">
-            How Mixed Cell (Heterogeneous) Row Layouts Work
-          </h4>
-        </div>
-        
-        <p className="text-xs leading-relaxed font-sans text-slate-600">
-          To build complex arrays (e.g. adding <strong>dummy, idle, or guardring cells</strong> to the boundaries of rows), you do not need to manually map thousands of individual coordinates. 
-          The compiler automatically splits any row block into structured <strong>segments</strong> based on Columns D & E in your sheet! Here is how to indicate exactly which physical unit cell gets inserted:
-        </p>
-
-        {/* Dynamic Graphic Explanation Map */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 bg-[#1e1e1e] text-white border border-[#333] p-4 font-mono text-xs tracking-tight rounded-lg">
-          {/* Box 1 */}
-          <div>
-            <div className="text-amber-400 font-bold uppercase mb-2">// 1. SPREADSHEET ROW DEFINITION</div><p className="text-slate-300 text-sm mb-2">In sheet <code className="text-white font-bold">format_template</code>, define row blocks. Reference your custom purpose keys for segments:
-            </p>
-            <div className="bg-[#2d2d2d] border border-[#444] p-2 space-y-1 rounded-lg text-sm">
-              <div><code className="text-sky-600 font-bold">Col B (Purpose)</code>: active ➔ <code className="text-emerald-600 font-bold">Col D (Left)</code>: dummy:20, idle:10 ➔ <code className="text-emerald-600 font-bold">Col E (Right)</code>: dummy:20</div>
-            </div>
-          </div>
-
-          {/* Box 2 */}
-          <div>
-            <div className="text-amber-400 font-bold uppercase mb-2">// 2. THE CELL CLASS MAPPING</div><p className="text-slate-300 text-sm mb-2">In sheet <code className="text-white font-bold">pix_tbl</code> (or Cell Mapping tab), tell the compiler exactly which physical unit cell coordinates correspond to each purpose key:
-            </p>
-            <div className="bg-[#2d2d2d] border border-[#444] p-2 space-y-1 rounded-lg text-sm">
-              <div><code className="text-sky-600 font-bold">active</code> ➔ Cell: <code className="text-white font-bold">pixel_active</code>, Lib: <code className="text-white font-bold">pixel_lib</code></div>
-              <div><code className="text-emerald-600 font-bold">dummy</code> ➔ Cell: <code className="text-white font-bold">pixel_dummy</code>, Lib: <code className="text-white font-bold">pixel_lib</code></div>
-              <div><code className="text-purple-600 font-bold">idle</code> ➔ Cell: <code className="text-white font-bold">pixel_idle_1x</code>, Lib: <code className="text-white font-bold">sensor_lib</code></div>
-            </div>
-          </div>
-
-          {/* Box 3 */}
-          <div className="space-y-2 lg:pl-4">
-            <div className="text-amber-400 font-bold uppercase">// 3. RESULTING CAD ROW LAYOUT</div>
-            <p className="text-slate-300 text-sm leading-snug">
-              The engine automatically calculates centering offsets &amp; outputs clean aligned simple mosaic blocks in the CAD coordinate:
-            </p>
-            <div className="mt-3 p-3 bg-[#2d2d2d] border border-[#444] rounded-lg text-xs font-mono space-y-2">
-              <div className="text-white font-bold">Generated Physical Composition:</div>
-              <div className="flex w-full h-4 rounded overflow-hidden">
-                <span className="bg-emerald-900 border border-emerald-700 text-emerald-100 px-1 py-0.5 font-bold flex items-center justify-center">dummy x20</span>
-                <span className="bg-purple-900 border border-purple-700 text-purple-100 px-1 py-0.5 font-bold flex items-center justify-center">idle x10</span>
-                <span className="bg-sky-900 border border-sky-700 text-sky-100 px-1 py-0.5 flex-1 font-bold flex items-center justify-center">active (Center region)</span>
-                <span className="bg-emerald-900 border border-emerald-700 text-emerald-100 px-1 py-0.5 font-bold flex items-center justify-center">dummy x20</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="text-sm bg-slate-200/50 p-3 rounded-lg border border-slate-300">
-            <strong>Summary:</strong> By adding a custom map key (e.g. <code className="text-slate-800 bg-slate-300 px-1 font-mono">my_cell</code>) in the cell mapping sub-tab, you can insert it anywhere in your array row layout by simply using its key name followed by the columns count (e.g. <code className="text-emerald-700 font-mono font-bold">my_cell:16</code>). 
-        </div>
-      </div>
-
-      {/* File Format Instructions */}
-      <div className="space-y-2">
-        <h4 className="text-sm font-black uppercase tracking-wider text-glass-text/80">Excel File Sheet Layout Specifications</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-          <div className="bg-glass-bg/30 p-3 rounded-lg border border-glass-border overflow-x-auto">
-            <div className="font-bold text-glass-text mb-1 font-mono text-sm uppercase italic">1. pix_tbl (Cell Library Map)</div>
-            <p className="text-glass-text/90 text-sm leading-relaxed mb-2">
-              Defines physical libraries, cell names, and placement rotations for purpose classes.
-            </p>
-            <div className="font-mono text-xs text-glass-text bg-glass-panel border border-glass-border rounded-lg overflow-hidden min-w-[300px]">
-              <table className="w-full text-left border-collapse">
-                <thead className="bg-glass-bg text-glass-text">
-                  <tr>
-                    <th className="p-1 border-b border-glass-border border-r w-6 text-center font-normal text-glass-muted"></th>
-                    <th className="p-1 border-b border-glass-border border-r text-center font-normal">A</th>
-                    <th className="p-1 border-b border-glass-border border-r text-center font-normal">B</th>
-                    <th className="p-1 border-b border-glass-border border-r text-center font-normal">C</th>
-                    <th className="p-1 border-b border-glass-border text-center font-normal">D</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="border-b border-glass-border">
-                    <td className="p-1 border-r border-glass-border bg-glass-bg text-center text-glass-muted">1</td>
-                    <td className="p-1 border-r border-glass-border font-bold">Name</td>
-                    <td className="p-1 border-r border-glass-border font-bold">library</td>
-                    <td className="p-1 border-r border-glass-border font-bold">Cell</td>
-                    <td className="p-1 font-bold">rotation</td>
-                  </tr>
-                  <tr className="border-b border-glass-border">
-                    <td className="p-1 border-r border-glass-border bg-glass-bg text-center text-glass-muted">2</td>
-                    <td className="p-1 border-r border-glass-border">active</td>
-                    <td className="p-1 border-r border-glass-border">pixel_lib</td>
-                    <td className="p-1 border-r border-glass-border">pixel_active</td>
-                    <td className="p-1">R0</td>
-                  </tr>
-                  <tr>
-                    <td className="p-1 border-r border-glass-border bg-glass-bg text-center text-glass-muted">3</td>
-                    <td className="p-1 border-r border-glass-border">rov</td>
-                    <td className="p-1 border-r border-glass-border">pixel_lib</td>
-                    <td className="p-1 border-r border-glass-border">pixel_rov</td>
-                    <td className="p-1">MX</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-          <div className="bg-glass-bg/30 p-3 rounded-lg border border-glass-border overflow-x-auto col-span-1 md:col-span-2">
-            <div className="font-bold text-glass-text mb-1 font-mono text-sm uppercase italic">2. format_template (Params & Grid)</div>
-            <p className="text-glass-text/90 text-sm leading-relaxed mb-3">
-              Contains scalar metadata, column count, and stacked row blocks. 
-              <strong> Heterogeneous Rows Support (Columns D & E):</strong> Specify left/right segment padding to create varying cell rows. 
-            </p>
-            <p className="text-xs text-glass-text/75 mt-2">
-              Use format <code className="bg-slate-200 text-slate-800 px-1 font-bold">count</code> (e.g. <code className="bg-slate-200 text-slate-800 px-1">20</code>, defaults to <code className="bg-slate-200 text-slate-800 px-1">dummy</code>) or <code className="bg-slate-200 text-slate-800 px-1">purpose:count</code> (e.g. <code className="bg-slate-200 text-slate-800 px-1">dummy:20</code> or <code className="bg-slate-200 text-slate-800 px-1">idle:10,dummy:10</code>). The center active region columns count is calculated automatically!
-            </p>
-            <div className="font-mono text-xs text-glass-text bg-glass-panel border border-glass-border rounded-lg overflow-hidden min-w-[600px]">
-              <table className="w-full text-left border-collapse">
-                <thead className="bg-glass-bg text-glass-text">
-                  <tr>
-                    <th className="p-1 border-b border-glass-border border-r w-6 text-center font-normal text-glass-muted"></th>
-                    <th className="p-1 border-b border-glass-border border-r text-center font-normal">A (row_num)</th>
-                    <th className="p-1 border-b border-glass-border border-r text-center font-normal">B (Purpose)</th>
-                    <th className="p-1 border-b border-glass-border border-r text-center font-normal">C (Marker)</th>
-                    <th className="p-1 border-b border-glass-border border-r text-center font-normal">D (Left Padding)</th>
-                    <th className="p-1 border-b border-glass-border text-center font-normal">E (Right Padding)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="border-b border-glass-border text-glass-text/80 italic bg-glass-bg">
-                    <td className="p-1 border-r border-glass-border bg-glass-bg text-center">...</td>
-                    <td className="p-1 border-r border-glass-border">...</td>
-                    <td className="p-1 border-r border-glass-border">...</td>
-                    <td className="p-1 border-r border-glass-border">...</td>
-                    <td className="p-1 border-r border-glass-border">...</td>
-                    <td className="p-1">...</td>
-                  </tr>
-                  <tr className="border-b border-glass-border">
-                    <td className="p-1 border-r border-glass-border bg-glass-bg text-center text-glass-muted">12</td>
-                    <td className="p-1 border-r border-glass-border font-bold bg-amber-500/10 text-amber-200">col_num</td>
-                    <td className="p-1 border-r border-glass-border bg-amber-500/10 text-amber-200">1936</td>
-                    <td className="p-1 border-r border-glass-border">active</td>
-                    <td className="p-1 border-r border-glass-border"></td>
-                    <td className="p-1"></td>
-                  </tr>
-                  <tr className="border-b border-glass-border">
-                    <td className="p-1 border-r border-glass-border bg-glass-bg text-center text-glass-muted">13</td>
-                    <td className="p-1 border-r border-glass-border font-bold">row_num</td>
-                    <td className="p-1 border-r border-glass-border font-bold">Row Count</td>
-                    <td className="p-1 border-r border-glass-border font-bold">ROV Indicator</td>
-                    <td className="p-1 border-r border-glass-border font-bold text-emerald-600">Left Column Segments</td>
-                    <td className="p-1 font-bold text-emerald-600">Right Column Segments</td>
-                  </tr>
-                  <tr className="border-b border-glass-border">
-                    <td className="p-1 border-r border-glass-border bg-glass-bg text-center text-glass-muted">14</td>
-                    <td className="p-1 border-r border-glass-border">1294</td>
-                    <td className="p-1 border-r border-glass-border">active (c1)</td>
-                    <td className="p-1 border-r border-glass-border"></td>
-                    <td className="p-1 border-r border-glass-border text-emerald-600 font-bold">dummy:20</td>
-                    <td className="p-1 text-emerald-600 font-bold">dummy:20</td>
-                  </tr>
-                  <tr className="border-b border-glass-border">
-                    <td className="p-1 border-r border-glass-border bg-glass-bg text-center text-glass-muted">15</td>
-                    <td className="p-1 border-r border-glass-border">2</td>
-                    <td className="p-1 border-r border-glass-border">rov (rov)</td>
-                    <td className="p-1 border-r border-glass-border font-black text-red-500">ROV</td>
-                    <td className="p-1 border-r border-glass-border"></td>
-                    <td className="p-1"></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
+      <ExcelGuide />
     </div>
   );
 }
