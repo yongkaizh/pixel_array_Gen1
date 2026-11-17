@@ -50,8 +50,8 @@ active row when that purpose is absent), and centers its target-layer bounds at
 `(0, 0)`. For segmented rows, the union of every matching target segment is centered,
 excluding other purposes from the bounds calculation. With no marker, selection
 uses the largest active block, or the entire pitch envelope if none exists.
-Verification rectangles use the configured centering layer and purpose. Verification
-rectangles use each mosaic's saved orientation and only reuse bounds for the same
+Verification rectangles are drawn on **M1 pin**; the configured centering layer
+is only measured, never used for marker output. Rectangles use each mosaic's saved orientation and only reuse bounds for the same
 library and cell. Generated verification rectangles are tagged and removed on
 reruns; untagged shapes are retained.
 

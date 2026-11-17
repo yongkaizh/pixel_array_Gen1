@@ -746,7 +746,7 @@ def main():
    )
    when(matchesTarget
      bBox = paMosaicBBox(item)
-     verificationRect = dbCreateRect(cv list("{skill_content(center_layer)}" "{skill_content(center_purpose)}") bBox)
+     verificationRect = dbCreateRect(cv list("M1" "pin") bBox)
      when(verificationRect
        dbReplaceProp(verificationRect "pixelArrayVerification" "boolean" t)
      )

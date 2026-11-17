@@ -1,6 +1,6 @@
 import { LayoutConfig } from "../../types";
 import { nominalCenter } from "../../math/layout";
-import { SkillBuilder, escapeSkill } from "./SkillBuilder";
+import { SkillBuilder } from "./SkillBuilder";
 
 export function generateCentering(builder: SkillBuilder, config: LayoutConfig): void {
   const center = nominalCenter(config);
@@ -35,7 +35,7 @@ export function generateCentering(builder: SkillBuilder, config: LayoutConfig): 
       )
       when(matchesTarget
         bBox = paMosaicBBox(item)
-        verificationRect = dbCreateRect(cv list("${escapeSkill(config.center_layer || 'BDTID')}" "${escapeSkill(config.center_purpose || 'drawing')}") bBox)
+        verificationRect = dbCreateRect(cv list("M1" "pin") bBox)
         when(verificationRect
           dbReplaceProp(verificationRect "pixelArrayVerification" "boolean" t)
         )

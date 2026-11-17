@@ -72,6 +72,16 @@ describe('executed SKILL geometry', () => {
     checkCentered(cv.shapes[0].bBox);
   });
 
+  it.each(['BDTID', 'DBDTI', 'custom_center'])('draws M1 pin markers when measuring %s', layer => {
+    const c = { ...config('R180'), center_layer: layer, center_purpose: 'drawing' };
+    const code = generateSkillCode(c);
+    expect(code).toContain(`paLayerBBox(master list("${layer}" "drawing"))`);
+    const cv = runSkill(code, { 'lib/sensor': { bBox: [[10, -20], [11.25, -17.5]] } });
+    expect(cv.shapes).toHaveLength(1);
+    expect(cv.shapes[0].lpp).toEqual(['M1', 'pin']);
+    checkCentered(cv.shapes[0].bBox);
+  });
+
   it('uses the same geometry helper source in the standalone Python script', () => {
     const python = readFileSync('src/generators/templates/pixel_array.py', 'utf8');
     const runtime = readFileSync('src/generators/skill/runtime.il', 'utf8');

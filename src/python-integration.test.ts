@@ -14,7 +14,7 @@ const rotations = ['R0', 'R90', 'R180', 'R270', 'MX', 'MY', 'MXR90', 'MYR90'];
 
 describe.skipIf(!python)('Excel → standalone Python → executed SKILL', () => {
   it.each(rotations.flatMap(rot => [[rot, 'main'], [rot, 'padding']]))('%s target in %s matches the browser for mixed rotations, asymmetric margins and sizes', (rotation, location) => {
-    const config = { ...getDefaultLayoutConfig(), total_cols: 10, x_pitch: 2.5, y_pitch: 3.25, rov_purpose: 'sensor',
+    const config = { ...getDefaultLayoutConfig(), total_cols: 10, x_pitch: 2.5, y_pitch: 3.25, rov_purpose: 'sensor', center_layer: 'DBDTI', center_purpose: 'drawing',
       rows: [{ purpose: 'pad', rows: 2 }, { purpose: 'sensor', rows: 5, segments: [
         { purpose: 'pad', cols: 1 }, { purpose: 'sensor', cols: 6 }, { purpose: 'pad', cols: 3 },
       ] }, { purpose: 'pad', rows: 1 }],
@@ -29,6 +29,8 @@ describe.skipIf(!python)('Excel → standalone Python → executed SKILL', () =>
       const browser = runSkill(generateSkillCode(config), masters);
       const standalone = runSkill(readFileSync(join(folder, 'pixel_array.il'), 'utf8'), masters);
       expect(standalone).toEqual(browser);
+      expect(standalone.shapes.length).toBeGreaterThan(0);
+      expect(standalone.shapes.every((shape: any) => shape.lpp[0] === 'M1' && shape.lpp[1] === 'pin')).toBe(true);
     } finally {
       rmSync(folder, { recursive: true, force: true });
     }
