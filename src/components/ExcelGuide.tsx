@@ -1,11 +1,22 @@
 import React, { useId, useState } from 'react';
 import { ArrowRight, FileDown, Grid2X2, Layers } from 'lucide-react';
 import { EXCEL_GUIDE_CONFIG as example } from '../config/excelGuide';
-import { getLeftRightStringsFromSegments } from '../math/grid';
-import { exportToExcel } from '../exporters/excel';
+import * as XLSX from 'xlsx';
+import { createExcelWorkbook, exportToExcel } from '../exporters/excel';
+
+// Preview the same workbook object that is serialized by the download action.
+const workbook = createExcelWorkbook(example);
+const steps = [
+  { id: 'cells', label: 'Map cells', sheet: 'pix_tbl', start: 0, end: 4, columns: 5 },
+  { id: 'settings', label: 'Set size', sheet: 'format_template', start: 0, end: 11, columns: 3 },
+  { id: 'rows', label: 'Set rows', sheet: 'format_template', start: 12, end: 18, columns: 6 },
+] as const;
 
 export function ExcelGuide() {
-  const [sheet, setSheet] = useState<'cells' | 'rows'>('cells');
+  const [sheet, setSheet] = useState<'cells' | 'settings' | 'rows'>('cells');
+  const step = steps.find(item => item.id === sheet)!;
+  const worksheet = workbook.Sheets[step.sheet];
+  const grid = XLSX.utils.sheet_to_json<(string | number)[]>(worksheet, { header: 1, defval: '' });
   const arrowId = useId();
   const rowCount = example.rows.reduce((sum, row) => sum + row.rows, 0);
   const activeRow = example.rows[1];
@@ -14,7 +25,6 @@ export function ExcelGuide() {
   const active = segments[mainIdx];
   const leftCols = segments.slice(0, mainIdx).reduce((sum, seg) => sum + seg.cols, 0);
   const rightCols = segments.slice(mainIdx + 1).reduce((sum, seg) => sum + seg.cols, 0);
-  const { leftStr, rightStr } = getLeftRightStringsFromSegments(segments, activeRow.purpose);
   const centerX = 60 + (leftCols + active.cols / 2) * 32;
   const fillFor = (purpose: string) => purpose === 'active' ? '#bae6fd' : purpose === 'idle' ? '#ddd6fe' : '#e2e8f0';
   const purposeAt = (row: number, col: number) => {
@@ -41,8 +51,8 @@ export function ExcelGuide() {
     <section className="min-w-0 rounded-lg border border-glass-border bg-glass-bg/30 overflow-hidden" aria-label="Visual Excel guide">
       <div className="flex flex-wrap items-center justify-between gap-3 p-4 sm:p-5 border-b border-glass-border">
         <div>
-          <h4 className="flex items-center gap-2 font-sans font-black uppercase italic tracking-tight text-sm text-glass-text"><Layers size={17} className="text-neon-cyan" />How mixed-cell rows work</h4>
-          <p className="mt-1 text-sm text-glass-muted">Map the cells. Set the sides. The main region fills the remaining columns.</p>
+          <h4 className="flex items-center gap-2 font-sans font-black uppercase italic tracking-tight text-sm text-glass-text"><Layers size={17} className="text-neon-cyan" />From Excel to your array</h4>
+          <p className="mt-1 text-sm text-glass-muted">Follow the downloaded example, cell for cell. Both sheets build the array shown here.</p>
         </div>
         <button type="button" onClick={downloadExample} className="glass-button inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-mono font-bold uppercase tracking-wide text-glass-text cursor-pointer focus-visible:outline-sky-500">
           <FileDown size={15} /> Download this example
@@ -52,61 +62,49 @@ export function ExcelGuide() {
       <div className="grid lg:grid-cols-2">
         <div className="min-w-0 p-4 sm:p-5 space-y-4">
           <div className="flex gap-1 rounded-lg border border-glass-border bg-glass-bg p-1" role="group" aria-label="Workbook sheet example">
-            {(['cells', 'rows'] as const).map((value, idx) => (
-              <button key={value} type="button" aria-pressed={sheet === value} onClick={() => setSheet(value)} className={`flex-1 rounded-md px-3 py-2 text-xs font-mono font-bold uppercase tracking-wide cursor-pointer focus-visible:outline-sky-500 ${sheet === value ? 'glass-button bg-white text-neon-cyan shadow-sm' : 'text-glass-muted hover:text-glass-text'}`}>
-                <span className="mr-2 text-slate-400">{idx + 1}</span>{value === 'cells' ? 'Map cells' : 'Set rows'}
+            {steps.map((item, idx) => (
+              <button key={item.id} type="button" aria-pressed={sheet === item.id} onClick={() => setSheet(item.id)} className={`flex-1 rounded-md px-2 py-2 text-xs font-mono font-bold uppercase tracking-wide cursor-pointer focus-visible:outline-sky-500 ${sheet === item.id ? 'glass-button bg-white text-neon-cyan shadow-sm' : 'text-glass-muted hover:text-glass-text'}`}>
+                <span className="mr-1 text-slate-400">{idx + 1}</span>{item.label}
               </button>
             ))}
           </div>
 
           <div className="rounded-lg border border-glass-border overflow-hidden">
-            <div className="flex items-center gap-2 bg-glass-bg px-3 py-2 text-glass-text border-b border-glass-border text-sm font-mono font-semibold">
-              <Grid2X2 size={15} /> {sheet === 'cells' ? 'pix_tbl' : 'format_template'}
+            <div className="flex flex-wrap items-center justify-between gap-2 bg-glass-bg px-3 py-2 text-glass-text border-b border-glass-border text-xs font-mono font-semibold">
+              <span className="inline-flex items-center gap-2"><Grid2X2 size={15} />{step.sheet}</span>
+              <span className="text-glass-muted font-normal">{sheet === 'cells' ? 'A1:E4' : sheet === 'settings' ? 'A1:C11' : 'A13:F18'}</span>
             </div>
-            <div className="overflow-x-auto" tabIndex={0} role="region" aria-label={`${sheet === 'cells' ? 'Cell mapping' : 'Row layout'} example table`}>
-              {sheet === 'cells' ? (
-                <table className="excel-guide-table">
-                  <caption className="sr-only">Map logical names to physical cells and rotations.</caption>
-                  <thead><tr>{['Name', 'library', 'Cell', 'rotation'].map(label => <th key={label}>{label}</th>)}</tr></thead>
-                  <tbody>
-                    {Object.values(example.cell_map).map(cell => <tr key={cell.name}>
-                      <td><span className={`rounded px-1.5 py-1 font-semibold ${cell.name === 'active' ? 'bg-sky-100 text-sky-800' : cell.name === 'idle' ? 'bg-violet-100 text-violet-800' : 'bg-slate-200 text-slate-700'}`}>{cell.name}</span></td>
-                      <td>{cell.lib}</td><td>{cell.cell}</td><td>{cell.rot}</td>
-                    </tr>)}
-                  </tbody>
-                </table>
-              ) : (
-                <table className="excel-guide-table excel-guide-rows">
-                  <caption className="sr-only">Twelve columns: two dummy and one idle on the left, eight active in the middle, and one dummy on the right.</caption>
-                  <thead><tr>{['A · row_num', 'B · Purpose', 'C · Marker', 'D · Left', 'E · Right'].map(label => <th key={label}>{label}</th>)}</tr></thead>
-                  <tbody>
-                    {example.rows.map((row, idx) => <tr key={idx} className={row.purpose === 'active' ? 'bg-sky-50/70' : ''}>
-                      <td>{row.rows}</td><td className={row.purpose === 'active' ? 'font-semibold text-sky-800' : ''}>{row.purpose}</td>
-                      <td>{row.purpose === example.rov_purpose ? <span className="rounded bg-sky-600 text-white px-1.5 py-0.5 font-semibold">ROV</span> : '—'}</td>
-                      <td>{row.segments ? leftStr : '—'}</td><td>{row.segments ? rightStr : '—'}</td>
-                    </tr>)}
-                  </tbody>
-                </table>
-              )}
+            <div className="overflow-x-auto max-h-96" tabIndex={0} role="region" aria-label={`${sheet === 'cells' ? 'Cell mapping' : sheet === 'settings' ? 'Array settings' : 'Row layout'} example table`}>
+              <table className="excel-guide-table excel-guide-workbook">
+                <caption className="sr-only">Exact cells from the downloadable {step.sheet} worksheet. Blank cells are empty in Excel.</caption>
+                <thead><tr><th aria-label="Row number" />{Array.from({ length: step.columns }, (_, col) => <th key={col} scope="col">{XLSX.utils.encode_col(col)}</th>)}</tr></thead>
+                <tbody>
+                  {grid.slice(step.start, step.end).map((row, idx) => {
+                    const rowIndex = step.start + idx;
+                    const isSection = String(row[0]).startsWith('---');
+                    return <tr key={rowIndex} className={sheet === 'rows' && rowIndex === 16 ? 'bg-sky-50' : ''}>
+                      <th scope="row">{rowIndex + 1}</th>
+                      {Array.from({ length: isSection ? 1 : step.columns }, (_, col) => {
+                        const address = XLSX.utils.encode_cell({ r: rowIndex, c: col });
+                        return <td key={address} colSpan={isSection ? step.columns : undefined} className={isSection ? 'excel-guide-section' : undefined} data-cell={address} title={`${step.sheet}!${address}`}>{row[col]}</td>;
+                      })}
+                    </tr>;
+                  })}
+                </tbody>
+              </table>
             </div>
           </div>
 
-          {sheet === 'cells' ? (
-            <div className="flex items-center gap-2 text-sm text-slate-600">
-              <span className="rounded bg-sky-100 px-2 py-1 font-mono text-sky-800">active</span><ArrowRight size={16} className="shrink-0 text-slate-400" /><span>Use these names in B, D, and E.</span>
-            </div>
-          ) : (
-            <div className="flex flex-wrap gap-2 text-xs font-mono text-slate-600">
-              <span className="rounded-md border border-glass-border px-2 py-1">col_num = {example.total_cols}</span>
-              <span className="rounded-md border border-glass-border px-2 py-1">x pitch = {example.x_pitch}</span>
-              <span className="rounded-md border border-glass-border px-2 py-1">y pitch = {example.y_pitch}</span>
-              <p className="w-full text-sm font-sans text-slate-500">Read rows from top to bottom. “—” means leave the cell empty.</p>
-            </div>
-          )}
+          <div className="flex items-start gap-2 text-sm leading-relaxed text-glass-muted">
+            <ArrowRight size={16} className="mt-1 shrink-0 text-neon-cyan" />
+            {sheet === 'cells' ? <p>Keep all five headers. Column A defines the names used in the row layout; column E sets each cell’s rotation.</p>
+              : sheet === 'settings' ? <p>Enter values in B2–B7. Put the total column count in <strong className="text-glass-text">A11, below col_num</strong>. The example uses 12 columns and a 2.5 × 2.5 pitch.</p>
+              : <p>Keep rows 13–15. Fill row blocks from row 16, top to bottom. <strong className="text-glass-text">Row 17</strong> creates the highlighted band: 4 rows of Pixels (active), with padding in D17 and E17. Blank cells stay empty.</p>}
+          </div>
 
           <div className="rounded-lg border border-glass-border bg-glass-panel p-3 space-y-3">
             <div className="flex items-center justify-between text-[11px] font-mono font-bold uppercase tracking-wide text-glass-muted">
-              <span>D · Left</span><span>B · Main</span><span>E · Right</span>
+              <span>D17 · Left</span><span>B17 · Main</span><span>E17 · Right</span>
             </div>
             <div className="grid grid-cols-[3fr_8fr_1fr] gap-1 text-center text-sm font-mono font-bold" aria-label="Row composition: 3 left columns, 8 main columns, 1 right column">
               <div className="grid grid-cols-[2fr_1fr] gap-0.5">
@@ -118,18 +116,14 @@ export function ExcelGuide() {
           </div>
 
           <details className="text-sm text-slate-500">
-            <summary className="cursor-pointer font-medium text-slate-600 focus-visible:outline-sky-500">Settings & segment syntax</summary>
-            <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 rounded-lg bg-slate-50 p-3 text-xs font-mono">
-              <dt>library</dt><dd>{example.top_lib}</dd><dt>cellname</dt><dd>{example.top_cell}</dd>
-              <dt>rov purpose</dt><dd>{example.rov_purpose}</dd><dt>center layer</dt><dd>{example.center_layer} {example.center_purpose}</dd>
-            </dl>
-            <p className="mt-2 text-xs leading-relaxed">D and E accept name:count, separated by commas: dummy:2, idle:1. Leave a side blank for no padding. Each segment uses its own cell-map rotation. The ROV target is centered after assembly; verification markers use M1 pin.</p>
+            <summary className="cursor-pointer font-medium text-slate-600 focus-visible:outline-sky-500">Segment syntax</summary>
+            <p className="mt-2 text-xs leading-relaxed">D17 and E17 accept name:count, separated by commas: dummy:2, idle:1. Leave a side blank for no padding. Each segment uses its own cell-map rotation. The ROV target is centered after assembly; verification markers use M1 pin.</p>
           </details>
         </div>
 
         <figure className="min-w-0 border-t lg:border-t-0 lg:border-l border-glass-border bg-glass-bg p-4 sm:p-5">
           <figcaption className="flex items-center justify-between gap-2 text-sm text-slate-600">
-            <span className="font-semibold text-slate-800">Assembled array</span><span>{example.total_cols} columns × {rowCount} rows</span>
+            <span className="font-semibold text-slate-800">Result of this workbook</span><span>{example.total_cols} columns × {rowCount} rows</span>
           </figcaption>
           <svg viewBox="0 0 520 430" className="excel-guide-figure w-full h-auto mt-2" role="img" aria-label="Twelve-column mixed array: four active rows have two dummy columns and one idle column on the left, eight active columns in the middle, and one dummy column on the right. The active ROV target is centered at zero.">
             <defs><marker id={arrowId} markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto-start-reverse"><path d="M0 0 L6 3 L0 6" fill="#94a3b8" /></marker></defs>
@@ -151,7 +145,7 @@ export function ExcelGuide() {
                   const start = segments.slice(0, idx).reduce((sum, part) => sum + part.cols, 0);
                   return <text key={idx} x={60 + (start + seg.cols / 2) * 32} y="369" fill={seg.purpose === 'active' ? '#0284c7' : seg.purpose === 'idle' ? '#7c3aed' : '#64748b'} fontWeight="600">{seg.cols}</text>;
                 })}
-                <text x="108" y="388" fill="#94a3b8">D · Left</text><text x={centerX} y="388" fill="#94a3b8">B · Main</text><text x="428" y="388" fill="#94a3b8">E · Right</text>
+                <text x="108" y="388" fill="#94a3b8">D17</text><text x={centerX} y="388" fill="#94a3b8">B17</text><text x="428" y="388" fill="#94a3b8">E17</text>
               </g>
             </g>
           </svg>

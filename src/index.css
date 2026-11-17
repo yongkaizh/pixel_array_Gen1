@@ -174,3 +174,38 @@ body {
   .excel-guide-rows th { white-space: normal; }
   .excel-guide-rows td:nth-child(4), .excel-guide-rows td:nth-child(5) { white-space: normal; }
 }
+
+.excel-guide-workbook th {
+  text-align: center;
+  padding: .4rem .65rem;
+  background: #f1f5f9;
+}
+
+.excel-guide-workbook td {
+  min-width: 7rem;
+  max-width: 17rem;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  padding: .55rem .65rem;
+  border-left: 1px solid #e2e8f0;
+}
+
+.excel-guide-workbook tbody th {
+  position: sticky;
+  left: 0;
+  border-top: 1px solid #e2e8f0;
+  font-size: 11px;
+}
+
+.excel-guide-workbook thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.excel-guide-workbook td.excel-guide-section {
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 600;
+}

@@ -1,8 +1,7 @@
 import * as XLSX from 'xlsx';
 import { LayoutConfig } from '../types';
-import { getLeftRightStringsFromSegments } from '../math/grid';
 
-export function exportToExcel(config: LayoutConfig): ArrayBuffer {
+export function createExcelWorkbook(config: LayoutConfig): XLSX.WorkBook {
   const wb = XLSX.utils.book_new();
 
   // 1. Create pix_tbl sheet data
@@ -83,6 +82,11 @@ export function exportToExcel(config: LayoutConfig): ArrayBuffer {
   ];
   XLSX.utils.book_append_sheet(wb, tmplSheet, 'format_template');
 
+  return wb;
+}
+
+export function exportToExcel(config: LayoutConfig): ArrayBuffer {
+  const wb = createExcelWorkbook(config);
   // Generate ArrayBuffer representation
   const wopts: XLSX.WritingOptions = { bookType: 'xlsx', bookSST: false, type: 'array' };
   const wbout = XLSX.write(wb, wopts);
