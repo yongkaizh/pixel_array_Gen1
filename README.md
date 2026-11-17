@@ -20,7 +20,8 @@ This application allows you to upload an Excel file defining your row block type
 
 1. **Upload your Excel Spec:** Use the drag-and-drop zone or click to upload your `.xlsx` configuration file. If you don't have one, click **Download Template** to get started.
 2. **Review the Visualization:** The application will instantly parse your file and display the pixel array. You can zoom in and inspect the rows, padding columns, ROV (Region of Validation) markers, and dummy cells. The larger viewport adapts to the window; drag its bottom-right corner to resize its width and height.
-3. **Download Code:**
+3. **Read and Download Code:**
+   - Both code readers are resizable from the bottom-right corner, with line wrapping and adjustable text size. Run instructions expand when needed.
    - Click **Download SKILL Code** to get the `.il` file ready for Cadence Virtuoso.
    - Click **Download Python Code** to get a standalone parser.
 4. **Export Image:**

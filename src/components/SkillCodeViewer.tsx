@@ -1,94 +1,36 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { generateSkillCode } from '../utils';
 import { LayoutConfig } from '../types';
-import { Copy, Check, FileDown, Terminal, Database } from 'lucide-react';
+import { Database, Terminal } from 'lucide-react';
+import { CodeReader } from './CodeReader';
 
 interface SkillCodeViewerProps {
   config: LayoutConfig;
 }
 
 export const SkillCodeViewer = React.memo(function SkillCodeViewer({ config }: SkillCodeViewerProps) {
-  const [copied, setCopied] = useState(false);
   const skillCode = useMemo(() => generateSkillCode(config), [config]);
   const highlightedCode = useMemo(() => highlightSkillCode(skillCode), [skillCode]);
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(skillCode);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleDownload = () => {
-    const blob = new Blob([skillCode], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'pixel_array.il';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
-
   return (
-    <div className="bg-glass-panel rounded-lg border border-glass-border p-6 flex flex-col gap-5 text-glass-text">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h3 className="font-sans font-black uppercase italic tracking-tight text-base mb-1 flex items-center gap-2">
-            <Database className="w-4 h-4 text-glass-text" />
-            Generated Cadence SKILL Script
-          </h3>
-          <p className="text-xs text-glass-text/85">
-            Copy or download this file directly into your Cadence Virtuoso working directory to run.
-          </p>
-        </div>
+    <section className="min-w-0 bg-glass-panel rounded-xl border border-glass-border p-4 sm:p-6 flex flex-col gap-4 text-glass-text">
+      <div>
+        <h3 className="font-sans font-bold text-base mb-1 flex items-center gap-2">
+          <Database className="w-4 h-4 shrink-0" /> Cadence SKILL script
+        </h3>
+        <p className="text-sm text-glass-muted">Generated from your applied layout. Ready to copy or download.</p>
       </div>
-
-      <div className="bg-glass-bg rounded-lg p-3.5 border border-glass-border text-xs text-glass-text flex items-start gap-2.5">
-        <Terminal className="w-4 h-4 text-glass-text/80 shrink-0 mt-0.5" />
-        <div className="space-y-1">
-          <span className="font-mono font-bold uppercase text-sm tracking-wide text-glass-text">Execution in Cadence Virtuoso:</span>
-          <p className="leading-relaxed text-sm">
-            1. Save as <code className="font-mono bg-slate-200 px-1 py-0.5 text-slate-800 font-bold">pixel_array.il</code> inside Virtuoso's working directory.<br />
-            2. In the CIW console, load the compiled layout view: <code className="font-mono bg-slate-200 px-1 py-0.5 text-slate-800 font-bold">load("pixel_array.il")</code>.<br />
-            3. The layout cellview is automatically compiled, centered, and written.
-          </p>
-        </div>
-      </div>
-
-      {/* Editor Frame */}
-      <div className="relative rounded-lg border border-glass-border bg-black/5 overflow-hidden">
-        {/* Editor Toolbar */}
-        <div className="flex items-center justify-between px-5 py-3 border-b border-glass-border bg-glass-bg text-glass-text">
-          <div className="text-xs text-glass-text font-mono uppercase tracking-wider font-bold">
-            pixel_array.il
-          </div>
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={handleCopy}
-              className="p-1.5 rounded-lg text-glass-text hover:bg-glass-panel border border-transparent hover:border-[#141414] cursor-pointer transition active:scale-95"
-              title="Copy SKILL Script"
-            >
-              {copied ? <Check className="w-4 h-4 text-green-700" /> : <Copy className="w-4 h-4" />}
-            </button>
-            <button
-              onClick={handleDownload}
-              className="p-1.5 rounded-lg text-glass-text hover:bg-glass-panel border border-transparent hover:border-[#141414] cursor-pointer transition active:scale-95"
-              title="Download Script File"
-            >
-              <FileDown className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-
-        {/* Script code with manual SKILL-like highlight */}
-        <div className="overflow-x-auto max-h-[500px] overflow-y-auto bg-slate-950 select-text">
-          <div className="p-5 font-mono text-sm leading-relaxed text-slate-300 min-w-max">
-            {highlightedCode}
-          </div>
-        </div>
-      </div>
-    </div>
+      <details className="rounded-lg border border-glass-border bg-glass-bg px-4 py-3 text-sm">
+        <summary className="cursor-pointer font-medium focus-visible:outline-sky-500">
+          <Terminal className="inline-block w-4 h-4 mr-2" />How to run in Virtuoso
+        </summary>
+        <p className="mt-3 leading-relaxed text-glass-muted">
+          Save <code className="text-glass-text">pixel_array.il</code> in Virtuoso’s working directory, then run{' '}
+          <code className="break-all text-glass-text">load("pixel_array.il")</code> in the CIW.
+          The script creates, centers, and saves the layout.
+        </p>
+      </details>
+      <CodeReader code={skillCode} filename="pixel_array.il" language="SKILL">{highlightedCode}</CodeReader>
+    </section>
   );
 });
 
@@ -99,9 +41,9 @@ function highlightSkillCode(code: string) {
     // Handle comments separately for performance
     if (line.trim().startsWith(';')) {
       return (
-        <div key={idx} className="flex hover:bg-slate-900/40 transition-colors group">
-          <span className="inline-block text-right pr-4 text-slate-650 select-none w-12 shrink-0 border-r border-slate-800 mr-4 opacity-50 group-hover:opacity-100">{idx + 1}</span>
-          <span className="text-slate-400 italic whitespace-pre">{line}</span>
+        <div key={idx} className="code-line">
+          <span className="code-line-number">{idx + 1}</span>
+          <span className="code-line-text text-slate-400 italic">{line}</span>
         </div>
       );
     }
@@ -138,9 +80,9 @@ function highlightSkillCode(code: string) {
     });
 
     return (
-      <div key={idx} className="flex hover:bg-slate-900/40 transition-colors group">
-        <span className="inline-block text-right pr-4 text-slate-400 select-none w-12 shrink-0 border-r border-slate-800 mr-4 opacity-50 group-hover:opacity-100">{idx + 1}</span>
-        <span className="whitespace-pre">
+      <div key={idx} className="code-line">
+        <span className="code-line-number">{idx + 1}</span>
+        <span className="code-line-text">
           {styledCode}
           {trailingComment && <span className="text-slate-400 italic">{trailingComment}</span>}
         </span>

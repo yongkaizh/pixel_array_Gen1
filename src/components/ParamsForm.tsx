@@ -288,7 +288,7 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
         </div>
 
         {/* Preset Selector Dropdown */}
-        <div className="flex items-center gap-2 bg-glass-bg p-1.5 border border-glass-border rounded-lg shrink-0">
+        <div className="flex min-w-0 max-w-full items-center gap-2 bg-glass-bg p-1.5 border border-glass-border rounded-lg">
           <span className="text-xs font-mono font-bold uppercase text-indigo-600 px-1">Preset:</span>
           <select
             onChange={(e) => {
@@ -298,7 +298,7 @@ export function ParamsForm({ config, onConfigChange, isModified, onApplyChanges,
               }
             }}
             defaultValue=""
-            className="text-xs font-mono bg-white text-slate-800 border border-slate-300 rounded px-2 py-1 font-semibold focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+            className="min-w-0 flex-1 text-xs font-mono bg-white text-slate-800 border border-slate-300 rounded px-2 py-1 font-semibold focus:ring-1 focus:ring-indigo-500 cursor-pointer"
           >
             <option value="" disabled>-- Quick Load Preset --</option>
             {PRESET_CONFIGS.map(p => (

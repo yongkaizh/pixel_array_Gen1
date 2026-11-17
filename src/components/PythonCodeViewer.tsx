@@ -1,87 +1,30 @@
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
 import { generatePythonCode } from '../utils';
-import { Copy, Check, FileDown, CheckCircle } from 'lucide-react';
+import { Code } from 'lucide-react';
+import { CodeReader } from './CodeReader';
 
 export const PythonCodeViewer = React.memo(function PythonCodeViewer() {
-  const [copied, setCopied] = useState(false);
-
-  // Generate only the correct, working Python script
   const correctedCode = generatePythonCode(true);
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(correctedCode);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleDownload = () => {
-    const blob = new Blob([correctedCode], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'pixel_array_generator.py';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
-
+  const highlightedCode = useMemo(() => highlightPythonCode(correctedCode), [correctedCode]);
   return (
-    <div className="bg-glass-panel rounded-lg border border-glass-border p-6 flex flex-col gap-4 text-glass-text">
+    <section className="min-w-0 bg-glass-panel rounded-xl border border-glass-border p-4 sm:p-6 flex flex-col gap-4 text-glass-text">
       <div>
-        <h3 className="font-sans font-black uppercase italic tracking-tight text-base mb-1">
-          Python Integration Automation Script
+        <h3 className="font-sans font-bold text-base mb-1 flex items-center gap-2">
+          <Code className="w-4 h-4 shrink-0" /> Python automation script
         </h3>
-        <p className="text-xs text-glass-text/80">
-          Automates the conversion of layout spreadsheet configurations to Cadence SKILL layout files.
-        </p>
+        <p className="text-sm text-glass-muted">Convert your Excel specification to SKILL locally or on a server.</p>
       </div>
-
-      <div className="bg-emerald-50 rounded-lg border border-glass-border p-4 text-glass-text text-xs leading-relaxed">
-        <span className="font-bold flex items-center gap-1.5 text-emerald-950 uppercase tracking-wider mb-1 font-mono text-xs">
-          <CheckCircle className="w-3.5 h-3.5 text-emerald-700" />
-          Production-Ready Compiler Script
-        </span>
-        Use this script to automatically parse layout templates and export Cadence SKILL scripts directly on your local system or servers. It supports custom pixel dimensions, custom pitch/row configurations, and heterogeneous row block segments.
-      </div>
-
-      {/* Code Display Sandbox */}
-      <div className="relative rounded-lg border border-glass-border bg-black/5 overflow-hidden">
-        {/* Code Actions Toolbar */}
-        <div className="flex items-center justify-between px-5 py-3 border-b border-glass-border bg-glass-bg text-glass-text">
-          <div className="text-xs text-glass-text font-mono uppercase tracking-wider font-bold">
-            pixel_array_generator.py
-          </div>
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={handleCopy}
-              className="p-1.5 rounded-lg text-glass-text hover:bg-glass-panel border border-transparent hover:border-[#141414] cursor-pointer transition active:scale-95 flex items-center gap-1"
-              title="Copy to Clipboard"
-            >
-              {copied ? <Check className="w-3.5 h-3.5 text-green-700" /> : <Copy className="w-3.5 h-3.5" />}
-              <span className="text-sm font-bold font-mono">COPY</span>
-            </button>
-            <button
-              onClick={handleDownload}
-              className="p-1.5 rounded-lg text-glass-text hover:bg-glass-panel border border-transparent hover:border-[#141414] cursor-pointer transition active:scale-95 flex items-center gap-1"
-              title="Download Script File"
-            >
-              <FileDown className="w-3.5 h-3.5" />
-              <span className="text-sm font-bold font-mono">DOWNLOAD</span>
-            </button>
-          </div>
+      <details className="rounded-lg border border-glass-border bg-glass-bg px-4 py-3 text-sm">
+        <summary className="cursor-pointer font-medium focus-visible:outline-sky-500">How to run the Python generator</summary>
+        <div className="mt-3 space-y-2 text-glass-muted leading-relaxed">
+          <p>Install the dependencies: <code className="text-glass-text">pip install pandas openpyxl</code>.</p>
+          <p>Save your workbook as <code className="text-glass-text">array_pixel.xlsx</code> beside the downloaded script, then run{' '}
+            <code className="break-all text-glass-text">python3 pixel_array_generator.py</code>.</p>
+          <p>The generator writes <code className="text-glass-text">pixel_array.il</code> using the workbook’s settings.</p>
         </div>
-
-        {/* Highlighted Editor Body */}
-        <div className="overflow-x-auto max-h-[400px] overflow-y-auto bg-slate-950">
-          <pre className="p-5 font-mono text-sm leading-relaxed text-slate-300">
-            <code>
-              {highlightPythonCode(correctedCode)}
-            </code>
-          </pre>
-        </div>
-      </div>
-    </div>
+      </details>
+      <CodeReader code={correctedCode} filename="pixel_array_generator.py" language="Python">{highlightedCode}</CodeReader>
+    </section>
   );
 });
 
@@ -90,14 +33,13 @@ function highlightPythonCode(code: string) {
   const lines = code.split('\n');
   return lines.map((line, idx) => {
     // Process line colors
-    let content: React.ReactNode = line;
 
     // Check if full line is a comment
     if (line.trim().startsWith('#')) {
       return (
-        <div key={idx} className="table-row hover:bg-slate-900/50 transition-colors">
-          <span className="table-cell text-right text-slate-500 select-none w-10 text-xs border-r border-slate-800 pr-2 mr-3 opacity-60">{idx + 1}</span>
-          <span className="text-slate-400 italic pl-3">{line}</span>
+        <div key={idx} className="code-line">
+          <span className="code-line-number">{idx + 1}</span>
+          <span className="code-line-text text-slate-400 italic">{line}</span>
         </div>
       );
     }
@@ -133,9 +75,9 @@ function highlightPythonCode(code: string) {
     });
 
     return (
-      <div key={idx} className="table-row hover:bg-slate-900/50 transition-colors">
-        <span className="table-cell text-right text-slate-500 select-none w-10 text-xs border-r border-slate-800 pr-2 mr-3 opacity-60">{idx + 1}</span>
-        <span className="pl-3">
+      <div key={idx} className="code-line">
+        <span className="code-line-number">{idx + 1}</span>
+        <span className="code-line-text">
           {styledCode}
           {trailingComment && <span className="text-slate-400 italic">{trailingComment}</span>}
         </span>

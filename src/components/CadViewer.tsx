@@ -881,10 +881,10 @@ export const CadViewer = React.memo(function CadViewer({ config }: CadViewerProp
     <div className="cad-viewport flex flex-col w-full bg-glass-panel rounded-lg border border-glass-border text-glass-text overflow-hidden relative">
       {/* Header Bar */}
       <div className="shrink-0 flex flex-col xl:flex-row xl:items-center justify-between px-6 py-4 border-b border-glass-border bg-glass-panel gap-4">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
+        <div className="flex min-w-0 flex-wrap items-center gap-4">
+          <div className="flex min-w-0 items-center gap-2">
             <div className="w-2.5 h-2.5 bg-neon-rose" />
-            <h3 className="font-sans font-black uppercase italic text-sm tracking-tight whitespace-nowrap">
+            <h3 className="min-w-0 break-words font-sans font-black uppercase italic text-sm tracking-tight">
               CAD Layout Viewport: {config.top_cell} <span className="text-xs text-glass-text/80 font-mono italic normal-case font-normal">({config.top_lib})</span>
             </h3>
           </div>
