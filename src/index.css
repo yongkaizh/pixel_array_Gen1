@@ -172,4 +172,5 @@ body {
   .excel-guide-figure text { font-size: 20px; }
   .excel-guide-table th, .excel-guide-table td { font-size: 11px; padding: 0.65rem 0.3rem; }
   .excel-guide-rows th { white-space: normal; }
+  .excel-guide-rows td:nth-child(4), .excel-guide-rows td:nth-child(5) { white-space: normal; }
 }
